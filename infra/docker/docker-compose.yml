@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  # PostgreSQL database container
+  db:
+    # Name of the container
+    container_name: postgresql
+    # PostgreSQL image and version to use
+    image: postgres:14.1-alpine
+    # Restart policy for the container
+    restart: always
+    # Environment variables to pass to the container
+    environment:
+      # The image will only initialize the database if the data directory is empty
+      POSTGRES_USER: oonhvxbq
+      POSTGRES_DB: oonhvxbq
+      POSTGRES_PASSWORD: WNDWxbMlQEQLCqkQQybNREkQyOJMZ5eD
+    # Port mapping for the container
+    ports:
+      - 5433:5432
+    # Environment file to load environment variables from
+    env_file: [ '../../configs/.env' ]
+    networks:
+      - starter-network
+
+  # Database management tool container
+  pgadmin:
+    # Define a container name for the pgadmin service
+    container_name: pgadmin
+    # Use the dpage/pgadmin4:5.7 image for the service
+    image: dpage/pgadmin4:5.7
+    # Always restart the container if it stops
+    restart: always
+    # Set environment variables for the service
+    environment:
+      PGADMIN_DEFAULT_EMAIL: test@test.com
+      PGADMIN_DEFAULT_PASSWORD: oonhvxbf
+    # Expose port 80 in the container and map it to port 8080 on the host
+    ports:
+      - 8888:80
+    # Mount a local directory to the container to store pgadmin data
+    volumes:
+      - ./pgadmin:/var/lib/pgadmin
+    # Specify that the service depends on the db service
+    depends_on:
+      - db
+    networks:
+      - starter-network
+
+networks:
+  starter-network:
+
+
+

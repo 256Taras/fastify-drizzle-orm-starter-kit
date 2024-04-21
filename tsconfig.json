@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Node 18",
+  "compilerOptions": {
+    "noEmit": true,
+    "allowJs": true,
+    "checkJs": true,
+    "target": "ES2022",
+    "module": "ES2022",
+    "lib": ["ES2022"],
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": false,
+    "experimentalDecorators": false,
+    "strict": true,
+    "alwaysStrict": true,
+    "allowUnreachableCode": true,
+    "allowUnusedLabels": true,
+    "noImplicitAny": false,
+    "noImplicitReturns": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "strictPropertyInitialization": false,
+    "paths": {
+      "#*": ["./src/*"],
+    }
+  },
+  "include": [
+    "tests/utils/**/*.js",
+    "src/**/*.ts",
+    "src/**/*.cjs",
+    "src/**/*.js",
+    "tests/**/*.js",
+    "tests/**/*.cjs",
+    "tests/**/*.ts",
+    "infra/**/*.js",
+    "infra/**/*.cjs",
+    "infra/**/*.ts"
+  ],
+  "exclude": ["node_modules"]
+}

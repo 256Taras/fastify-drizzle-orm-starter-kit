@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  # Backend container
+  backend:
+    # Build configuration for the container
+    build:
+      # Context for the Dockerfile
+      context: ../../
+      # Path to the Dockerfile
+      dockerfile: ./infra/docker/Dockerfile
+    # Command to run inside the container
+    command: yarn start
+    # Port mapping for the container
+    ports:
+      - '8000:8000'
+      - '9229:9229'
+    # Environment file to load environment variables from
+    env_file: [ '../../configs/.env' ]
+    # List of services to depend on before starting this container
+    depends_on: [ 'db' ]
+    # Mount source code directory into container
+    volumes: [ './:/app' ]
+    networks:
+      - starter-network
+
+networks:
+  starter-network:

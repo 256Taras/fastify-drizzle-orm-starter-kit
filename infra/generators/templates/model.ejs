@@ -1,0 +1,13 @@
+import { uuid, timestamp, pgTable<% fields.forEach(field => { %>,<%= field.type %><% }); %> } from "drizzle-orm/pg-core";
+
+export const <%= modelName %> = pgTable('<%= modelName.toLowerCase() %>', {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+<% fields.forEach(field => { %>
+  <%= field.name %>: <%= field.type %>("<%= field.name %>"<% if (field.primaryKey) { %>).primaryKey()<% } else { %><% if (field.options.length) { %>, {
+    length: <%= field.options.length %>
+  }<% } %>)<%= field.nullable ? '' : '.notNull()' %><% } %>,
+<% }); %>
+  createdAt: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
+
+  updatedAt: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
+});

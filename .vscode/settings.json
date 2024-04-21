@@ -1,0 +1,21 @@
+{
+  "cSpell.words": [
+    "adminer",
+    "fastify",
+    "IEFT",
+    "imageproxy",
+    "Millis",
+    "openapi",
+    "pino",
+    "prettierrc",
+    "ratelimit",
+    "Serializers",
+    "unmocked"
+  ],
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "js/ts.implicitProjectConfig.checkJs": true,
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": false,
+  "editor.tabSize": 2,
+  "prettier.useEditorConfig": false
+}
