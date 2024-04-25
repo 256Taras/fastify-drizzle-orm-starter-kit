@@ -6,17 +6,7 @@ import { STATUS_SUCCESS } from "#libs/common.constants.js";
 import { ConflictException, ResourceNotFoundException, UnauthorizedException } from "#libs/errors/domain.errors.js";
 import { authTokens } from "#modules/auth/auth-token.model.js";
 
-/**
- * @typedef {import("./auth.contracts").Credentials} Credentials
- * @typedef {import("./auth.contracts").SignInInput} SignInInput
- * @typedef {import("./auth.contracts").SignUpInput} SignUpInput
- */
-
-/**
- * @param {Dependencies} Deps
- * @param {SignUpInput} dto
- * @returns {Promise<Credentials>}
- */
+/** @type {SignUpUser} **/
 const signUpUser = async ({ db, encrypterService, authTokenService, logger }, { firstName, lastName, email, password }) => {
   logger.debug(`Try sign up user with email: ${email}`);
 
@@ -32,13 +22,11 @@ const signUpUser = async ({ db, encrypterService, authTokenService, logger }, { 
   return authTokenService.generateTokens({ id: savedUser.id, roles: savedUser.role });
 };
 
-/**
- * @param {Dependencies} deps
- * @param {SignInInput} dto
- * @returns {Promise<Credentials>}
- */
+/** @type {SignInUser} **/
 const signInUser = async ({ db, encrypterService, authTokenService }, { email, password }) => {
   const [maybeUser] = await db.select().from(users).where(eq(users.email, email));
+
+  console.log(maybeUser);
 
   if (!maybeUser) throw new ResourceNotFoundException(`User with email: ${email} not found`);
 
@@ -48,10 +36,7 @@ const signInUser = async ({ db, encrypterService, authTokenService }, { email, p
   return authTokenService.generateTokens({ id: maybeUser.id, roles: maybeUser.role });
 };
 
-/**
- * @param {Dependencies} deps
- * @returns {Promise<STATUS_SUCCESS>}
- */
+/** @type {LogOutUser} **/
 const logOutUser = async ({ db, logger, sessionStorageService }) => {
   const { userId, ppid } = sessionStorageService.getUserCredentials();
 
@@ -66,10 +51,7 @@ const logOutUser = async ({ db, logger, sessionStorageService }) => {
   return STATUS_SUCCESS;
 };
 
-/**
- * @param {Dependencies} deps
- * @returns {Promise<Credentials>}
- */
+/** @type {RefreshTokens} **/
 const refreshTokens = async ({ db, authTokenService, sessionStorageService }) => {
   const { userId, ppid } = sessionStorageService.getUserCredentials();
 
@@ -97,3 +79,14 @@ export default function authService(deps) {
     signOut: () => logOutUser(deps),
   };
 }
+
+/**
+ * @typedef {import("./auth.contracts").Credentials} Credentials
+ * @typedef {import("./auth.contracts").SignInInput} SignInInput
+ * @typedef {import("./auth.contracts").SignUpInput} SignUpInput
+ *
+ * @typedef {function(Dependencies, SignUpInput):Promise<Credentials>} SignUpUser
+ * @typedef {function(Dependencies, SignInInput):Promise<Credentials>} SignInUser
+ * @typedef {function(Dependencies):Promise<STATUS_SUCCESS>} LogOutUser
+ * @typedef {function(Dependencies):Promise<Credentials>} RefreshTokens
+ */

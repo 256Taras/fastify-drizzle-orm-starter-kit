@@ -13,8 +13,6 @@ class Application {
   #database;
 
   constructor() {
-    this.#database = new DatabaseManager({ configs });
-    this.#restApi = new RestApiServer({ configs, database: this.#database });
     // @ts-ignore
     return this.#start();
   }
@@ -76,12 +74,14 @@ class Application {
 
     if (APP_CONFIG.env === "development") {
       logger.info(`[${APP_CONFIG.applicationName}]: See the documentation on ${APP_CONFIG.applicationUrl}/docs`);
-      logger.info(`[${APP_CONFIG.applicationName}]: You can check your database here: ${APP_CONFIG.adminerUrl}`);
     }
   }
 
   async #start() {
     try {
+      this.#database = new DatabaseManager({ configs });
+      this.#restApi = new RestApiServer({ configs, database: this.#database });
+
       this.#initStopHandlers();
       await this.#initInfrastructure();
       // Run servers (all kind of transports: Rest API, WS, etc.)

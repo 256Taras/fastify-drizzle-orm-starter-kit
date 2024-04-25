@@ -63,6 +63,7 @@
     "@fastify/request-context": "^5.1.0",
     "@fastify/static": "^7.0.3",
     "@fastify/swagger": "^8.14.0",
+    "@fastify/swagger-ui": "^3.0.0",
     "@fastify/type-provider-typebox": "^4.0.0",
     "@sinclair/typebox": "^0.32.22",
     "ajv": "^8.12.0",

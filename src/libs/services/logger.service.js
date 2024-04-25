@@ -1,5 +1,6 @@
 import Pino from "pino";
 import { requestContext } from "@fastify/request-context";
+import { DefaultLogger } from "drizzle-orm";
 
 import { APP_CONFIG, LOGGER_CONFIG } from "#configs/index.js";
 
@@ -30,5 +31,13 @@ const loggerService = Pino(TerminalOptions);
 
 // @ts-ignore
 export const logger = requestContext.get("logger") ?? loggerService;
+
+export const databaseLogger = new DefaultLogger({
+  writer: {
+    write(message) {
+      logger.debug(message);
+    },
+  },
+});
 
 export default loggerService;

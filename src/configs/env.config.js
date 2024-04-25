@@ -26,6 +26,7 @@ export const CONFIG_SCHEMA = Type.Object(
     ENABLE_PERSISTENCE_FORCE_LOGGING: TypeEnable,
     HTTP_PORT: Type.Integer(),
     VERSION: Type.String(),
+    DATABASE_TIMEOUT: Type.Integer(),
     SHUTDOWN_TIMEOUT: Type.Integer(),
     IP: Type.String(),
     RATE_LIMIT_MAX: Type.Integer(),

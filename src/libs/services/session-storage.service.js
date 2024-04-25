@@ -5,7 +5,6 @@ import { TOKENS } from "#libs/common.constants.js";
 /**
  * Retrieves user data from the request context.
  * @returns {{ userId: string, refreshTokenId: string }} Object containing user ID and refresh token ID.
- * This function will compile correctly in TypeScript despite the TypeScript warnings.
  */
 // @ts-ignore
 const getUser = () => requestContext.get(TOKENS.userJwtData);
@@ -13,7 +12,6 @@ const getUser = () => requestContext.get(TOKENS.userJwtData);
 /**
  * Stores user data in the request context.
  * @param {{ userId: string, refreshTokenId: string }} data An object containing user ID and refresh token ID.
- *  This function will compile correctly in TypeScript despite the TypeScript warnings.
  */
 // @ts-ignore
 const setUser = (data) => requestContext.set(TOKENS.userJwtData, data);
@@ -21,7 +19,6 @@ const setUser = (data) => requestContext.set(TOKENS.userJwtData, data);
 /**
  * Retrieves user credentials from the request context.
  * @returns {{ userId: string, ppid: string, refreshTokenId: string }} Object containing user ID, partner ID (ppid), and refresh token ID.
- * This function will compile correctly in TypeScript despite the TypeScript warnings.
  */
 // @ts-ignore
 const getUserCredentials = () => requestContext.get(TOKENS.userCredentials);

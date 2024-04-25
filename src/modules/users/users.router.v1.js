@@ -16,7 +16,7 @@ export default async function usersRouterV1(app) {
 
   app.get("/", {
     schema: usersSchemas.getList,
-    //  preHandler: app.auth([app.verifyJwt]),
+    preHandler: app.auth([app.verifyJwt]),
     async handler(req) {
       return usersService.findAll(req.query);
     },

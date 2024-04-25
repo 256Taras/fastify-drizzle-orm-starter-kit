@@ -5,6 +5,7 @@ import path from "node:path";
 import Fastify from "fastify";
 import fastifyRequestContextPlugin from "@fastify/request-context";
 import fastifySwaggerPlugin from "@fastify/swagger";
+import fastifySwaggerUiPlugin from "@fastify/swagger-ui";
 import fastifyRateLimit from "@fastify/rate-limit";
 import fastifyHelmet from "@fastify/helmet";
 import fastifyStatic from "@fastify/static";
@@ -21,7 +22,7 @@ import defaultLogger, { logger } from "#libs/services/logger.service.js";
 import { globalHttpFastify404ErrorHandler, globalHttpFastifyErrorHandler } from "#infra/api/http/fastify-error-handler.js";
 import sharedHealthCheckRouter from "#modules/health-check/router.js";
 import { getDirName } from "#libs/utils/files.js";
-import { FASTIFY_CORS_CONFIG } from "#configs/index.js";
+import { FASTIFY_CORS_CONFIG, OPENAPI_CONFIG } from "#configs/index.js";
 
 export class RestApiServer {
   /** @type {import('fastify/types/instance').FastifyInstance} */
@@ -48,6 +49,7 @@ export class RestApiServer {
     this.#fastify.register(fastifyAuth);
     // Swagger plugin for API documentation.
     this.#fastify.register(fastifySwaggerPlugin, this.#configs.OPENAPI_CONFIG);
+    this.#fastify.register(fastifySwaggerUiPlugin, this.#configs.OPENAPI_CONFIG);
     // RequestContext plugin provides context storage across async operations during request/response lifecycle.
     this.#fastify.register(fastifyRequestContextPlugin, { defaultStoreValues: { logger: defaultLogger } });
     // Autoload plugin to load custom plugins from a directory.

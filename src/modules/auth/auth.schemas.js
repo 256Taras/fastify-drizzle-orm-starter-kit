@@ -1,4 +1,3 @@
-// eslint-disable-next-line no-unused-vars
 import { Type } from "@sinclair/typebox";
 import { pick } from "rambda";
 

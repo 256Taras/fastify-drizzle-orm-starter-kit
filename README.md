@@ -233,7 +233,7 @@ The <type> and <summary> fields are mandatory, the (<scope>) field is optional.
 - [] db:
   - [x] drizzle-orm
   - [x] postgres-js
-  - [ ] separate loggerService for db logging
+  - [x] separate loggerService for db logging
   - [ ] cursor pagination
 - [x] local code style support:
   - [x] esLint setup
@@ -243,14 +243,14 @@ The <type> and <summary> fields are mandatory, the (<scope>) field is optional.
 - [] built-in Auth:
   - [x] bearer token (JWT) (Manually)
   - [] API_KEY (Manually)
-- [] permissions checks:
+- [ ] permissions checks:
 - [x] rate limiting (https://www.npmjs.com/package/fastify-rate-limit)
   - [x] global rate limit
   - [x] rate limit per route
 - [x] request timeouts (implement manually)
 - [x] request-scoped storage support, based on Asynchronous Local Storage to receive data without mutation request
-- [] templates rendering support
-- [] ability to run CPU intensive tasks in the Piscina worker pool
+- [ ] templates rendering support
+- [ ] ability to run CPU intensive tasks in the Piscina worker pool
 - [x] covering utilities with .d.ts files
 - [x] support Docker installation
 
