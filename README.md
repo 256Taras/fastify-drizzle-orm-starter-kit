@@ -29,11 +29,11 @@ We assume that everyone who comes here is **`programmer with intermediate knowle
 
 | Name           | Version  |
 |----------------|----------|
-| Node           | v20.11.x |
+| Node           | v24.x.x  |
 | Typescript     | v5.4.x   |
 | PostgreSQL     | v15.0.x  |
 | Yarn           | v1.22.x  |
-| NPM            | v8.19.x  |
+| NPM            | v10.x.x  |
 | Docker         | v18.10.x |
 | Docker Compose | v1.23.x  |
 
