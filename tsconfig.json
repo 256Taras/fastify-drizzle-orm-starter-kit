@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "display": "Node 18",
+  "display": "Node 24",
   "compilerOptions": {
     "noEmit": true,
     "allowJs": true,
@@ -23,9 +23,14 @@
     "declaration": true,
     "strictPropertyInitialization": false,
     "skipLibCheck": true,
+    "maxNodeModuleJsDepth": 1,
+    "baseUrl": ".",
     "paths": {
       "#*": ["./src/*"],
-    }
+    },
+    "typeRoots": ["./node_modules/@types", "./src/@types"],
+    "incremental": true,
+    "forceConsistentCasingInFileNames": true
   },
   "include": [
     "tests/utils/**/*.js",

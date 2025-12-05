@@ -1,7 +1,8 @@
 import * as configs from "../configs/index.js";
 
 /**
- * Base FastifyInstance type
+ * Base FastifyInstance type with TypeBox type provider support
+ * TypeBox type provider is applied via withTypeProvider() at runtime
  * @typedef {import('fastify').FastifyInstance} FastifyInstanceBase
  */
 

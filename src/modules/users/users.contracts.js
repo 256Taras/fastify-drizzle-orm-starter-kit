@@ -1,7 +1,7 @@
 import { Type } from "@sinclair/typebox";
 import { createInsertSchema, createSelectSchema } from "drizzle-typebox";
 
-import { COMMON_CONTRACTS_V1 } from "#libs/common.contracnts.js";
+import { COMMON_CONTRACTS_V1 } from "#libs/common.contracts.js";
 import { paginationSchema } from "#libs/utils/schemas.js";
 import { users } from "#modules/users/users.model.js";
 

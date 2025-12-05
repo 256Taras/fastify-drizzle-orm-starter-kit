@@ -1,132 +1,64 @@
-export class BadRequestException extends Error {
+import { BaseDomainError } from "./base-domain-error.js";
+
+export class BadRequestException extends BaseDomainError {
   /**
-   *
    * @param {string} message
    */
   constructor(message) {
-    super(message);
-    this.name = "BadRequestException";
-  }
-
-  /**
-   *
-   * @param {string} message
-   */
-  static of(message) {
-    return Promise.reject(new BadRequestException(message));
+    super(message, "BadRequestException");
   }
 }
 
-export class ConflictException extends Error {
+export class ConflictException extends BaseDomainError {
   /**
-   *
    * @param {string} message
    */
   constructor(message) {
-    super(message);
-    this.name = "ConflictException";
-  }
-
-  /**
-   *
-   * @param {string} message
-   */
-  static of(message) {
-    return Promise.reject(new ConflictException(message));
+    super(message, "ConflictException");
   }
 }
 
-export class ForbiddenException extends Error {
+export class ForbiddenException extends BaseDomainError {
   /**
-   *
    * @param {string} message
    */
   constructor(message) {
-    super(message);
-    this.name = "ForbiddenException";
-  }
-
-  /**
-   *
-   * @param {string} message
-   */
-  static of(message) {
-    return Promise.reject(new ForbiddenException(message));
+    super(message, "ForbiddenException");
   }
 }
 
-export class ResourceAlreadyExistException extends Error {
+export class ResourceAlreadyExistException extends BaseDomainError {
   /**
-   *
    * @param {string} message
    */
   constructor(message) {
-    super(message);
-    this.name = "ResourceAlreadyExistException";
-  }
-
-  /**
-   *
-   * @param {string} message
-   */
-  static of(message) {
-    return Promise.reject(new ResourceAlreadyExistException(message));
+    super(message, "ResourceAlreadyExistException");
   }
 }
 
-export class ResourceNotFoundException extends Error {
+export class ResourceNotFoundException extends BaseDomainError {
   /**
-   *
    * @param {string} message
    */
   constructor(message) {
-    super(message);
-    this.name = "ResourceNotFoundException";
-  }
-
-  /**
-   *
-   * @param {string} message
-   */
-  static of(message) {
-    return Promise.reject(new ResourceNotFoundException(message));
+    super(message, "ResourceNotFoundException");
   }
 }
 
-export class UnauthorizedException extends Error {
+export class UnauthorizedException extends BaseDomainError {
   /**
-   *
    * @param {string} message
    */
   constructor(message) {
-    super(message);
-    this.name = "UnauthorizedException";
-  }
-
-  /**
-   *
-   * @param {string} message
-   */
-  static of(message) {
-    return Promise.reject(new UnauthorizedException(message));
+    super(message, "UnauthorizedException");
   }
 }
 
-export class UnprocessableEntityException extends Error {
+export class UnprocessableEntityException extends BaseDomainError {
   /**
-   *
    * @param {string} message
    */
   constructor(message) {
-    super(message);
-    this.name = "UnprocessableEntityException";
-  }
-
-  /**
-   *
-   * @param {string} message
-   */
-  static of(message) {
-    return Promise.reject(new UnprocessableEntityException(message));
+    super(message, "UnprocessableEntityException");
   }
 }

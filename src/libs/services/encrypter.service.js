@@ -82,7 +82,6 @@ const compareHash = async (password, hash) => {
  */
 const encryptData = (rawData) => {
   const iv = randomBytes(16);
-  // @ts-ignore - Buffer is valid CipherKey in runtime
   const cipher = createCipheriv(cryptoConfig.algorithm, cryptoConfig.key, iv);
   let encrypted = cipher.update(rawData, "utf8", "hex");
   encrypted += cipher.final("hex");
@@ -90,14 +89,12 @@ const encryptData = (rawData) => {
 };
 
 /**
- * Decrypts data.
- * @param {string} encryptedData - The data to decrypt.
- * @returns {string} The decrypted data.
+ * @param {string} encryptedData
+ * @returns {string}
  */
 const decryptData = (encryptedData) => {
   const [ivHex, encrypted] = encryptedData.split(":");
   const iv = Buffer.from(ivHex, "hex");
-  // @ts-ignore - Buffer is valid CipherKey in runtime
   const decipher = createDecipheriv(cryptoConfig.algorithm, cryptoConfig.key, iv);
   let decrypted = decipher.update(encrypted, "hex", "utf8");
   decrypted += decipher.final("utf8");

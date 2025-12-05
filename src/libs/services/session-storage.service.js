@@ -3,33 +3,34 @@ import { requestContext } from "@fastify/request-context";
 import { TOKENS } from "#libs/common.constants.js";
 
 /**
- * Retrieves user data from the request context.
- * @returns {{ userId: string, refreshTokenId: string }} Object containing user ID and refresh token ID.
+ * @returns {{ userId: string, refreshTokenId: string } | undefined}
  */
-// @ts-ignore
-const getUser = () => requestContext.get(TOKENS.userJwtData);
+const getUser = () => {
+  const user = requestContext.get(TOKENS.userJwtData);
+  return user;
+};
 
 /**
- * Stores user data in the request context.
- * @param {{ userId: string, refreshTokenId: string }} data An object containing user ID and refresh token ID.
+ * @param {{ userId: string, refreshTokenId: string }} data
  */
-// @ts-ignore
-const setUser = (data) => requestContext.set(TOKENS.userJwtData, data);
+const setUser = (data) => {
+  requestContext.set(TOKENS.userJwtData, data);
+};
 
 /**
- * Retrieves user credentials from the request context.
- * @returns {{ userId: string, ppid: string, refreshTokenId: string }} Object containing user ID, partner ID (ppid), and refresh token ID.
+ * @returns {{ userId: string, ppid: string, refreshTokenId: string } | undefined}
  */
-// @ts-ignore
-const getUserCredentials = () => requestContext.get(TOKENS.userCredentials);
+const getUserCredentials = () => {
+  const credentials = requestContext.get(TOKENS.userCredentials);
+  return credentials;
+};
 
 /**
- * Stores user credentials in the request context.
- * @param {{ userId: string, ppid: string, refreshTokenId: string }} credentials An object containing user ID, partner ID (ppid), and refresh token ID.
- * This function will compile correctly in TypeScript despite the TypeScript warnings.
+ * @param {{ userId: string, ppid: string, refreshTokenId: string }} credentials
  */
-// @ts-ignore
-const setUserCredentials = (credentials) => requestContext.set(TOKENS.userCredentials, credentials);
+const setUserCredentials = (credentials) => {
+  requestContext.set(TOKENS.userCredentials, credentials);
+};
 
 /**
  * Creates a session storage service to manage user data and credentials.
