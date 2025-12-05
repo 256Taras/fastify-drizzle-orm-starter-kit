@@ -5,6 +5,10 @@ import { ResourceNotFoundException } from "#libs/errors/domain.errors.js";
 import { calculatePaginationOffset, createPaginatedResponse } from "#libs/utils/pagination.js";
 import { NON_PASSWORD_COLUMNS, users } from "#modules/users/users.model.js";
 
+/**
+ * @typedef {import("#@types/di-container.jsdoc.js").Dependencies} Dependencies
+ */
+
 /** @type {FindOneById} */
 const findOneById = async ({ db, logger }, id) => {
   logger.debug(`Get user with id: ${id}`);
@@ -34,7 +38,9 @@ const findAll = async ({ db }, { limit, page }) => {
   });
 };
 
-/** @param {Dependencies} deps */
+/**
+ * @param {Dependencies} deps
+ */
 export default function usersService(deps) {
   return {
     findAll: partial(findAll, [deps]),

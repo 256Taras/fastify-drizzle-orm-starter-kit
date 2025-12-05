@@ -1,6 +1,6 @@
 import usersSchemas from "./users.schemas.js";
 
-/** @type {import("@fastify/type-provider-typebox").FastifyPluginAsyncTypebox } */
+/** @type {import("#@types/fastify-plugin.jsdoc.js").FastifyPluginAsyncTypeboxExtended} */
 export default async function usersRouterV1(app) {
   const { sessionStorageService, usersService } = app.diContainer.cradle;
 

@@ -304,6 +304,21 @@ export default tseslint.config(
     },
   },
 
+  // Override for JSDoc type definition files
+  // Imports are used in JSDoc via typeof, so they should not be flagged as unused
+  {
+    files: ['**/*.jsdoc.js', 'src/@types/**/*.js'],
+    rules: {
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+      'unicorn/require-module-specifiers': 'off', // Allow export {} for type-only files
+      'jsdoc/require-jsdoc': 'off', // Type definition files don't need JSDoc
+      'jsdoc/require-param': 'off',
+      'jsdoc/require-param-type': 'off',
+      'jsdoc/require-property-description': 'off', // Properties in typedef don't need descriptions
+    },
+  },
+
   // Override for router files - handler should be last
   // Using partitionByNewLine to keep handler in separate group (after newline)
   {

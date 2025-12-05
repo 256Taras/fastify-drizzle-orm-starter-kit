@@ -23,7 +23,7 @@ const patterns = {
 const generateModulePatterns = (basePath, subPaths) =>
   Object.values(subPaths).map((pattern) => path.join(basePath, pattern));
 
-/** @type {import("@fastify/type-provider-typebox").FastifyPluginAsyncTypebox<import("#@types/fastify.js").FastifyGlobalOptionConfig> } */
+/** @type {import("@fastify/type-provider-typebox").FastifyPluginAsyncTypebox<import("#@types/fastify.jsdoc.js").FastifyGlobalOptionConfig> } */
 const diContainerPlugin = async (app, opts) => {
   diContainer.register({
     app: awilix.asValue(app),

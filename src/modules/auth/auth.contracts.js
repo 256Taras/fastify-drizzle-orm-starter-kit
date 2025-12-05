@@ -1,6 +1,6 @@
 import { Type } from "@sinclair/typebox";
 
-import { USER_ENTITY_CONTRACT, USER_OUTPUT_CONTRACT } from "#modules/users/users.contracts.js";
+import { USER_INSERT_CONTRACT, USER_OUTPUT_CONTRACT } from "#modules/users/users.contracts.js";
 
 export const CREDENTIALS_TOKENS_CONTRACT = Type.Object(
   {
@@ -20,11 +20,16 @@ export const SIGN_IN_UP_OUTPUT_CONTRACT = Type.Intersect([
   ),
 ]);
 
-export const SIGN_UP_INPUT_CONTRACT = Type.Pick(USER_ENTITY_CONTRACT, ["email", "password", "firstName", "lastName"]);
+// Sign up input - pick only required fields from insert schema (omit id, timestamps)
+// export const SIGN_UP_INPUT_CONTRACT = Type.Pick(USER_INSERT_CONTRACT, ["email", "password", "firstName", "lastName"]);
+export const SIGN_UP_INPUT_CONTRACT = USER_INSERT_CONTRACT;
+
+// Sign in input - pick only email and password
 export const SIGN_IN_INPUT_CONTRACT = Type.Pick(SIGN_UP_INPUT_CONTRACT, ["email", "password"]);
 
 /**
- * @typedef {import("@sinclair/typebox").Static<SIGN_IN_UP_OUTPUT_CONTRACT>} Credentials
- * @typedef {import("@sinclair/typebox").Static<SIGN_IN_INPUT_CONTRACT>} SignInInput
- * @typedef {import("@sinclair/typebox").Static<SIGN_UP_INPUT_CONTRACT>} SignUpInput
+ * Type definitions for auth module
+ * @typedef {import("@sinclair/typebox").Static<typeof SIGN_IN_UP_OUTPUT_CONTRACT>} Credentials
+ * @typedef {import("@sinclair/typebox").Static<typeof SIGN_IN_INPUT_CONTRACT>} SignInInput
+ * @typedef {import("@sinclair/typebox").Static<typeof SIGN_UP_INPUT_CONTRACT>} SignUpInput
  */

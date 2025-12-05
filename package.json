@@ -82,7 +82,7 @@
     "@types/lodash-es": "^4.17.12",
     "@types/node": "^24.0.0",
     "@types/pg": "^8.10.9",
-    "typescript-eslint": "^8.19.0",
+    "typescript-eslint": "^8.48.1",
     "dotenv-safe": "^8.2.0",
     "drizzle-kit": "^0.31.8",
     "@commitlint/cli": "^19.0.0",
@@ -104,7 +104,7 @@
     "lint-staged": "^12.4.1",
     "pino-pretty": "^9.1.0",
     "prettier": "^3.0.0",
-    "typescript": "^5.2.2",
+    "typescript": "^5.9.3",
     "yeoman-generator": "6.0.1"
   }
 }

@@ -6,14 +6,20 @@ import { ConflictException, ResourceNotFoundException, UnauthorizedException } f
 import { authTokens } from "#modules/auth/auth-token.model.js";
 import { NON_PASSWORD_COLUMNS, users } from "#modules/users/users.model.js";
 
+/**
+ * @typedef {import("#@types/di-container.jsdoc.js").Dependencies} Dependencies
+ */
+
 /** @type {SignUpUser} **/
 const signUpUser = async ({ authTokenService, db, encrypterService, logger }, { email, firstName, lastName, password }) => {
   logger.debug(`Try sign up user with email: ${email}`);
 
   const [maybeUser] = await db.select().from(users).where(eq(users.email, email));
+
   if (maybeUser) throw new ConflictException(`User with email: ${email} already registered`);
 
   const hashedPassword = await encrypterService.getHash(password);
+
   const [savedUser] = await db
     .insert(users)
     .values({ email, firstName, lastName, password: hashedPassword })
@@ -29,6 +35,7 @@ const signInUser = async ({ authTokenService, db, encrypterService }, { email, p
   if (!maybeUser) throw new ResourceNotFoundException(`User with email: ${email} not found`);
 
   const isPasswordValid = await encrypterService.compareHash(password, maybeUser.password);
+
   if (!isPasswordValid) throw new UnauthorizedException("Invalid password");
 
   return authTokenService.generateTokens({ id: maybeUser.id, roles: maybeUser.role });
@@ -39,6 +46,7 @@ const logOutUser = async ({ db, logger, sessionStorageService }) => {
   const { ppid, userId } = sessionStorageService.getUserCredentials();
 
   logger.debug(`Logging out user: ${userId}`);
+
   const result = await db
     .delete(authTokens)
     .where(and(eq(authTokens.ppid, ppid), eq(authTokens.userId, userId)))
@@ -54,6 +62,7 @@ const refreshTokens = async ({ authTokenService, db, sessionStorageService }) =>
   const { ppid, userId } = sessionStorageService.getUserCredentials();
 
   const [maybeUser] = await db.select().from(users).where(eq(users.id, userId));
+
   if (!maybeUser) throw new ResourceNotFoundException("User not found");
 
   const result = await db

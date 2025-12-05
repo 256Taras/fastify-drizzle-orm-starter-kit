@@ -14,7 +14,7 @@ export class DatabaseManager {
 
   /**
    * Initializes a new instance of the DatabaseManager.
-   * @param {{configs: import("#@types/common").Configs}} configs - The configuration object.
+   * @param {{configs: import("#@types/common.jsdoc.js").Configs}} configs - The configuration object.
    */
   constructor({ configs }) {
     const { APP_CONFIG, DB_CONFIG } = configs;

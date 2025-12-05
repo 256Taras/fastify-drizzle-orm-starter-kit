@@ -65,7 +65,7 @@ async function requestTimeoutPlugin(app, options) {
       // @ts-ignore
       requestContext.set(SIGNAL_KEY, controller.signal);
 
-      done(undefined);
+      done();
     } catch (error) {
       // @ts-ignore
       done(error);

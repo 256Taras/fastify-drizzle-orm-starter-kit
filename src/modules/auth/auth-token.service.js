@@ -4,8 +4,12 @@ import { FASTIFY_JWT_CONFIG } from "#configs/index.js";
 import { authTokens } from "#modules/auth/auth-token.model.js";
 
 /**
+ * @typedef {import("#@types/di-container.jsdoc.js").Dependencies} Dependencies
+ */
+
+/**
  * Generates access and refresh tokens for a user.
- * @param {import("@fastify/awilix").Cradle & {jwtService: object}} deps - The dependencies required for token generation.
+ * @param {Dependencies} deps - The dependencies required for token generation.
  * @param {object} user - The user for whom the tokens are generated.
  * @returns {Promise<{ refreshToken: string, accessToken: string, user: object }>} An object containing the refresh token, access token, and user object.
  */

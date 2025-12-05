@@ -121,7 +121,9 @@ class ErrorHandler {
   #mapAjvErrorToUserFriendly(err) {
     if (!err.validation) return [];
     return err.validation.map((validationError) => {
-      const field = String(validationError.params?.missingProperty ?? validationError.instancePath?.replace(/^\//, "") ?? "");
+      const field = String(
+        validationError.params?.missingProperty ?? validationError.instancePath?.replace(/^\//, "") ?? "",
+      );
       const userMessage = this.#formatErrorMessage(validationError, field);
 
       return {
