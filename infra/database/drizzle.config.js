@@ -6,8 +6,8 @@ import { ENV_CONFIG } from "#configs/env.config.js";
 export default defineConfig({
   schema: "src/**/*.model.js",
   out: "infra/database/migrations",
-  driver: "pg",
+  dialect: "postgresql",
   dbCredentials: {
-    connectionString: ENV_CONFIG.DATABASE_URL,
+    url: ENV_CONFIG.DATABASE_URL,
   },
 });
