@@ -23,7 +23,7 @@ const generateTokens = async ({ db, jwtService, encrypterService }, user) => {
     { expiresIn: FASTIFY_JWT_CONFIG.refreshTokenExpirationTime },
   );
 
-  db.insert(authTokens).values({ id: refreshTokenId, ppid: refreshHash, userId: user.id });
+  await db.insert(authTokens).values({ id: refreshTokenId, ppid: refreshHash, userId: user.id });
 
   return { refreshToken, accessToken, user };
 };

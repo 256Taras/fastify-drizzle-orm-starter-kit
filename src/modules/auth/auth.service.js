@@ -26,12 +26,10 @@ const signUpUser = async ({ db, encrypterService, authTokenService, logger }, { 
 const signInUser = async ({ db, encrypterService, authTokenService }, { email, password }) => {
   const [maybeUser] = await db.select().from(users).where(eq(users.email, email));
 
-  console.log(maybeUser);
-
   if (!maybeUser) throw new ResourceNotFoundException(`User with email: ${email} not found`);
 
   const isPasswordValid = await encrypterService.compareHash(password, maybeUser.password);
-  if (!isPasswordValid) throw new Error("Invalid password");
+  if (!isPasswordValid) throw new UnauthorizedException("Invalid password");
 
   return authTokenService.generateTokens({ id: maybeUser.id, roles: maybeUser.role });
 };
@@ -56,7 +54,7 @@ const refreshTokens = async ({ db, authTokenService, sessionStorageService }) =>
   const { userId, ppid } = sessionStorageService.getUserCredentials();
 
   const [maybeUser] = await db.select().from(users).where(eq(users.id, userId));
-  if (!maybeUser) throw new Error("User not found");
+  if (!maybeUser) throw new ResourceNotFoundException("User not found");
 
   const result = await db
     .delete(authTokens)

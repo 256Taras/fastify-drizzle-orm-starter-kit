@@ -13,3 +13,4 @@ export * from "./app.config.js";
 export * from "./auth.config.js";
 export * from "./db.config.js";
 export * from "./storage.config.js";
+export * from "./encryption.config.js";

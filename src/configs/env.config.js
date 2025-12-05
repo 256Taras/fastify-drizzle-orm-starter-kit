@@ -37,6 +37,7 @@ export const CONFIG_SCHEMA = Type.Object(
     JWT_ACCESS_TOKEN_EXPIRATION_TIME: Type.String(),
     JWT_ACCESS_TOKEN_SECRET: Type.String(),
     DATABASE_URL: Type.String(),
+    ENCRYPTION_KEY: Type.String({ minLength: 32 }),
   },
   { additionalProperties: false },
 );

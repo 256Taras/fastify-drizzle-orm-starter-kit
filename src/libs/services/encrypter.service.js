@@ -1,11 +1,26 @@
-import crypto, { createCipheriv, createDecipheriv, randomBytes, randomUUID } from "node:crypto";
+import crypto, { createCipheriv, createDecipheriv, randomBytes, randomUUID, createHash } from "node:crypto";
 
-// Local cryptographic configuration
+import { ENCRYPTION_CONFIG } from "#configs/index.js";
+
+// Ensure encryption key is properly formatted (32 bytes for AES-256)
+const getEncryptionKey = () => {
+  const key = ENCRYPTION_CONFIG.key;
+  if (!key || key.length < 32) {
+    throw new Error("ENCRYPTION_KEY must be at least 32 characters long");
+  }
+  // For AES-256, we need exactly 32 bytes. Hash the key if it's longer, or pad if shorter
+  if (key.length === 32) {
+    return Buffer.from(key, "utf8");
+  }
+  // Hash to get exactly 32 bytes
+  return createHash("sha256").update(key).digest();
+};
+
 const cryptoConfig = {
-  saltRounds: 10,
-  keyLength: 64,
-  key: "your-secret-key-here", // Replace with your actual secure key
-  algorithm: "aes-256-cbc", // Example algorithm
+  saltRounds: ENCRYPTION_CONFIG.saltRounds,
+  keyLength: ENCRYPTION_CONFIG.keyLength,
+  key: getEncryptionKey(),
+  algorithm: ENCRYPTION_CONFIG.algorithm,
 };
 
 /**
@@ -64,7 +79,8 @@ const compareHash = async (password, hash) => {
  */
 const encryptData = (rawData) => {
   const iv = randomBytes(16);
-  const cipher = createCipheriv(cryptoConfig.algorithm, Buffer.from(cryptoConfig.key), iv);
+  // @ts-ignore - Buffer is valid CipherKey in runtime
+  const cipher = createCipheriv(cryptoConfig.algorithm, cryptoConfig.key, iv);
   let encrypted = cipher.update(rawData, "utf8", "hex");
   encrypted += cipher.final("hex");
   return `${iv.toString("hex")}:${encrypted}`;
@@ -78,7 +94,8 @@ const encryptData = (rawData) => {
 const decryptData = (encryptedData) => {
   const [ivHex, encrypted] = encryptedData.split(":");
   const iv = Buffer.from(ivHex, "hex");
-  const decipher = createDecipheriv(cryptoConfig.algorithm, Buffer.from(cryptoConfig.key), iv);
+  // @ts-ignore - Buffer is valid CipherKey in runtime
+  const decipher = createDecipheriv(cryptoConfig.algorithm, cryptoConfig.key, iv);
   let decrypted = decipher.update(encrypted, "hex", "utf8");
   decrypted += decipher.final("utf8");
   return decrypted;

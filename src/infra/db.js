@@ -52,8 +52,9 @@ export class DatabaseManager {
     try {
       await this.postgres`SELECT 1`;
     } catch (error) {
-      // @ts-ignore
-      throw new Error("Failed to connect to the database.");
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      logger.error(`Database connection failed: ${errorMessage}`);
+      throw new Error(`Failed to connect to the database: ${errorMessage}`);
     }
   }
 
@@ -62,9 +63,11 @@ export class DatabaseManager {
    * @param {object} notice - The notice object from PostgreSQL.
    */
   handleNotice(notice) {
-    logger.error("Database notice:", notice);
     if (notice.severity === "ERROR" || notice.severity === "FATAL") {
-      throw new Error(`Database error: ${notice.message}`);
+      logger.error("Database notice:", notice);
+      throw new Error(`Database error: ${notice.message || "Unknown database error"}`);
+    } else {
+      logger.warn("Database notice:", notice);
     }
   }
 
