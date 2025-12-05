@@ -2,38 +2,42 @@
 import path from "node:path";
 
 // Import necessary Fastify core and plugins.
-import Fastify from "fastify";
+import fastifyAutoLoad from "@fastify/autoload";
+import fastifyCors from "@fastify/cors";
+import fastifyFormBody from "@fastify/formbody";
+import fastifyHelmet from "@fastify/helmet";
+import fastifyMultipart from "@fastify/multipart";
+import fastifyRateLimit from "@fastify/rate-limit";
 import fastifyRequestContextPlugin from "@fastify/request-context";
+import fastifyStatic from "@fastify/static";
 import fastifySwaggerPlugin from "@fastify/swagger";
 import fastifySwaggerUiPlugin from "@fastify/swagger-ui";
-import fastifyRateLimit from "@fastify/rate-limit";
-import fastifyHelmet from "@fastify/helmet";
-import fastifyStatic from "@fastify/static";
-import fastifyMultipart from "@fastify/multipart";
-import fastifyFormBody from "@fastify/formbody";
-import fastifyAutoLoad from "@fastify/autoload";
+import Fastify from "fastify";
 // eslint-disable-next-line import/order
 import fastifyAuth from "@fastify/auth";
 
 // Import custom modules and configurations.
-import fastifyCors from "@fastify/cors";
 
-import defaultLogger, { logger } from "#libs/services/logger.service.js";
+import { FASTIFY_CORS_CONFIG } from "#configs/index.js";
 import { globalHttpFastify404ErrorHandler, globalHttpFastifyErrorHandler } from "#infra/api/http/fastify-error-handler.js";
-import sharedHealthCheckRouter from "#modules/health-check/router.js";
+import defaultLogger, { logger } from "#libs/services/logger.service.js";
 import { getDirName } from "#libs/utils/files.js";
-import { FASTIFY_CORS_CONFIG, OPENAPI_CONFIG } from "#configs/index.js";
+import sharedHealthCheckRouter from "#modules/health-check/router.js";
 
 export class RestApiServer {
-  /** @type {import('fastify/types/instance').FastifyInstance} */
-  #fastify;
-
   /** @type {import('fastify').FastifyPluginOptions} */
   #configs;
+
+  /** @type {import('fastify/types/instance').FastifyInstance} */
+  #fastify;
 
   /** @type {import('#src/configs/index.js')} */
   #options;
 
+  /**
+   *
+   * @param {object} options
+   */
   constructor(options = {}) {
     this.#configs = options.configs;
     this.#options = options;
@@ -41,6 +45,9 @@ export class RestApiServer {
     Object.freeze(this);
   }
 
+  /**
+   *
+   */
   async buildServerApp() {
     // Error handlers to handle 404 and other HTTP errors.
     this.#fastify.setErrorHandler(globalHttpFastifyErrorHandler);
@@ -80,19 +87,6 @@ export class RestApiServer {
   }
 
   /**
-   * Stops the Fastify server gracefully.
-   * @async
-   * @returns {Promise<void>}
-   */
-  async stop() {
-    try {
-      await this.#fastify.close();
-    } catch (err) {
-      logger.error("Server failed to close with error: ", err);
-    }
-  }
-
-  /**
    * Starts the Fastify server on the specified IP and port.
    * @async
    * @param {object} param0 - Server start parameters.
@@ -103,7 +97,7 @@ export class RestApiServer {
   async start({ ip, port }) {
     await this.buildServerApp();
 
-    await this.#fastify.listen({ port, host: ip });
+    await this.#fastify.listen({ host: ip, port });
 
     // Upon this.#fastify readiness, print the route table and/or plugin tree for debugging purposes.
     this.#fastify.ready(() => {
@@ -114,6 +108,19 @@ export class RestApiServer {
   }
 
   /**
+   * Stops the Fastify server gracefully.
+   * @async
+   * @returns {Promise<void>}
+   */
+  async stop() {
+    try {
+      await this.#fastify.close();
+    } catch (error) {
+      logger.error("Server failed to close with error: ", error);
+    }
+  }
+
+  /**
    * Auto-loads plugins from the designated directory.
    */
   #autoLoadPlugins() {
@@ -121,8 +128,12 @@ export class RestApiServer {
 
     this.#fastify.register(fastifyAutoLoad, {
       dir: pluginsPath,
-      maxDepth: 1,
+      /**
+       *
+       * @param {string} p
+       */
       matchFilter: (p) => p.endsWith(".plugin.js"),
+      maxDepth: 1,
       options: {
         ...this.#options,
       },
@@ -136,9 +147,13 @@ export class RestApiServer {
     const routesPath = path.join(getDirName(import.meta.url), "../../../modules");
     this.#fastify.register(fastifyAutoLoad, {
       dir: routesPath,
-      maxDepth: 2,
-      matchFilter: (p) => p.endsWith(".router.v1.js"),
       ignorePattern: /d.ts/,
+      /**
+       *
+       * @param {string} p
+       */
+      matchFilter: (p) => p.endsWith(".router.v1.js"),
+      maxDepth: 2,
       options: {
         ...this.#options,
         prefix: "/v1",

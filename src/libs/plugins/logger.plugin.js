@@ -1,8 +1,8 @@
-import fp from "fastify-plugin";
 import { requestContext } from "@fastify/request-context";
+import fp from "fastify-plugin";
 
-import defaultLogger from "#libs/services/logger.service.js";
 import { APP_CONFIG, LOGGER_CONFIG } from "#configs/index.js";
+import defaultLogger from "#libs/services/logger.service.js";
 
 /** @type {import("@fastify/type-provider-typebox").FastifyPluginAsyncTypebox<import("#@types/fastify.js").FastifyGlobalOptionConfig> } */
 const requestLoggerPlugin = async (app) => {
@@ -29,21 +29,21 @@ const requestLoggerPlugin = async (app) => {
   const requestLogger = (request, _, done) => {
     if (LOGGER_CONFIG.enableRequestLogging) {
       defaultLogger.info({
-        requestId: request.id,
+        msg: "Incoming request",
         request: {
-          method: request.method,
-          url: request.url,
-          query: request.query,
-          params: request.params,
-          ip: request.ip,
-          ips: request.ips,
-          hostname: request.hostname,
-          protocol: request.protocol,
           authorization: !!request.headers.authorization ?? null,
           contentType: request.headers["content-type"],
+          hostname: request.hostname,
+          ip: request.ip,
+          ips: request.ips,
+          method: request.method,
+          params: request.params,
+          protocol: request.protocol,
+          query: request.query,
+          url: request.url,
           userAgent: request.headers["user-agent"] ?? null,
         },
-        msg: "Incoming request",
+        requestId: request.id,
       });
     }
     done();
@@ -57,24 +57,24 @@ const requestLoggerPlugin = async (app) => {
   const responseLogger = (request, reply, done) => {
     if (LOGGER_CONFIG.enableRequestLogging) {
       defaultLogger.info({
-        requestId: request.id,
+        msg: "Request completed",
         request: {
-          method: request.method,
-          url: request.url,
-          query: request.query,
-          params: request.params,
-          body: APP_CONFIG.env !== "production" ? request.body : undefined,
+          authorization: !!request.headers.authorization ?? null,
+          body: APP_CONFIG.env === "production" ? undefined : request.body,
+          contentType: request.headers["content-type"],
+          hostname: request.hostname,
           ip: request.ip,
           ips: request.ips,
-          hostname: request.hostname,
+          method: request.method,
+          params: request.params,
           protocol: request.protocol,
-          statusCode: reply.raw.statusCode,
+          query: request.query,
           responseTime: reply.elapsedTime,
-          contentType: request.headers["content-type"],
-          authorization: !!request.headers.authorization ?? null,
+          statusCode: reply.raw.statusCode,
+          url: request.url,
           userAgent: request.headers["user-agent"] ?? null,
         },
-        msg: "Request completed",
+        requestId: request.id,
       });
     }
     done();

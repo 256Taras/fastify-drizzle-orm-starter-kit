@@ -34,8 +34,8 @@ async function authPlugin(app, options) {
     sessionStorageService.setUserCredentials(data);
   };
 
-  app.register(fastifyJwt, { secret: jwtConfig.accessTokenSecret, namespace: "accessToken" });
-  app.register(fastifyJwt, { secret: jwtConfig.refreshTokenSecret, namespace: "refreshToken" });
+  app.register(fastifyJwt, { namespace: "accessToken", secret: jwtConfig.accessTokenSecret });
+  app.register(fastifyJwt, { namespace: "refreshToken", secret: jwtConfig.refreshTokenSecret });
   app.decorate("verifyJwt", options?.infra?.authService.verifyJwt ?? defaultVerifyJwt);
   app.decorate("verifyJwtRefreshToken", options?.infra?.authService.verifyJwtRefreshToken ?? defaultVerifyJwtRefreshToken);
 }

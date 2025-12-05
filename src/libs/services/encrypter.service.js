@@ -1,8 +1,11 @@
-import crypto, { createCipheriv, createDecipheriv, randomBytes, randomUUID, createHash } from "node:crypto";
+import crypto, { createCipheriv, createDecipheriv, createHash, randomBytes, randomUUID } from "node:crypto";
 
 import { ENCRYPTION_CONFIG } from "#configs/index.js";
 
 // Ensure encryption key is properly formatted (32 bytes for AES-256)
+/**
+ *
+ */
 const getEncryptionKey = () => {
   const key = ENCRYPTION_CONFIG.key;
   if (!key || key.length < 32) {
@@ -17,10 +20,10 @@ const getEncryptionKey = () => {
 };
 
 const cryptoConfig = {
-  saltRounds: ENCRYPTION_CONFIG.saltRounds,
-  keyLength: ENCRYPTION_CONFIG.keyLength,
-  key: getEncryptionKey(),
   algorithm: ENCRYPTION_CONFIG.algorithm,
+  key: getEncryptionKey(),
+  keyLength: ENCRYPTION_CONFIG.keyLength,
+  saltRounds: ENCRYPTION_CONFIG.saltRounds,
 };
 
 /**
@@ -38,7 +41,7 @@ const generateRandomBytes = (length = 16, encoding = "hex") => randomBytes(lengt
  */
 const generateUUID = (clean = false) => {
   const uuid = randomUUID();
-  return clean ? uuid.replace(/-/g, "") : uuid;
+  return clean ? uuid.replaceAll("-", "") : uuid;
 };
 
 /**
@@ -120,14 +123,14 @@ const base64Decode = (data) => Buffer.from(data, "base64").toString();
  * @returns {object} An object containing cryptographic utility functions.
  */
 const createEncrypterService = () => ({
-  randomBytes: generateRandomBytes,
+  base64Decode,
+  base64Encode,
+  compareHash,
+  decryptData,
+  encryptData,
   generateUUID,
   getHash,
-  compareHash,
-  encryptData,
-  decryptData,
-  base64Encode,
-  base64Decode,
+  randomBytes: generateRandomBytes,
 });
 
 export default createEncrypterService;

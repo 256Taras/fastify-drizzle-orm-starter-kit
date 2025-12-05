@@ -1,7 +1,7 @@
-import os from "node:os";
-import { exec } from "node:child_process";
-import { performance } from "node:perf_hooks";
 import { executionAsyncId } from "node:async_hooks";
+import { exec } from "node:child_process";
+import os from "node:os";
+import { performance } from "node:perf_hooks";
 
 import { sql } from "drizzle-orm";
 
@@ -39,8 +39,8 @@ const checkDiskSpace = async () =>
           const [caption, freeSpace, size] = line.trim().split(/\s+/);
           return {
             filesystem: caption,
-            size: parseInt(size, 10),
-            free: parseInt(freeSpace, 10),
+            free: Number.parseInt(freeSpace, 10),
+            size: Number.parseInt(size, 10),
           };
         });
         resolve(disks);
@@ -57,9 +57,9 @@ const checkDiskSpace = async () =>
           const parts = line.split(/\s+/);
           return {
             filesystem: parts[0],
-            size: parseInt(parts[1], 10) * 1024,
-            free: parseInt(parts[3], 10) * 1024,
+            free: Number.parseInt(parts[3], 10) * 1024,
             mount: parts[5],
+            size: Number.parseInt(parts[1], 10) * 1024,
           };
         });
         resolve(disks);
@@ -123,20 +123,19 @@ export default async (fastify) => {
       schema: schemas.basic,
     },
     async () => ({
-      uptime: process.uptime(),
       memoryUsage: process.memoryUsage(),
       timestamp: Date.now(),
+      uptime: process.uptime(),
     }),
   );
 
   fastify.get("/healthcheck/extended", {
-    schema: schemas.extended,
     async handler() {
       let dbStatus;
       try {
         await this.diContainer.cradle.db.execute(sql`SELECT 1 + 1 as healthcheck`);
         dbStatus = true;
-      } catch (e) {
+      } catch {
         dbStatus = false;
       }
 
@@ -148,24 +147,25 @@ export default async (fastify) => {
       };
 
       return {
-        uptime: process.uptime(),
-        memoryUsage: process.memoryUsage(),
-        osLoad: os.loadavg(),
-        eventLoopLag,
+        activeRequests,
         database: {
           status: dbStatus ? "connected" : "disconnected",
         },
-        versions: {
-          node: process.version,
-          fastify: fastify.version,
-          application: process.env.VERSION,
-        },
         diskSpace,
         environment: process.env.NODE_ENV || "development",
+        eventLoopLag,
+        memoryUsage: process.memoryUsage(),
+        osLoad: os.loadavg(),
         pid: process.pid,
-        activeRequests,
         timestamp: Date.now(),
+        uptime: process.uptime(),
+        versions: {
+          application: process.env.VERSION,
+          fastify: fastify.version,
+          node: process.version,
+        },
       };
     },
+    schema: schemas.extended,
   });
 };

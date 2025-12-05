@@ -1,13 +1,13 @@
+import { randomUUID } from "node:crypto";
 import fs from "node:fs";
-import util from "node:util";
 import path from "node:path";
 import { pipeline } from "node:stream";
-import { randomUUID } from "node:crypto";
+import util from "node:util";
 
 import { STORAGE_CONFIG } from "#configs/index.js";
 
 export const generateFileName = (name) => {
-  const extension = path.extname(name).substring(1);
+  const extension = path.extname(name).slice(1);
 
   return `${randomUUID()}.${extension}`;
 };
@@ -46,14 +46,13 @@ const onFile = async (part) => {
   part.file.on("error", async () => {
     try {
       await fs.promises.unlink(filePath);
-    } catch (err) {
+    } catch (error) {
       // @ts-ignore
       // eslint-disable-next-line no-console
-      console.error(`Error deleting file ${filePath}: ${err.message}`);
+      console.error(`Error deleting file ${filePath}: ${error.message}`);
     }
   });
 
-  // eslint-disable-next-line no-param-reassign
   part.path = filePath;
 
   await pump(part.file, fs.createWriteStream(filePath));

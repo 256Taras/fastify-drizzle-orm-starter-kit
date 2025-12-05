@@ -20,17 +20,17 @@ const HeaderSchema = {
 const StatusSchema = Type.Object({ status: Type.Boolean() }, { additionalProperties: false });
 
 const OffsetLimitSchema = Type.Object({
-  offset: Type.Integer({
-    description: "Number of records to be skipped to retrieve the documents. Default is 0, starts from the beginning.",
-    maximum: 10000,
-    minimum: 0,
-    default: OFFSET,
-  }),
   limit: Type.Integer({
-    description: `Batch size, the number of documents to be fetched in a single go. Default is ${LIMIT}.`,
-    minimum: 0,
-    maximum: 100,
     default: LIMIT,
+    description: `Batch size, the number of documents to be fetched in a single go. Default is ${LIMIT}.`,
+    maximum: 100,
+    minimum: 0,
+  }),
+  offset: Type.Integer({
+    default: OFFSET,
+    description: "Number of records to be skipped to retrieve the documents. Default is 0, starts from the beginning.",
+    maximum: 10_000,
+    minimum: 0,
   }),
 });
 
@@ -43,30 +43,30 @@ const OrderBySchema = Type.Optional(
       description: "The field to order by.",
     }),
     type: createEnumTypeUnionSchema(Object.values(ORDER_BY), {
-      description: "The order direction.",
       default: "ASC",
+      description: "The order direction.",
     }),
   }),
 );
 
 export const COMMON_CONTRACTS_V1 = {
   headers: HeaderSchema,
-  status: StatusSchema,
-  timestamp: Type.Intersect([TimestampSchema.createdAt, TimestampSchema.updatedAt]),
-  offsetLimit: OffsetLimitSchema,
   id: IdSchema,
+  offsetLimit: OffsetLimitSchema,
   orderBy: OrderBySchema,
   paginationQuery: Type.Object({
+    limit: Type.Integer({
+      default: LIMIT,
+      description: `Batch size, the number of documents to be fetched in a single go. Default is ${LIMIT}.`,
+      maximum: 100,
+      minimum: 1,
+    }),
     page: Type.Integer({
+      default: 1,
       description: "Current page. Default is 1.",
       minimum: 1,
-      default: 1,
-    }),
-    limit: Type.Integer({
-      description: `Batch size, the number of documents to be fetched in a single go. Default is ${LIMIT}.`,
-      minimum: 1,
-      maximum: 100,
-      default: LIMIT,
     }),
   }),
+  status: StatusSchema,
+  timestamp: Type.Intersect([TimestampSchema.createdAt, TimestampSchema.updatedAt]),
 };

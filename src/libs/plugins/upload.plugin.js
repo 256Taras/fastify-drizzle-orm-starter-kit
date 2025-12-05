@@ -2,10 +2,26 @@ import fs from "node:fs/promises";
 
 import fp from "fastify-plugin";
 
-import { BAD_REQUEST_400, UNSUPPORTED_MEDIA_TYPE_415 } from "#libs/errors/http.errors.js";
-import { toServerPath } from "#libs/utils/upload.js";
-import { ensureDirectoryExists } from "#libs/utils/files.js";
 import { STORAGE_CONFIG } from "#configs/storage.config.js";
+import { BAD_REQUEST_400, UNSUPPORTED_MEDIA_TYPE_415 } from "#libs/errors/http.errors.js";
+import { ensureDirectoryExists } from "#libs/utils/files.js";
+import { toServerPath } from "#libs/utils/upload.js";
+
+/**
+ * Handles file operations like moving and optionally renaming files.
+ * @param {string} originalPath - The original path of the file.
+ * @param {string} newPath - The intended new path for the file.
+ * @param {boolean} [isRename] - Indicates if the file should be renamed as part of the operation.
+ * @returns {Promise<string>} - The new path of the file after the operation.
+ */
+async function handleFileOperation(originalPath, newPath, isRename = true) {
+  const adjustedPath = newPath.replace(/\/$/, "");
+  await ensureDirectoryExists(adjustedPath);
+  if (isRename) {
+    await fs.rename(originalPath, adjustedPath);
+  }
+  return adjustedPath.replace(`${STORAGE_CONFIG.uploadServerPath}/`, "");
+}
 
 /**
  * Validates a specific part of the request against its defined schema.
@@ -29,21 +45,10 @@ function validateRequestPart(req, part) {
 }
 
 /**
- * Handles file operations like moving and optionally renaming files.
- * @param {string} originalPath - The original path of the file.
- * @param {string} newPath - The intended new path for the file.
- * @param {boolean} [isRename] - Indicates if the file should be renamed as part of the operation.
- * @returns {Promise<string>} - The new path of the file after the operation.
+ *
+ * @param {import('fastify').FastifyInstance} app
+ * @param {object} option
  */
-async function handleFileOperation(originalPath, newPath, isRename = true) {
-  const adjustedPath = newPath.replace(/\/$/, "");
-  await ensureDirectoryExists(adjustedPath);
-  if (isRename) {
-    await fs.rename(originalPath, adjustedPath);
-  }
-  return adjustedPath.replace(`${STORAGE_CONFIG.uploadServerPath}/`, "");
-}
-
 const uploadPlugin = async (app, option) => {
   /**
    * Removes an uploaded file if it exists on the server.
@@ -88,11 +93,11 @@ const uploadPlugin = async (app, option) => {
     if (!contentType || !contentType.includes("multipart/form-data"))
       throw new UNSUPPORTED_MEDIA_TYPE_415("Only 'multipart/form-data' is accepted");
 
-    Object.entries(req.body).forEach(([key, item]) => {
+    for (const [key, item] of Object.entries(req.body)) {
       req.body[key] = item.type === "field" ? item.value : item;
-    });
+    }
 
-    ["body", "query", "headers"].forEach((part) => validateRequestPart(req, part));
+    for (const part of ["body", "query", "headers"]) validateRequestPart(req, part);
   };
 
   app.decorate("parseMultipartFields", option?.parseMultipartFields ?? parseMultipartFields);

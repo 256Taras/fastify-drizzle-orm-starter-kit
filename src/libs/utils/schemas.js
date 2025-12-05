@@ -9,12 +9,17 @@ import { Type } from "@sinclair/typebox";
  */
 export const mixinTagForSchema = (schemas, tag) => {
   // @ts-ignore
-  Object.keys(schemas).forEach((k) => {
+  for (const k of Object.keys(schemas)) {
     schemas[k].tags = tag;
-  });
+  }
   return schemas;
 };
 
+/**
+ *
+ * @param {object} object
+ * @param {object} otp
+ */
 export const createEnumTypeUnionSchema = (object, otp = {}) =>
   Type.Union(
     // @ts-ignore
@@ -22,6 +27,10 @@ export const createEnumTypeUnionSchema = (object, otp = {}) =>
     otp,
   );
 
+/**
+ *
+ * @param {string[]} mimetypes
+ */
 export const createFileTypeSchema = (mimetypes) => {
   const baseSchema = {
     encoding: Type.Optional(Type.String()),
@@ -29,26 +38,27 @@ export const createFileTypeSchema = (mimetypes) => {
     limit: Type.Optional(Type.Boolean()),
   };
 
-  if (mimetypes && mimetypes.length) {
-    baseSchema.mimetype = Type.Optional(Type.String({ enum: mimetypes }));
-  } else {
-    baseSchema.mimetype = Type.Optional(Type.String());
-  }
+  baseSchema.mimetype =
+    mimetypes && mimetypes.length > 0 ? Type.Optional(Type.String({ enum: mimetypes })) : Type.Optional(Type.String());
 
   return Type.Object(baseSchema, { isFile: true });
 };
 
+/**
+ *
+ * @param {import('@sinclair/typebox').TSchema} dataType
+ */
 export const paginationSchema = (dataType) =>
   Type.Object({
-    meta: Type.Object({
-      itemCount: Type.Number(),
-      pageCount: Type.Number(),
-      page: Type.Number(),
-      limit: Type.Number(),
-      hasPreviousPage: Type.Boolean(),
-      hasNextPage: Type.Boolean(),
-    }),
     data: Type.Array(dataType),
+    meta: Type.Object({
+      hasNextPage: Type.Boolean(),
+      hasPreviousPage: Type.Boolean(),
+      itemCount: Type.Number(),
+      limit: Type.Number(),
+      page: Type.Number(),
+      pageCount: Type.Number(),
+    }),
   });
 
 const HTTP_STATUS_CODE_LENGTH = 3;
@@ -56,24 +66,28 @@ const CUSTOM_ERROR_CODE_LENGTH = 6;
 const DELIMITER_CODE_LENGTH = 3;
 const ERROR_DETAIL_SCHEMA = Type.Array(
   Type.Object({
-    type: createEnumTypeUnionSchema(["userMessage", "developerMessage"], { description: "Type of message" }),
-    message: Type.String({ description: "Error message" }),
     field: Type.String({ description: "Field associated with the error" }),
     location: createEnumTypeUnionSchema(["body", "query", "params", "headers"], {
       description: "Location of the error",
     }),
+    message: Type.String({ description: "Error message" }),
+    type: createEnumTypeUnionSchema(["userMessage", "developerMessage"], { description: "Type of message" }),
   }),
   { description: "Details of the error" },
 );
 
+/**
+ *
+ * @param {object} httpFastifyError
+ */
 const mapHttpErrorToSchemaError = (httpFastifyError) => ({
   [`${httpFastifyError.statusCode}`]: Type.Object(
     {
-      url: Type.String({ description: "Error URL" }),
       code: createEnumTypeUnionSchema([httpFastifyError.code], { description: "Error code" }),
-      statusCode: createEnumTypeUnionSchema([httpFastifyError.statusCode], { description: "HTTP status code" }),
-      userMessage: createEnumTypeUnionSchema([httpFastifyError.userMessage], { description: "Message for the user" }),
       developerMessage: Type.String({ description: "Message for the developer" }),
+      statusCode: createEnumTypeUnionSchema([httpFastifyError.statusCode], { description: "HTTP status code" }),
+      url: Type.String({ description: "Error URL" }),
+      userMessage: createEnumTypeUnionSchema([httpFastifyError.userMessage], { description: "Message for the user" }),
       // @ts-ignore
       ...(httpFastifyError.statusCode === 400 ? { errorDetails: ERROR_DETAIL_SCHEMA } : {}),
       traceId: Type.Optional(Type.String({ description: "Trace ID for debugging" })),
@@ -109,7 +123,7 @@ const sortSchemaErrorsByCodeAsc = (a, b) => {
  * @param {object} httpErrorCollection Collection of HTTP errors.
  */
 export const listHttpErrorsAsSchemaErrors = (httpErrorCollection) => {
-  const list = [...Object.values(httpErrorCollection).map(mapHttpErrorToSchemaError)];
+  const list = Object.values(httpErrorCollection).map(mapHttpErrorToSchemaError);
   return list.sort(sortSchemaErrorsByCodeAsc);
 };
 
@@ -119,5 +133,5 @@ export const listHttpErrorsAsSchemaErrors = (httpErrorCollection) => {
  */
 export const mapHttpErrorsToSchemaErrorCollection = (httpErrorCollection) => {
   const list = listHttpErrorsAsSchemaErrors(httpErrorCollection);
-  return list.reduce((obj, item) => ({ ...obj, [Object.keys(item)[0]]: item[Object.keys(item)[0]] }), {});
+  return Object.fromEntries(list.map((item) => [Object.keys(item)[0], item[Object.keys(item)[0]]]));
 };

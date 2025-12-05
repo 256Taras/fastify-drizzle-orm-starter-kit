@@ -1,9 +1,9 @@
-import { createSelectSchema } from "drizzle-typebox";
 import { Type } from "@sinclair/typebox";
+import { createSelectSchema } from "drizzle-typebox";
 
-import { users } from "#modules/users/users.model.js";
 import { COMMON_CONTRACTS_V1 } from "#libs/common.contracnts.js";
 import { paginationSchema } from "#libs/utils/schemas.js";
+import { users } from "#modules/users/users.model.js";
 
 export const USER_ENTITY_CONTRACT = createSelectSchema(users);
 

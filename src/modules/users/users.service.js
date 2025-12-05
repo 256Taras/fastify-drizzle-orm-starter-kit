@@ -1,9 +1,9 @@
-import { partial } from "rambda";
 import { count, eq } from "drizzle-orm";
+import { partial } from "rambda";
 
 import { ResourceNotFoundException } from "#libs/errors/domain.errors.js";
-import { NON_PASSWORD_COLUMNS, users } from "#modules/users/users.model.js";
 import { calculatePaginationOffset, createPaginatedResponse } from "#libs/utils/pagination.js";
+import { NON_PASSWORD_COLUMNS, users } from "#modules/users/users.model.js";
 
 /** @type {FindOneById} */
 const findOneById = async ({ db, logger }, id) => {
@@ -18,8 +18,8 @@ const findOneById = async ({ db, logger }, id) => {
 };
 
 /** @type {FindAll} */
-const findAll = async ({ db }, { page, limit }) => {
-  const { offset } = calculatePaginationOffset({ page, limit });
+const findAll = async ({ db }, { limit, page }) => {
+  const { offset } = calculatePaginationOffset({ limit, page });
 
   const [[{ itemCount }], entities] = await Promise.all([
     db.select({ itemCount: count() }).from(users),
@@ -27,18 +27,18 @@ const findAll = async ({ db }, { page, limit }) => {
   ]);
 
   return createPaginatedResponse({
-    itemCount,
     entities,
-    offset,
+    itemCount,
     limit,
+    offset,
   });
 };
 
 /** @param {Dependencies} deps */
 export default function usersService(deps) {
   return {
-    findOneById: partial(findOneById, [deps]),
     findAll: partial(findAll, [deps]),
+    findOneById: partial(findOneById, [deps]),
   };
 }
 

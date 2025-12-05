@@ -13,21 +13,21 @@
  *   hasNextPage: boolean
  * }} Metadata for the paginated response.
  */
-const createPageMetaDto = ({ offset, limit, itemCount }) => {
+const createPageMetaDto = ({ itemCount, limit, offset }) => {
   const page = Math.floor(offset / limit) + 1;
 
   const pageCount = Math.ceil(itemCount / limit);
   const hasPreviousPage = page > 1;
   const hasNextPage = page < pageCount;
 
-  return { page, limit, itemCount, pageCount, hasPreviousPage, hasNextPage };
+  return { hasNextPage, hasPreviousPage, itemCount, limit, page, pageCount };
 };
 
 /**
  * @param {{page?: number, limit?:number}} root0
  * @returns {{offset: number }} Options for the paginated collection.
  */
-export const calculatePaginationOffset = ({ page = 1, limit = 10 } = {}) => {
+export const calculatePaginationOffset = ({ limit = 10, page = 1 } = {}) => {
   const offset = (page - 1) * limit;
   return { offset };
 };
@@ -65,7 +65,7 @@ const createPageDto = (data, meta) => ({ data, meta });
  *   }
  * }>} A promise that resolves to the paginated response object.
  */
-export const createPaginatedResponse = async ({ entities, itemCount, offset, limit }) => {
-  const pageMetaDto = createPageMetaDto({ itemCount, offset, limit });
+export const createPaginatedResponse = async ({ entities, itemCount, limit, offset }) => {
+  const pageMetaDto = createPageMetaDto({ itemCount, limit, offset });
   return createPageDto(entities, pageMetaDto);
 };

@@ -1,28 +1,34 @@
 import { FastifyAuthFunction } from "@fastify/auth";
-import { FastifyInstance } from "fastify";
-// eslint-disable-next-line node/file-extension-in-import,import/named
 import { PostgresJsDatabase } from "drizzle-orm/postgres-js/driver";
+import { FastifyInstance } from "fastify";
 
 import { logger } from "#libs/services/logger.service";
 
-// eslint-disable-next-line import/no-duplicates
 import * as configs from "../configs/index.js";
 
 declare module "fastify" {
   interface FastifyInstance {
-    verifyJwt: FastifyAuthFunction;
-    verifyJwtRefreshToken: FastifyAuthFunction;
-    verifyApiKey: FastifyAuthFunction;
-    // eslint-disable-next-line no-use-before-define
+    configs: typeof configs;
+
     parseMultipartFields: (req: FastifyRequest, rep: FastifyReply) => Promise<void>;
     removeUploadIfExists: (filePath: string) => Promise<void>;
-    uploadToStorage: (uploadedFile: Record<string, any>, folder: string) => Promise<string>;
     upload: (uploadedFile: Record<string, any>) => Promise<string>;
-    configs: typeof configs;
+    uploadToStorage: (uploadedFile: Record<string, any>, folder: string) => Promise<string>;
+    verifyApiKey: FastifyAuthFunction;
+    verifyJwt: FastifyAuthFunction;
+    verifyJwtRefreshToken: FastifyAuthFunction;
   }
 }
 
 declare module "@fastify/jwt" {
+  interface FastifyJWT {
+    payload: { id: number };
+    user: {
+      age: number;
+      id: number;
+      name: string;
+    };
+  }
   interface JWT {
     accessToken: {
       sign: (payload: { id: number; name: string }) => string;
@@ -34,28 +40,20 @@ declare module "@fastify/jwt" {
       verify: (token: string | string[]) => Promise<{ id: number; refreshTokenId: string }>;
     };
   }
-  interface FastifyJWT {
-    payload: { id: number };
-    user: {
-      id: number;
-      name: string;
-      age: number;
-    };
-  }
 }
 
 export declare type FastifyGlobalOptionConfig = {
-  database: any;
-  configs: typeof configs;
-  app: FastifyInstance;
   [key: string]: any;
+  app: FastifyInstance;
+  configs: typeof configs;
+  database: any;
 };
 
 declare module "@fastify/awilix" {
   interface Cradle {
     app: FastifyInstance;
     configs: typeof configs;
-    logger: typeof logger;
     db: PostgresJsDatabase;
+    logger: typeof logger;
   }
 }

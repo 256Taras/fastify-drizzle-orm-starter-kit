@@ -1,4 +1,3 @@
-// eslint-disable-next-line node/file-extension-in-import
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
@@ -8,23 +7,23 @@ export class DatabaseManager {
   /** @type {import('drizzle-orm/postgres-js').PostgresJsDatabase} */
   drizzle;
 
+  isInitialized = false;
+
   /** @type {import('postgres').Sql} */
   postgres;
-
-  isInitialized = false;
 
   /**
    * Initializes a new instance of the DatabaseManager.
    * @param {{configs: import("#@types/common").Configs}} configs - The configuration object.
    */
   constructor({ configs }) {
-    const { DB_CONFIG, APP_CONFIG } = configs;
+    const { APP_CONFIG, DB_CONFIG } = configs;
     this.databaseUrl = DB_CONFIG?.databaseUrl;
 
     this.postgres = postgres(this.databaseUrl, {
       idle_timeout: DB_CONFIG.timeout,
-      onnotice: this.handleNotice,
       onclose: this.handleClose,
+      onnotice: this.handleNotice,
     });
 
     this.drizzle = drizzle(this.postgres, {
@@ -46,16 +45,20 @@ export class DatabaseManager {
   }
 
   /**
-   * Performs a simple database query to test the connection.
+   * Disconnects the database connection if initialized.
    */
-  async testConnection() {
-    try {
-      await this.postgres`SELECT 1`;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      logger.error(`Database connection failed: ${errorMessage}`);
-      throw new Error(`Failed to connect to the database: ${errorMessage}`);
+  async disconnect() {
+    if (this.isInitialized) {
+      await this.postgres.end();
     }
+  }
+
+  /**
+   * Handles unexpected connection closures by logging and throwing an error.
+   * @param {number} connId - The connection ID that was unexpectedly closed.
+   */
+  handleClose(connId) {
+    logger.info(`Connection ${connId} closed unexpectedly.`);
   }
 
   /**
@@ -72,19 +75,15 @@ export class DatabaseManager {
   }
 
   /**
-   * Handles unexpected connection closures by logging and throwing an error.
-   * @param {number} connId - The connection ID that was unexpectedly closed.
+   * Performs a simple database query to test the connection.
    */
-  handleClose(connId) {
-    logger.info(`Connection ${connId} closed unexpectedly.`);
-  }
-
-  /**
-   * Disconnects the database connection if initialized.
-   */
-  async disconnect() {
-    if (this.isInitialized) {
-      await this.postgres.end();
+  async testConnection() {
+    try {
+      await this.postgres`SELECT 1`;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      logger.error(`Database connection failed: ${errorMessage}`);
+      throw new Error(`Failed to connect to the database: ${errorMessage}`);
     }
   }
 }

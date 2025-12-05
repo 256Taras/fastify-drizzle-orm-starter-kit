@@ -22,6 +22,7 @@
     "resolveJsonModule": true,
     "declaration": true,
     "strictPropertyInitialization": false,
+    "skipLibCheck": true,
     "paths": {
       "#*": ["./src/*"],
     }

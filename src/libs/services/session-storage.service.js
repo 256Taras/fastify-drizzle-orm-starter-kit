@@ -37,8 +37,8 @@ const setUserCredentials = (credentials) => requestContext.set(TOKENS.userCreden
  */
 const sessionStorageService = () => ({
   getUser,
-  setUser,
   getUserCredentials,
+  setUser,
   setUserCredentials,
 });
 

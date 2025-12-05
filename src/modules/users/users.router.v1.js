@@ -2,11 +2,12 @@ import usersSchemas from "./users.schemas.js";
 
 /** @type {import("@fastify/type-provider-typebox").FastifyPluginAsyncTypebox } */
 export default async function usersRouterV1(app) {
-  const { usersService, sessionStorageService } = app.diContainer.cradle;
+  const { sessionStorageService, usersService } = app.diContainer.cradle;
 
   app.get("/profile", {
-    schema: usersSchemas.getProfile,
     preHandler: app.auth([app.verifyJwt]),
+    schema: usersSchemas.getProfile,
+
     async handler() {
       const { id } = sessionStorageService.get();
 
@@ -15,8 +16,9 @@ export default async function usersRouterV1(app) {
   });
 
   app.get("/", {
-    schema: usersSchemas.getList,
     preHandler: app.auth([app.verifyJwt]),
+    schema: usersSchemas.getList,
+
     async handler(req) {
       return usersService.findAll(req.query);
     },

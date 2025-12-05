@@ -21,8 +21,8 @@ export default async function authRouterV1(app) {
   });
 
   app.post("/log-out", {
-    schema: authSchemas.logOut,
     preValidation: [app.auth([app.verifyJwtRefreshToken])],
+    schema: authSchemas.logOut,
 
     async handler() {
       return authService.signOut();
@@ -30,8 +30,8 @@ export default async function authRouterV1(app) {
   });
 
   app.put("/refresh-tokens", {
-    schema: authSchemas.refreshTokens,
     preValidation: [app.auth([app.verifyJwtRefreshToken])],
+    schema: authSchemas.refreshTokens,
 
     async handler() {
       return authService.refreshAccessToken();

@@ -1,4 +1,4 @@
-import Generator from "yeoman-generator"; // eslint-disable-line
+import Generator from "yeoman-generator";
 
 import getModuleNames from "./helpers/get-module-names.js";
 import pluralToSingularGlobal from "./helpers/plural-to-singular.js";
@@ -7,8 +7,36 @@ export default class extends Generator {
   isSecure = false;
   constructor(args, opts) {
     super(args, opts);
-    this.argument("modelName", { type: String, required: true });
-    this.argument("modelAttributes", { type: String, required: true });
+    this.argument("modelName", { required: true, type: String });
+    this.argument("modelAttributes", { required: true, type: String });
+  }
+
+  _parseModelAttributes(modelAttributes) {
+    const fields = [];
+
+    for (const part of modelAttributes.split(",").map((part) => part.trim())) {
+      const [nameType, typeWithOptions] = part.split(":", 2);
+      const nullable = nameType.endsWith("?");
+      const name = nullable ? nameType.slice(0, -1) : nameType;
+      const options = {};
+      let type = typeWithOptions;
+
+      // Handling length within type options
+      const lengthMatch = typeWithOptions.match(/\((\d+)\)/);
+      if (lengthMatch) {
+        options.length = Number.parseInt(lengthMatch[1], 10);
+        type = typeWithOptions.split("(")[0];
+      }
+
+      fields.push({
+        name,
+        nullable,
+        options,
+        type,
+      });
+    }
+
+    return fields;
   }
 
   /**
@@ -17,10 +45,10 @@ export default class extends Generator {
   prompting() {
     return this.prompt([
       {
-        type: "confirm",
-        name: "isSecure",
-        message: "Need request authorization?",
         default: true,
+        message: "Need request authorization?",
+        name: "isSecure",
+        type: "confirm",
       },
     ]).then((dto) => {
       const { isSecure } = dto;
@@ -29,18 +57,18 @@ export default class extends Generator {
   }
 
   writing() {
-    const { modelName, modelAttributes } = this.options;
+    const { modelAttributes, modelName } = this.options;
     const fields = this._parseModelAttributes(modelAttributes);
     const { isSecure } = this;
 
     const moduleNames = getModuleNames(modelName);
     const pluralModuleNames = getModuleNames(pluralToSingularGlobal(modelName));
     const templateData = {
-      modelName,
       fields,
+      isSecure,
+      modelName,
       moduleNames,
       pluralModuleNames,
-      isSecure,
     };
 
     // Helper function to simplify template copying
@@ -58,36 +86,5 @@ export default class extends Generator {
     copyTemplate("schemas", `${modelName}.schemas`);
     copyTemplate("contracts", `${modelName}.contracts`);
     copyTemplate("service", `${modelName}.service`);
-  }
-
-  _parseModelAttributes(modelAttributes) {
-    const fields = [];
-
-    modelAttributes
-      .split(",")
-      .map((part) => part.trim())
-      .forEach((part) => {
-        const [nameType, typeWithOptions] = part.split(":", 2);
-        const nullable = nameType.endsWith("?");
-        const name = nullable ? nameType.slice(0, -1) : nameType;
-        const options = {};
-        let type = typeWithOptions;
-
-        // Handling length within type options
-        const lengthMatch = typeWithOptions.match(/\((\d+)\)/);
-        if (lengthMatch) {
-          options.length = parseInt(lengthMatch[1], 10);
-          type = typeWithOptions.split("(")[0];
-        }
-
-        fields.push({
-          name,
-          type,
-          options,
-          nullable,
-        });
-      });
-
-    return fields;
   }
 }

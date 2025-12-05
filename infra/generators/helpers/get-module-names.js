@@ -11,20 +11,20 @@
  */
 const getModuleNames = (modelName) => {
   // Generate camelCase
-  const camelCase = modelName.replace(/(?:^\w|[A-Z]|\b\w|\s+)/g, (match, index) =>
+  const camelCase = modelName.replaceAll(/(?:^\w|[A-Z]|\b\w|\s+)/g, (match, index) =>
     index === 0 ? match.toLowerCase() : match.toUpperCase(),
   );
 
   // Generate kebabCase
   const kebabCase = modelName
-    .replace(/([a-z])([A-Z])/g, "$1-$2")
-    .replace(/\s+/g, "-")
+    .replaceAll(/([a-z])([A-Z])/g, "$1-$2")
+    .replaceAll(/\s+/g, "-")
     .toLowerCase();
 
   // Generate snake_case
   const snakeCase = modelName
-    .replace(/([a-z])([A-Z])/g, "$1_$2")
-    .replace(/\s+/g, "_")
+    .replaceAll(/([a-z])([A-Z])/g, "$1_$2")
+    .replaceAll(/\s+/g, "_")
     .toLowerCase();
 
   // Generate UPPER_SNAKE_CASE
@@ -33,10 +33,10 @@ const getModuleNames = (modelName) => {
   const pascalCase = camelCase.charAt(0).toUpperCase() + camelCase.slice(1);
 
   return {
-    pascalCase,
     camelCase: camelCase.charAt(0).toUpperCase() + camelCase.slice(1), // Upper first letter
-    lowerCamelCase: camelCase, // camelCase with first letter lower
     kebabCase, // hyphenated lower-case
+    lowerCamelCase: camelCase, // camelCase with first letter lower
+    pascalCase,
     snakeCase, // underscored lower-case
     upperSnakeCase, // underscored upper-case
   };

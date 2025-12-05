@@ -1,5 +1,5 @@
-import fp from "fastify-plugin";
 import { requestContext } from "@fastify/request-context";
+import fp from "fastify-plugin";
 
 import { SERVER_TIMEOUT_408 } from "#libs/errors/http.errors.js";
 
@@ -54,8 +54,9 @@ async function requestTimeoutPlugin(app, options) {
 
       const timeoutId = setTimeout(() => {
         controller.abort();
+        // @ts-expect-error - HookHandlerDoneFunction accepts Error
         done(new SERVER_TIMEOUT_408());
-      }, timeout);
+      }, timeout || 0);
 
       // @ts-ignore
       requestContext.set(TIMEOUT_KEY, timeoutId);
@@ -64,7 +65,7 @@ async function requestTimeoutPlugin(app, options) {
       // @ts-ignore
       requestContext.set(SIGNAL_KEY, controller.signal);
 
-      done();
+      done(undefined);
     } catch (error) {
       // @ts-ignore
       done(error);
