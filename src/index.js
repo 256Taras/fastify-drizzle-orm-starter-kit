@@ -1,125 +1,287 @@
-import { APP_CONFIG, SERVER_CONFIG } from "#configs/index.js";
+// application.js
 import * as configs from "#configs/index.js";
+import { APP_CONFIG, SERVER_CONFIG } from "#configs/index.js";
 import { RestApiServer } from "#infra/api/http/fastify-server.js";
 import { DatabaseManager } from "#infra/db.js";
 import { logger } from "#libs/services/logger.service.js";
 
+/**
+ * @typedef {'idle' | 'starting' | 'running' | 'stopping' | 'stopped'} AppState
+ */
+
+/**
+ * Application lifecycle manager
+ * Handles initialization, graceful shutdown, and error handling
+ */
 class Application {
-  #database;
-  #EXIT_FAILURE = 1;
-
-  #EXIT_SUCCESS = 0;
-
-  #restApi;
+  /** Signals to listen for graceful shutdown */
+  static SHUTDOWN_SIGNALS = ["SIGTERM", "SIGINT", "SIGHUP"];
 
   /**
-   *
+   * Checks if application is running
+   * @returns {boolean}
+   */
+  get isRunning() {
+    return this.#state === "running";
+  }
+
+  /**
+   * Gets current application state
+   * @returns {AppState}
+   */
+  get state() {
+    return this.#state;
+  }
+
+  /** @type {DatabaseManager | null} */
+  #database = null;
+
+  /** @type {NodeJS.Timeout | null} */
+  #forceShutdownTimer = null;
+
+  /** @type {boolean} */
+  #isShuttingDown = false;
+
+  /** @type {RestApiServer | null} */
+  #restApi = null;
+
+  /** @type {AppState} */
+  #state = "idle";
+
+  /**
+   * Private constructor - use Application.create() instead
    */
   constructor() {
-    // @ts-ignore
-    return this.#start();
+    this.#setupProcessHandlers();
   }
 
   /**
-   *
+   * Creates and starts the application
+   * @returns {Promise<Application>}
    */
-  async #gracefulShutdown() {
-    logger.info(`[${APP_CONFIG.applicationName}]: Stopping application on port ${SERVER_CONFIG.port}...`);
+  static async create() {
+    const app = new Application();
+    await app.start();
+    return app;
+  }
 
-    const forceShutdown = setTimeout(() => {
-      logger.info(`[${APP_CONFIG.applicationName}]: Application on port ${SERVER_CONFIG.port} stopped forcefully`);
+  /**
+   * Starts the application
+   * @returns {Promise<void>}
+   */
+  async start() {
+    if (this.#state !== "idle") {
+      throw new Error(`Cannot start application in ${this.#state} state`);
+    }
 
-      process.exit(this.#EXIT_FAILURE);
+    this.#state = "starting";
+    logger.info(`[${APP_CONFIG.applicationName}] Starting application...`);
+
+    try {
+      // Initialize database
+      this.#database = new DatabaseManager({ configs });
+
+      // Initialize REST API
+      this.#restApi = new RestApiServer({
+        configs,
+        database: this.#database,
+      });
+
+      // Initialize infrastructure (migrations, health checks, etc.)
+      await this.#initInfrastructure();
+
+      // Start REST API server
+      await this.#restApi.start({
+        ip: SERVER_CONFIG.ip,
+        port: SERVER_CONFIG.port,
+      });
+
+      this.#state = "running";
+      logger.info(`[${APP_CONFIG.applicationName}] Application running on ${SERVER_CONFIG.ip}:${SERVER_CONFIG.port}`);
+
+      if (APP_CONFIG.env === "development") {
+        logger.info(`[${APP_CONFIG.applicationName}] Documentation: ${APP_CONFIG.applicationUrl}/docs`);
+      }
+    } catch (error) {
+      this.#state = "stopped";
+      if (error instanceof Error) {
+        logger.fatal({ error: error?.stack || error }, `[${APP_CONFIG.applicationName}] Failed to start application`);
+      }
+
+      throw error;
+    }
+  }
+
+  /**
+   * Gracefully stops the application
+   * @returns {Promise<void>}
+   */
+  async stop() {
+    // Prevent multiple shutdown attempts
+    if (this.#isShuttingDown || this.#state === "stopped") {
+      return;
+    }
+
+    this.#isShuttingDown = true;
+    this.#state = "stopping";
+
+    logger.info(`[${APP_CONFIG.applicationName}] Initiating graceful shutdown...`);
+
+    // Set force shutdown timeout
+    this.#forceShutdownTimer = setTimeout(() => {
+      logger.warn(
+        `[${APP_CONFIG.applicationName}] Shutdown timeout (${SERVER_CONFIG.shutdownTimeout}ms) exceeded, forcing exit`,
+      );
+      process.exit(1);
     }, SERVER_CONFIG.shutdownTimeout);
 
-    await this.#stopInfrastructure();
+    try {
+      // Stop infrastructure in reverse order of initialization
+      await this.#stopInfrastructure();
 
-    logger.info(`[${APP_CONFIG.applicationName}]: Application successfully stopped`);
-    clearTimeout(forceShutdown);
+      this.#state = "stopped";
+      logger.info(`[${APP_CONFIG.applicationName}] Shutdown completed successfully`);
 
-    process.exit(this.#EXIT_SUCCESS);
+      this.#clearForceShutdown();
+      process.exit(0);
+    } catch (error) {
+      if (error instanceof Error) {
+        logger.error({ error: error?.stack || error }, `[${APP_CONFIG.applicationName}] Error during shutdown`);
+      }
+
+      this.#clearForceShutdown();
+      process.exit(1);
+    }
   }
 
   /**
-   *
+   * Clears force shutdown timer
+   */
+  #clearForceShutdown() {
+    if (this.#forceShutdownTimer) {
+      clearTimeout(this.#forceShutdownTimer);
+      this.#forceShutdownTimer = null;
+    }
+  }
+
+  /**
+   * Initializes application infrastructure
+   * @returns {Promise<void>}
    */
   async #initInfrastructure() {
-    logger.info(`[${APP_CONFIG.applicationName}]: Initializing infrastructure...`);
-    try {
-      //    await AppDataSource.initialize();
-    } catch (error) {
-      logger.error(error);
-    }
-    logger.info(`[${APP_CONFIG.applicationName}]: Infrastructure initialized`);
+    logger.info(`[${APP_CONFIG.applicationName}] Initializing infrastructure...`);
 
-    if (APP_CONFIG.env === "development") {
-      logger.info(`[${APP_CONFIG.applicationName}]: See the documentation on ${APP_CONFIG.applicationUrl}/docs`);
-    }
+    // Add infrastructure initialization here:
+    // - Run database migrations
+    // - Initialize caching layer
+    // - Set up health check endpoints
+    // - etc.
+
+    logger.info(`[${APP_CONFIG.applicationName}] Infrastructure initialized`);
   }
 
   /**
-   *
+   * Sets up process-level event handlers
    */
-  #initStopHandlers() {
-    /**
-     *
-     * @param {string} signal
-     */
-    const handleSignal = async (signal) => {
-      logger.info(`[${APP_CONFIG.applicationName}]: ${signal} signal received`);
-      await this.#gracefulShutdown();
-    };
-
-    // Subscribe to system signals
-    for (const signal of ["SIGTERM", "SIGINT", "SIGHUP"]) {
-      process.on(signal, () => handleSignal(signal));
+  #setupProcessHandlers() {
+    // Handle shutdown signals
+    for (const signal of Application.SHUTDOWN_SIGNALS) {
+      process.once(signal, () => {
+        logger.info(`[${APP_CONFIG.applicationName}] Received ${signal} signal`);
+        this.stop().catch((error) => {
+          logger.fatal({ error: error?.stack || error }, `[${APP_CONFIG.applicationName}] Error during signal handling`);
+          process.exit(1);
+        });
+      });
     }
 
-    process.on("uncaughtException", (error) => {
-      // eslint-disable-next-line no-console
-      console.error(error);
-      logger.fatal({
-        error: error.stack,
-        type: "uncaughtException",
-      });
+    // Handle uncaught exceptions
+    process.once("uncaughtException", (error) => {
+      logger.fatal(
+        { error: error?.stack || error, type: "uncaughtException" },
+        `[${APP_CONFIG.applicationName}] Uncaught exception`,
+      );
+      this.stop().catch(() => process.exit(1));
+    });
+
+    // Handle unhandled promise rejections
+    process.once("unhandledRejection", (reason, promise) => {
+      logger.fatal(
+        {
+          reason: reason instanceof Error ? reason.stack : String(reason),
+          promise: String(promise),
+          type: "unhandledRejection",
+        },
+        `[${APP_CONFIG.applicationName}] Unhandled rejection`,
+      );
+      this.stop().catch(() => process.exit(1));
+    });
+
+    // Log exit code
+    process.once("exit", (code) => {
+      const color = code === 0 ? "\u001B[32m" : "\u001B[31m"; // green or red
+      console.log(`${color}[${APP_CONFIG.applicationName}] Process exiting with code: ${code}\u001B[0m`);
     });
   }
 
   /**
-   *
-   */
-  async #start() {
-    try {
-      this.#database = new DatabaseManager({ configs });
-      this.#restApi = new RestApiServer({ configs, database: this.#database });
-
-      this.#initStopHandlers();
-      await this.#initInfrastructure();
-      // Run servers (all kind of transports: Rest API, WS, etc.)
-      await this.#restApi.start({ ip: SERVER_CONFIG.ip, port: SERVER_CONFIG.port });
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(error);
-
-      process.exit(this.#EXIT_FAILURE);
-    }
-  }
-
-  // stop all infrastructure: servers, db connections, storage connections (if exists), etc
-  /**
-   *
+   * Stops all infrastructure components in reverse order
+   * @returns {Promise<void>}
    */
   async #stopInfrastructure() {
-    await this.#restApi.stop();
-    if (this.#database.isInitialized) {
-      await this.#database.disconnect();
+    const errors = [];
+
+    // Stop REST API server
+    if (this.#restApi) {
+      try {
+        await this.#restApi.stop();
+        logger.info(`[${APP_CONFIG.applicationName}] REST API stopped`);
+      } catch (error) {
+        errors.push({ component: "REST API", error });
+        if (error instanceof Error) {
+          logger.error({ error: error?.stack || error }, `[${APP_CONFIG.applicationName}] Failed to stop REST API`);
+        }
+      }
+    }
+
+    // Disconnect database
+    if (this.#database?.isInitialized) {
+      try {
+        await this.#database.disconnect();
+        logger.info(`[${APP_CONFIG.applicationName}] Database disconnected`);
+      } catch (error) {
+        errors.push({ component: "Database", error });
+        if (error instanceof Error) {
+          logger.error({ error: error?.stack || error }, `[${APP_CONFIG.applicationName}] Failed to disconnect database`);
+        }
+      }
+    }
+
+    // If there were errors, throw aggregate error
+    if (errors.length > 0) {
+      throw new Error(`Failed to stop ${errors.length} component(s): ${errors.map((e) => e.component).join(", ")}`);
     }
   }
 }
 
-await new Application();
+// ============================================================================
+// Bootstrap
+// ============================================================================
 
-process.on("exit", (code) =>
-  // eslint-disable-next-line no-console
-  console.info(`\u001B[38;5;43m[${APP_CONFIG.applicationName}] Exit with code: ${code}.\u001B[0m`),
-);
+/**
+ * Application entry point
+ */
+async function bootstrap() {
+  try {
+    await Application.create();
+  } catch (error) {
+    if (error instanceof Error) {
+      logger.fatal({ error: error?.stack || error }, `[${APP_CONFIG.applicationName}] Bootstrap failed`);
+    }
+
+    process.exit(1);
+  }
+}
+
+// Start the application
+bootstrap();
