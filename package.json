@@ -28,10 +28,10 @@
     "prepush": "npm run lint && npm test",
     "check:types": "npx tsc --project tsconfig.json",
     "check:types:jsdoc": "node scripts/check-types.js",
-    "check:env": "node -r ./infra/bin/env/load-and-validate-env.cjs",
+    "check:env": "node -r ./scripts/env/load-and-validate-env.cjs",
     "check:dep": "npx depcheck",
     "ci": "yarn prettier:fix & yarn lint:fix && yarn lint && yarn test && yarn check",
-    "generate:module": "npx yo infra/generators/scaffold.js"
+    "generate:module": "npx yo tools/generators/scaffold.js"
   },
   "author": {
     "name": "Taras Ivaniuk",

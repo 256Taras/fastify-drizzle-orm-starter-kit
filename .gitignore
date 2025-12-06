@@ -108,3 +108,11 @@ dist
 .idea
 
 public/uploads
+
+# macOS
+.DS_Store
+
+# Docker pgAdmin data
+infra/docker/pgadmin/pgadmin4.db
+infra/docker/pgadmin/sessions/
+infra/docker/pgadmin/storage/
