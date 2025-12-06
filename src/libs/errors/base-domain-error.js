@@ -10,7 +10,6 @@ export class BaseDomainError extends Error {
   constructor(message, name) {
     super(message);
     this.name = name;
-    if (Error.captureStackTrace) {}
   }
 
   /**

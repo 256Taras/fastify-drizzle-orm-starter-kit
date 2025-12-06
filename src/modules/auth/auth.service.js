@@ -6,10 +6,6 @@ import { ConflictException, ResourceNotFoundException, UnauthorizedException } f
 import { authTokens } from "#modules/auth/auth-token.model.js";
 import { NON_PASSWORD_COLUMNS, users } from "#modules/users/users.model.js";
 
-/**
- * @typedef {import("#@types/di-container.jsdoc.js").Dependencies} Dependencies
- */
-
 /** @type {SignUpUser} **/
 const signUpUser = async ({ authTokenService, db, encrypterService, logger }, { email, firstName, lastName, password }) => {
   logger.debug(`Try sign up user with email: ${email}`);
@@ -94,9 +90,13 @@ export default function authService(deps) {
 }
 
 /**
- * @typedef {import("./auth.contracts").Credentials} Credentials
- * @typedef {import("./auth.contracts").SignInInput} SignInInput
- * @typedef {import("./auth.contracts").SignUpInput} SignUpInput
+ * @typedef {import("#@types/index.jsdoc.js").Dependencies} Dependencies
+ */
+
+/**
+ * @typedef {import("./auth.contracts.js").Credentials} Credentials
+ * @typedef {import("./auth.contracts.js").SignInInput} SignInInput
+ * @typedef {import("./auth.contracts.js").SignUpInput} SignUpInput
  *
  * @typedef {function(Dependencies, SignUpInput):Promise<Credentials>} SignUpUser
  * @typedef {function(Dependencies, SignInInput):Promise<Credentials>} SignInUser

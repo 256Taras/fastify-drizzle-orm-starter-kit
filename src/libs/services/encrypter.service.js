@@ -2,9 +2,10 @@ import crypto, { createCipheriv, createDecipheriv, createHash, randomBytes, rand
 
 import { ENCRYPTION_CONFIG } from "#configs/index.js";
 
-// Ensure encryption key is properly formatted (32 bytes for AES-256)
 /**
- *
+ * Ensures encryption key is properly formatted (32 bytes for AES-256)
+ * @returns {Buffer} The encryption key as a Buffer
+ * @throws {Error} If the encryption key is missing or too short
  */
 const getEncryptionKey = () => {
   const key = ENCRYPTION_CONFIG.key;

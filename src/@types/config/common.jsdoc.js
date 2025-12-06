@@ -1,3 +1,8 @@
+/**
+ * @file
+ * Common configuration types
+ */
+
 import { CONFIG_SCHEMA } from "#configs/env.config.js";
 import * as Config from "#configs/index.js";
 
@@ -11,5 +16,4 @@ import * as Config from "#configs/index.js";
  * @typedef {import("@sinclair/typebox").Static<typeof CONFIG_SCHEMA>} Env
  */
 
-// Export types for use in JSDoc
 export {};

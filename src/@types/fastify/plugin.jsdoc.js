@@ -1,11 +1,11 @@
 /**
- * Extended FastifyInstance with all custom methods and properties
- * @typedef {import("#@types/fastify-instance.jsdoc.js").FastifyInstanceExtended} FastifyInstanceExtended
+ * @file
+ * Fastify plugin types
  */
 
 /**
  * Custom Fastify plugin type that uses FastifyInstanceExtended
- * @typedef {(app: FastifyInstanceExtended, opts?: any) => Promise<void> | void} FastifyPluginAsyncExtended
+ * @typedef {(app: import("./instance.jsdoc.js").FastifyInstanceExtended, opts?: any) => Promise<void> | void} FastifyPluginAsyncExtended
  */
 
 /**
@@ -14,5 +14,4 @@
  * @typedef {FastifyPluginAsyncExtended} FastifyPluginAsyncTypeboxExtended
  */
 
-// Export types for use in JSDoc
 export {};

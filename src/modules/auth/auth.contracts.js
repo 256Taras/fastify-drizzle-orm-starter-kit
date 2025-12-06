@@ -21,8 +21,7 @@ export const SIGN_IN_UP_OUTPUT_CONTRACT = Type.Intersect([
 ]);
 
 // Sign up input - pick only required fields from insert schema (omit id, timestamps)
-// export const SIGN_UP_INPUT_CONTRACT = Type.Pick(USER_INSERT_CONTRACT, ["email", "password", "firstName", "lastName"]);
-export const SIGN_UP_INPUT_CONTRACT = USER_INSERT_CONTRACT;
+export const SIGN_UP_INPUT_CONTRACT = Type.Pick(USER_INSERT_CONTRACT, ["email", "password", "firstName", "lastName"]);
 
 // Sign in input - pick only email and password
 export const SIGN_IN_INPUT_CONTRACT = Type.Pick(SIGN_UP_INPUT_CONTRACT, ["email", "password"]);

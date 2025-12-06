@@ -133,6 +133,8 @@ export default async (fastify) => {
     async handler() {
       let dbStatus;
       try {
+        // @ts-ignore - db is defined in Dependencies but TypeScript can't infer it properly
+        // @ts-ignore - this context is extended with diContainer but TypeScript can't infer it
         await this.diContainer.cradle.db.execute(sql`SELECT 1 + 1 as healthcheck`);
         dbStatus = true;
       } catch {

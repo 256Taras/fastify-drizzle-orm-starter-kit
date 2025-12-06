@@ -1,6 +1,6 @@
 import authSchemas from "./auth.schemas.js";
 
-/** @type {import("#@types/fastify-plugin.jsdoc.js").FastifyPluginAsyncTypeboxExtended} */
+/** @type {import("#@types/index.jsdoc.js").FastifyPluginTypebox} */
 export default async function authRouterV1(app) {
   const { authService } = app.diContainer.cradle;
 

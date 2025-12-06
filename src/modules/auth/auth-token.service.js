@@ -4,10 +4,6 @@ import { FASTIFY_JWT_CONFIG } from "#configs/index.js";
 import { authTokens } from "#modules/auth/auth-token.model.js";
 
 /**
- * @typedef {import("#@types/di-container.jsdoc.js").Dependencies} Dependencies
- */
-
-/**
  * Generates access and refresh tokens for a user.
  * @param {Dependencies} deps - The dependencies required for token generation.
  * @param {object} user - The user for whom the tokens are generated.
@@ -40,3 +36,6 @@ export default function authTokenService(deps) {
     generateTokens: partial(generateTokens, [deps]),
   };
 }
+/**
+ * @typedef {import("#@types/index.jsdoc.js").Dependencies} Dependencies
+ */

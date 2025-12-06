@@ -42,7 +42,7 @@ export const CONFIG_SCHEMA = Type.Object(
   { additionalProperties: false },
 );
 
-/** @type {import("#@types/common.jsdoc.js").Env} */
+/** @type {import("#@types/index.jsdoc.js").Env} */
 export const ENV_CONFIG = envSchema({
   dotenv: {
     path: "configs/.env",

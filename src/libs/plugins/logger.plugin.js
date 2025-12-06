@@ -4,7 +4,7 @@ import fp from "fastify-plugin";
 import { APP_CONFIG, LOGGER_CONFIG } from "#configs/index.js";
 import defaultLogger from "#libs/services/logger.service.js";
 
-/** @type {import("@fastify/type-provider-typebox").FastifyPluginAsyncTypebox<import("#@types/fastify.jsdoc.js").FastifyGlobalOptionConfig> } */
+/** @type {import("@fastify/type-provider-typebox").FastifyPluginAsyncTypebox<import("#@types/index.jsdoc.js").PluginOptions> } */
 const requestLoggerPlugin = async (app) => {
   /**
    * @param {import('fastify').FastifyRequest} request
@@ -31,7 +31,7 @@ const requestLoggerPlugin = async (app) => {
       defaultLogger.info({
         msg: "Incoming request",
         request: {
-          authorization: !!request.headers.authorization ?? null,
+          authorization: request.headers.authorization ? true : null,
           contentType: request.headers["content-type"],
           hostname: request.hostname,
           ip: request.ip,
@@ -59,7 +59,7 @@ const requestLoggerPlugin = async (app) => {
       defaultLogger.info({
         msg: "Request completed",
         request: {
-          authorization: !!request.headers.authorization ?? null,
+          authorization: request.headers.authorization ? true : null,
           body: APP_CONFIG.env === "production" ? undefined : request.body,
           contentType: request.headers["content-type"],
           hostname: request.hostname,

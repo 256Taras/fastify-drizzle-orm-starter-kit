@@ -6,6 +6,7 @@ import { TOKENS } from "#libs/common.constants.js";
  * @returns {{ userId: string, refreshTokenId: string } | undefined}
  */
 const getUser = () => {
+  // @ts-ignore - requestContext.get has generic type issues
   const user = requestContext.get(TOKENS.userJwtData);
   return user;
 };
@@ -14,6 +15,7 @@ const getUser = () => {
  * @param {{ userId: string, refreshTokenId: string }} data
  */
 const setUser = (data) => {
+  // @ts-ignore - requestContext.set has generic type issues
   requestContext.set(TOKENS.userJwtData, data);
 };
 
@@ -21,6 +23,7 @@ const setUser = (data) => {
  * @returns {{ userId: string, ppid: string, refreshTokenId: string } | undefined}
  */
 const getUserCredentials = () => {
+  // @ts-ignore - requestContext.get has generic type issues
   const credentials = requestContext.get(TOKENS.userCredentials);
   return credentials;
 };
@@ -29,6 +32,7 @@ const getUserCredentials = () => {
  * @param {{ userId: string, ppid: string, refreshTokenId: string }} credentials
  */
 const setUserCredentials = (credentials) => {
+  // @ts-ignore - requestContext.set has generic type issues
   requestContext.set(TOKENS.userCredentials, credentials);
 };
 

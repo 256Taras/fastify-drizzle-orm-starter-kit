@@ -25,18 +25,18 @@ import { getDirName } from "#libs/utils/files.js";
 import sharedHealthCheckRouter from "#modules/health-check/router.js";
 
 export class RestApiServer {
-  /** @type {import('fastify').FastifyPluginOptions} */
+  /** @type {import("#@types/index.jsdoc.js").Configs} */
   #configs;
 
   /** @type {import('fastify/types/instance').FastifyInstance} */
   #fastify;
 
-  /** @type {import('#src/configs/index.js')} */
+  /** @type {import("#@types/index.jsdoc.js").ServerOptions} */
   #options;
 
   /**
-   *
-   * @param {object} options
+   * Creates a new instance of RestApiServer
+   * @param {import("#@types/index.jsdoc.js").ServerOptions} options - Server options containing configs and database
    */
   constructor(options = {}) {
     this.#configs = options.configs;
@@ -46,7 +46,9 @@ export class RestApiServer {
   }
 
   /**
-   *
+   * Builds and configures the Fastify server application
+   * Registers all plugins, error handlers, and routes
+   * @returns {Promise<void>}
    */
   async buildServerApp() {
     // Error handlers to handle 404 and other HTTP errors.
@@ -121,7 +123,9 @@ export class RestApiServer {
   }
 
   /**
-   * Auto-loads plugins from the designated directory.
+   * Auto-loads plugins from the designated directory
+   * Loads all files matching *.plugin.js pattern from libs/plugins directory
+   * Passes options (configs and database) to each plugin
    */
   #autoLoadPlugins() {
     const pluginsPath = path.join(getDirName(import.meta.url), "../../../libs/plugins");
@@ -141,7 +145,9 @@ export class RestApiServer {
   }
 
   /**
-   * Auto-loads routes from the designated directory.
+   * Auto-loads routes from the designated directory
+   * Loads all files matching *.router.v1.js pattern from modules directory
+   * Registers routes with /v1 prefix
    */
   #autoLoadRoutes() {
     const routesPath = path.join(getDirName(import.meta.url), "../../../modules");

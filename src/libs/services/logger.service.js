@@ -1,6 +1,6 @@
 import { requestContext } from "@fastify/request-context";
 import { DefaultLogger } from "drizzle-orm";
-import Pino from "pino";
+import pino from "pino";
 
 import { APP_CONFIG, LOGGER_CONFIG } from "#configs/index.js";
 
@@ -27,7 +27,8 @@ export const TerminalOptions = {
 };
 
 /**@typedef {'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal'} LOG_LEVEL */
-const loggerService = Pino(TerminalOptions);
+// @ts-ignore - pino is callable but TypeScript doesn't recognize it
+const loggerService = pino(TerminalOptions);
 
 // @ts-ignore
 export const logger = requestContext.get("logger") ?? loggerService;
@@ -35,8 +36,8 @@ export const logger = requestContext.get("logger") ?? loggerService;
 export const databaseLogger = new DefaultLogger({
   writer: {
     /**
-     *
-     * @param {string} message
+     * Writes a database log message to the logger
+     * @param {string} message - The log message to write
      */
     write(message) {
       logger.debug(message);

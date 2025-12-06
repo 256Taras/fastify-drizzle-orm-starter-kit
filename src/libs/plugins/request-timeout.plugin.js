@@ -19,7 +19,7 @@ const SIGNAL_KEY = "SIGNAL_KEY";
  * }, async (request, reply) => {
  *   // Your handler logic here.
  * });
- * @type {import('@fastify/type-provider-typebox').FastifyPluginAsyncTypebox} app
+ * @type {(app: import("#@types/index.jsdoc.js").FastifyInstance, options: { configs: { SERVER_CONFIG: { requestTimeout: number } } }) => Promise<void>}
  */
 async function requestTimeoutPlugin(app, options) {
   /**
@@ -75,7 +75,10 @@ async function requestTimeoutPlugin(app, options) {
   /**
    * Cleans up resources after sending a response or when an error occurs.
    * This function clears any timeouts and removes references from the request context.
-   * @type {import("fastify/types/hooks").onSendMetaHookHandler}
+   * @param {import('fastify').FastifyRequest} request
+   * @param {import('fastify').FastifyReply} reply
+   * @param {any} payload
+   * @param {(err: Error | null, newPayload?: any) => void} done
    */
   const cleanupResources = (request, reply, payload, done) => {
     performCleanup();
@@ -87,4 +90,5 @@ async function requestTimeoutPlugin(app, options) {
   app.addHook("onError", performCleanup);
 }
 
+// @ts-expect-error - FastifyInstanceExtended is used for JSDoc documentation, but fp() expects base FastifyInstance type. At runtime, the instance will have all extended properties.
 export default fp(requestTimeoutPlugin);

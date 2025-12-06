@@ -3,7 +3,7 @@ import { Type } from "@sinclair/typebox";
 import { ERROR_CODE_FORMAT } from "#libs/constants/error-codes.js";
 
 /**
- * @template T
+ * @template {Record<string, any>} T
  * @param {T} schemas
  * @param {string[]} tag
  * @returns {T}
@@ -16,16 +16,19 @@ export const mixinTagForSchema = (schemas, tag) => {
 };
 
 /**
- * @template T
- * @param {Record<string, T>} object
- * @param {import('@sinclair/typebox').TObjectOptions} [otp]
+ * Creates a TypeBox Union schema from an object or array of literal values
+ * @param {Record<string, string | number | boolean> | Array<string | number | boolean>} object
+ * @param {Record<string, any>} [options]
  * @returns {import('@sinclair/typebox').TUnion}
  */
-export const createEnumTypeUnionSchema = (object, otp = {}) =>
-  Type.Union(
-    Object.values(object).map((item) => Type.Literal(item)),
-    otp,
+export const createEnumTypeUnionSchema = (object, options = {}) => {
+  const values = Array.isArray(object) ? object : Object.values(object);
+  return Type.Union(
+    // @ts-ignore - TypeBox accepts literal values but TypeScript can't infer them properly
+    values.map((item) => Type.Literal(item)),
+    options,
   );
+};
 
 /**
  * @param {string[]} mimetypes

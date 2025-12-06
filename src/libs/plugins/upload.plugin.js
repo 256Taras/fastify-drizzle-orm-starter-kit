@@ -45,9 +45,8 @@ function validateRequestPart(req, part) {
 }
 
 /**
- *
- * @param {import('fastify').FastifyInstance} app
- * @param {object} option
+ * Fastify plugin for handling file uploads and multipart form data
+ * @type {(app: import("#@types/index.jsdoc.js").FastifyInstance, option?: { parseMultipartFields?: (req: import('fastify').FastifyRequest) => void; removeUploadIfExists?: (filePath: string) => Promise<void>; uploadToStorage?: (uploadedFile: object, folder: string) => Promise<string>; upload?: (uploadedFile: object) => Promise<string> }) => Promise<void>}
  */
 const uploadPlugin = async (app, option) => {
   /**
@@ -106,4 +105,5 @@ const uploadPlugin = async (app, option) => {
   app.decorate("upload", option?.upload ?? upload);
 };
 
+// @ts-expect-error - FastifyInstanceExtended is used for JSDoc documentation, but fp() expects base FastifyInstance type. At runtime, the instance will have all extended properties.
 export default fp(uploadPlugin);

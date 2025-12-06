@@ -1,3 +1,8 @@
+/**
+ * @file
+ * Dependency injection container types
+ */
+
 import encrypterService from "#libs/services/encrypter.service.js";
 import sessionStorageService from "#libs/services/session-storage.service.js";
 import authTokenService from "#modules/auth/auth-token.service.js";
@@ -17,10 +22,4 @@ import usersService from "#modules/users/users.service.js";
  * @property {ReturnType<typeof usersService>} usersService
  */
 
-/**
- * Extended Awilix Cradle with all dependencies
- * @typedef {Dependencies & { [key: string]: Record<string, any> }} AwilixCradle
- */
-
-// Export types for use in JSDoc
 export {};

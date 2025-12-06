@@ -5,6 +5,10 @@ import pluralToSingularGlobal from "./helpers/plural-to-singular.js";
 
 export default class extends Generator {
   isSecure = false;
+  /**
+   * @param {any[]} args
+   * @param {{ modelName?: string; modelAttributes?: string }} opts
+   */
   constructor(args, opts) {
     super(args, opts);
     this.argument("modelName", { required: true, type: String });
@@ -57,6 +61,7 @@ export default class extends Generator {
   }
 
   writing() {
+    // @ts-ignore - yeoman-generator options are dynamic
     const { modelAttributes, modelName } = this.options;
     const fields = this._parseModelAttributes(modelAttributes);
     const { isSecure } = this;

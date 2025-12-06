@@ -31,7 +31,10 @@ export const SYSTEM_HEALTH_SCHEMA = Type.Object(
         filesystem: Type.String(),
         free: Type.Number(),
         mount: Type.String(),
-        size: Type.Any(),
+        // size is always a number (bytes), but can be very large
+        size: Type.Number({
+          description: "Disk size in bytes",
+        }),
       }),
     ),
     environment: Type.String(),

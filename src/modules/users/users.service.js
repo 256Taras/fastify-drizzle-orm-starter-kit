@@ -6,7 +6,7 @@ import { calculatePaginationOffset, createPaginatedResponse } from "#libs/utils/
 import { NON_PASSWORD_COLUMNS, users } from "#modules/users/users.model.js";
 
 /**
- * @typedef {import("#@types/di-container.jsdoc.js").Dependencies} Dependencies
+ * @typedef {import("#@types/index.jsdoc.js").Dependencies} Dependencies
  */
 
 /** @type {FindOneById} */
@@ -49,9 +49,9 @@ export default function usersService(deps) {
 }
 
 /**
- * @typedef {import("./users.contracts").User} User
- * @typedef {import("./users.contracts").GetUsersListInputContract} GetUsersListInputContract
- * @typedef {import("./users.contracts").GetUsersListOutputContract} GetUsersListOutputContract
+ * @typedef {import("./users.contracts.js").User} User
+ * @typedef {import("./users.contracts.js").GetUsersListInputContract} GetUsersListInputContract
+ * @typedef {import("./users.contracts.js").GetUsersListOutputContract} GetUsersListOutputContract
  *
  * @typedef {function(Dependencies, string):Promise<User>} FindOneById
  * @typedef {function(Dependencies, GetUsersListInputContract):Promise<GetUsersListOutputContract>} FindAll
