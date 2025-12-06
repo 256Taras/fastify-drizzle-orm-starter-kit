@@ -1,9 +1,10 @@
-import { count, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { partial } from "rambda";
 
 import { ResourceNotFoundException } from "#libs/errors/domain.errors.js";
-import { calculatePaginationOffset, createPaginatedResponse } from "#libs/utils/pagination.js";
 import { NON_PASSWORD_COLUMNS, users } from "#modules/users/users.model.js";
+
+import { USERS_PAGINATION_CONFIG } from "./users.pagination.config.js";
 
 /**
  * @typedef {import("#@types/index.jsdoc.js").Dependencies} Dependencies
@@ -22,20 +23,10 @@ const findOneById = async ({ db, logger }, id) => {
 };
 
 /** @type {FindAll} */
-const findAll = async ({ db }, { limit, page }) => {
-  const { offset } = calculatePaginationOffset({ limit, page });
+const findAll = async ({ logger, paginationService }, paginationParams) => {
+  logger.debug("Get paginated users list", { paginationParams });
 
-  const [[{ itemCount }], entities] = await Promise.all([
-    db.select({ itemCount: count() }).from(users),
-    db.select().from(users).offset(offset).limit(limit),
-  ]);
-
-  return createPaginatedResponse({
-    entities,
-    itemCount,
-    limit,
-    offset,
-  });
+  return paginationService.paginate(USERS_PAGINATION_CONFIG, paginationParams);
 };
 
 /**
@@ -52,7 +43,9 @@ export default function usersService(deps) {
  * @typedef {import("./users.contracts.js").User} User
  * @typedef {import("./users.contracts.js").GetUsersListInputContract} GetUsersListInputContract
  * @typedef {import("./users.contracts.js").GetUsersListOutputContract} GetUsersListOutputContract
+ * @typedef {import("#libs/utils/pagination/pagination.types.jsdoc.js").PaginationParams} PaginationParams
+ * @typedef {import("#libs/utils/pagination/pagination.types.jsdoc.js").OffsetPaginatedResponse<any>} PaginatedResponse
  *
  * @typedef {function(Dependencies, string):Promise<User>} FindOneById
- * @typedef {function(Dependencies, GetUsersListInputContract):Promise<GetUsersListOutputContract>} FindAll
+ * @typedef {function(Dependencies, PaginationParams):Promise<PaginatedResponse>} FindAll
  */

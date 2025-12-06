@@ -30,5 +30,11 @@
  * }>} FastifyRequestWithQueryAndBody
  */
 
-export {};
+/**
+ * Fastify request with pagination property
+ * @typedef {import('fastify').FastifyRequest & {
+ *   pagination: import('#libs/utils/pagination/pagination.types.jsdoc.js').PaginationParams
+ * }} FastifyRequestWithPagination
+ */
 
+export {};

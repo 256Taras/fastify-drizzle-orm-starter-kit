@@ -220,6 +220,7 @@ class Application {
     // Log exit code
     process.once("exit", (code) => {
       const color = code === 0 ? "\u001B[32m" : "\u001B[31m"; // green or red
+      // eslint-disable-next-line no-console
       console.log(`${color}[${APP_CONFIG.applicationName}] Process exiting with code: ${code}\u001B[0m`);
     });
   }
@@ -271,17 +272,12 @@ class Application {
 /**
  * Application entry point
  */
-async function bootstrap() {
-  try {
-    await Application.create();
-  } catch (error) {
-    if (error instanceof Error) {
-      logger.fatal({ error: error?.stack || error }, `[${APP_CONFIG.applicationName}] Bootstrap failed`);
-    }
-
-    process.exit(1);
+try {
+  await Application.create();
+} catch (error) {
+  if (error instanceof Error) {
+    logger.fatal({ error: error?.stack || error }, `[${APP_CONFIG.applicationName}] Bootstrap failed`);
   }
-}
 
-// Start the application
-bootstrap();
+  process.exit(1);
+}

@@ -6,4 +6,3 @@ export const ORDER_BY = {
   asc: "ASC",
   desc: "DESC",
 };
-

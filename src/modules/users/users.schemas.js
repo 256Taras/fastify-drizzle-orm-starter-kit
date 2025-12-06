@@ -2,19 +2,19 @@ import { pick } from "rambda";
 
 import { defaultHttpErrorCollection } from "#libs/errors/default-http-error-collection.js";
 import { BadRequestException } from "#libs/errors/domain.errors.js";
+import { generatePaginatedRouteSchema } from "#libs/utils/pagination/index.js";
 import { mapHttpErrorsToSchemaErrorCollection, mixinTagForSchema } from "#libs/utils/schemas.js";
-import { USER_INPUT_LIST, USER_OUTPUT_CONTRACT, USER_OUTPUT_LIST } from "#modules/users/users.contracts.js";
+import { USER_OUTPUT_CONTRACT } from "#modules/users/users.contracts.js";
+
+import { USERS_PAGINATION_CONFIG } from "./users.pagination.config.js";
 
 const usersSchemas = {
-  getList: {
-    description: "Get all information of an authorized user.",
-    querystring: USER_INPUT_LIST,
-    response: {
-      200: USER_OUTPUT_LIST,
-      ...mapHttpErrorsToSchemaErrorCollection(pick([BadRequestException.name], defaultHttpErrorCollection)),
-    },
-    summary: "Get User info.",
-  },
+  getList: generatePaginatedRouteSchema({
+    config: USERS_PAGINATION_CONFIG,
+    description: "Get paginated list of users with filtering, sorting, and search",
+    errorSchemas: mapHttpErrorsToSchemaErrorCollection(pick([BadRequestException.name], defaultHttpErrorCollection)),
+    summary: "Get users list",
+  }),
 
   getProfile: {
     description: "Get all information of an authorized user.",

@@ -4,6 +4,7 @@
  */
 
 import encrypterService from "#libs/services/encrypter.service.js";
+import paginationService from "#libs/services/pagination.service.js";
 import sessionStorageService from "#libs/services/session-storage.service.js";
 import authTokenService from "#modules/auth/auth-token.service.js";
 import authService from "#modules/auth/auth.service.js";
@@ -18,9 +19,9 @@ import usersService from "#modules/users/users.service.js";
  * @property {ReturnType<typeof encrypterService>} encrypterService
  * @property {object} jwtService - JWT service from Fastify
  * @property {import('pino').Logger} logger
+ * @property {ReturnType<typeof paginationService>} paginationService
  * @property {ReturnType<typeof sessionStorageService>} sessionStorageService
  * @property {ReturnType<typeof usersService>} usersService
  */
 
 export {};
-

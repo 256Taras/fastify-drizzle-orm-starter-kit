@@ -26,6 +26,7 @@ const CONFIG = {
     /configs\/.*\.js$/, // Config files - types inferred automatically by TypeScript
     /libs\/common\.constants\.js$/, // Constants - types inferred automatically
     /libs\/constants\/.*\.js$/, // Constants files - types inferred automatically
+    /index\.js$/, // Index files - re-export files, types inferred from exports
     /^tools\//, // Development tools - no JSDoc needed
   ],
 };
@@ -130,6 +131,9 @@ function checkTypeCoverage() {
   const filesWithoutTypes = [];
 
   for (const file of jsFiles) {
+    if (shouldExcludeFromCoverage(file)) {
+      continue; // Skip excluded files
+    }
     if (hasJSDocTypes(file)) {
       withTypes++;
     } else {

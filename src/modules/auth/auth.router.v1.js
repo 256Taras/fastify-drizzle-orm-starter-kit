@@ -13,10 +13,10 @@ export default async function authRouterV1(app) {
   });
 
   app.post("/sign-in", {
-    schema: authSchemas.signIn,
     handler(req) {
       return authService.signInUser(req.body);
     },
+    schema: authSchemas.signIn,
   });
 
   app.post("/log-out", {

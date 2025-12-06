@@ -1,0 +1,41 @@
+import { FILTER_OPERATORS, PAGINATION_STRATEGY } from "#libs/utils/pagination/pagination.contracts.js";
+
+import { users } from "./users.model.js";
+
+/**
+ * Pagination configuration for users module
+ * @type {import("#libs/utils/pagination/pagination.types.jsdoc.js").PaginationConfig<typeof users>}
+ */
+export const USERS_PAGINATION_CONFIG = {
+  table: users,
+  defaultLimit: 10,
+  defaultSortBy: [["createdAt", "DESC"]],
+  excludeColumns: ["password"],
+  // Filterable columns with allowed operators per column
+  // Supports both simple columns and nested fields (e.g., 'student.email', 'course.id')
+  filterableColumns: {
+    // Email can be filtered with equality, case-insensitive search, or in array
+    email: [
+      /** @type {import('#libs/utils/pagination/pagination.types.jsdoc.js').FilterOperator} */ (FILTER_OPERATORS.eq),
+      /** @type {import('#libs/utils/pagination/pagination.types.jsdoc.js').FilterOperator} */ (FILTER_OPERATORS.ilike),
+      /** @type {import('#libs/utils/pagination/pagination.types.jsdoc.js').FilterOperator} */ (FILTER_OPERATORS.in),
+    ],
+    // Role can only be filtered with equality or in array (no partial search)
+    role: [
+      /** @type {import('#libs/utils/pagination/pagination.types.jsdoc.js').FilterOperator} */ (FILTER_OPERATORS.eq),
+      /** @type {import('#libs/utils/pagination/pagination.types.jsdoc.js').FilterOperator} */ (FILTER_OPERATORS.in),
+    ],
+    // Example of nested field filtering (if you had relations):
+    // 'student.email': [FILTER_OPERATORS.ilike],
+    // 'student.groups.title': [FILTER_OPERATORS.ilike],
+    // 'course.id': [FILTER_OPERATORS.eq],
+  },
+  maxLimit: 100,
+  optionalColumns: {
+    deletedAt: true,
+  },
+  searchableColumns: ["email", "firstName", "lastName"],
+  sortableColumns: ["email", "firstName", "lastName", "createdAt", "updatedAt"],
+  // @ts-expect-error - PAGINATION_STRATEGY.offset is a string literal that matches PaginationStrategy type
+  strategy: PAGINATION_STRATEGY.offset,
+};

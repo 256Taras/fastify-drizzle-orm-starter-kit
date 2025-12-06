@@ -5,5 +5,5 @@
  * This file is kept for backward compatibility
  */
 
-export { OFFSET, LIMIT, ORDER_BY } from "#libs/constants/pagination.constants.js";
-export { STATUS_SUCCESS, STATUS_FAIL, TOKENS, TABLES, ROLES_NAMES } from "#libs/constants/common.constants.js";
+export { ROLES_NAMES, STATUS_FAIL, STATUS_SUCCESS, TABLES, TOKENS } from "#libs/constants/common.constants.js";
+export { LIMIT, OFFSET, ORDER_BY } from "#libs/constants/pagination.constants.js";
