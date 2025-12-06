@@ -2,7 +2,6 @@
 import eslint from '@eslint/js';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import globals from 'globals';
-import nodePlugin from 'eslint-plugin-n';
 import pluginSecurity from 'eslint-plugin-security';
 import noSecrets from 'eslint-plugin-no-secrets';
 import jsdoc from 'eslint-plugin-jsdoc';
@@ -51,9 +50,6 @@ export default tseslint.config(
 
   // Security plugin recommended configuration
   pluginSecurity.configs.recommended,
-
-  // Node plugin flat configuration
-  nodePlugin.configs['flat/recommended'],
 
   // JSDoc flat configuration
   jsdoc.configs['flat/recommended'],
@@ -146,15 +142,6 @@ export default tseslint.config(
         },
       ],
 
-      // Node rules
-      'n/no-missing-import': 'off',
-      'n/no-missing-require': 'off',
-      'n/file-extension-in-import': 'off',
-      'n/no-unpublished-require': 'off',
-      'n/no-unpublished-import': 'off',
-      'n/no-process-exit': 'off',
-      'n/no-unsupported-features/node-builtins': 'off',
-
       // Import rules
       'import/no-unresolved': 'off',
       'import/named': 'off',
@@ -237,10 +224,6 @@ export default tseslint.config(
       'jsdoc/reject-any-type': 'off',
       'jsdoc/reject-function-type': 'off',
 
-      // Security warnings (less strict)
-      'security/detect-non-literal-fs-filename': 'off',
-      'security/detect-object-injection': 'off',
-
 
       // Other rules
       'no-constant-binary-expression': 'off',
@@ -256,8 +239,6 @@ export default tseslint.config(
       'security/detect-non-literal-fs-filename': 'off',
       '@typescript-eslint/ban-ts-comment': 'off',
       '@typescript-eslint/no-require-imports': 'off',
-      'n/no-unpublished-require': 'off',
-      'n/no-unpublished-import': 'off',
       'unicorn/import-style': 'off',
       'jsdoc/require-jsdoc': 'off',
       'jsdoc/require-param': 'off',
@@ -271,7 +252,6 @@ export default tseslint.config(
     rules: {
       'no-unused-vars': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
-      'n/file-extension-in-import': 'off',
     },
   },
 
@@ -287,7 +267,6 @@ export default tseslint.config(
   {
     files: ['src/index.js'],
     rules: {
-      'n/no-process-exit': 'off',
       'unicorn/consistent-function-scoping': 'off',
     },
   },

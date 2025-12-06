@@ -1,5 +1,4 @@
 /**
- *
  * Defining All Grants
  */
 export const PERMISSIONS_CONFIG = {

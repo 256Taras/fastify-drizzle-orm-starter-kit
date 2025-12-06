@@ -22,6 +22,21 @@ import {
   UNSUPPORTED_MEDIA_TYPE_415,
 } from "#libs/errors/http.errors.js";
 
+/**
+ * HTTP error entry structure
+ * @typedef {{
+ *   code: number;
+ *   developerMessage: string;
+ *   statusCode: number;
+ *   userMessage: string;
+ * }} HttpErrorEntry
+ */
+
+/**
+ * Collection of default HTTP error definitions
+ * Maps error class names to their HTTP error entry configurations
+ * @type {Record<string, HttpErrorEntry>}
+ */
 export const defaultHttpErrorCollection = {
   [BAD_REQUEST_400.name]: {
     code: 400_000,
