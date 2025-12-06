@@ -1,7 +1,7 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
-import { databaseLogger, logger } from "#libs/services/logger.service.js";
+import { databaseLogger, logger } from "#libs/logging/logger.service.js";
 
 export class DatabaseManager {
   /** @type {import('drizzle-orm/postgres-js').PostgresJsDatabase} */

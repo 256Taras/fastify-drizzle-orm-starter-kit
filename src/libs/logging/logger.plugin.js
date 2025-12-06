@@ -2,7 +2,7 @@ import { requestContext } from "@fastify/request-context";
 import fp from "fastify-plugin";
 
 import { APP_CONFIG, LOGGER_CONFIG } from "#configs/index.js";
-import defaultLogger from "#libs/services/logger.service.js";
+import defaultLogger from "#libs/logging/logger.service.js";
 
 /** @type {import("@fastify/type-provider-typebox").FastifyPluginAsyncTypebox<import("#@types/index.jsdoc.js").PluginOptions> } */
 const requestLoggerPlugin = async (app) => {

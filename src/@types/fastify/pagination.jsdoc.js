@@ -6,7 +6,7 @@
 /**
  * Fastify request with pagination decorator
  * @typedef {import('fastify').FastifyRequest & {
- *   pagination: import("#libs/utils/pagination/pagination.types.jsdoc.js").PaginationParams
+ *   pagination: import("#libs/pagination/pagination.types.jsdoc.js").PaginationParams
  * }} FastifyRequestWithPagination
  */
 

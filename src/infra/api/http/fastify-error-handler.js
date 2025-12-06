@@ -18,7 +18,7 @@ import {
   TOO_MANY_REQUESTS_429,
   UNSUPPORTED_MEDIA_TYPE_415,
 } from "#libs/errors/http.errors.js";
-import { logger } from "#libs/services/logger.service.js";
+import { logger } from "#libs/logging/logger.service.js";
 
 class ErrorHandler {
   #USER_MESSAGES = {

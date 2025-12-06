@@ -20,7 +20,7 @@ import fastifyAuth from "@fastify/auth";
 
 import { FASTIFY_CORS_CONFIG } from "#configs/index.js";
 import { globalHttpFastify404ErrorHandler, globalHttpFastifyErrorHandler } from "#infra/api/http/fastify-error-handler.js";
-import defaultLogger, { logger } from "#libs/services/logger.service.js";
+import defaultLogger, { logger } from "#libs/logging/logger.service.js";
 import { getDirName } from "#libs/utils/files.js";
 import sharedHealthCheckRouter from "#modules/health-check/router.js";
 
@@ -123,21 +123,20 @@ export class RestApiServer {
   }
 
   /**
-   * Auto-loads plugins from the designated directory
-   * Loads all files matching *.plugin.js pattern from libs/plugins directory
+   * Auto-loads plugins from the libs directory
+   * Recursively loads all files matching *.plugin.js pattern from libs directory
    * Passes options (configs and database) to each plugin
    */
   #autoLoadPlugins() {
-    const pluginsPath = path.join(getDirName(import.meta.url), "../../../libs/plugins");
+    const libsPath = path.join(getDirName(import.meta.url), "../../../libs");
 
     this.#fastify.register(fastifyAutoLoad, {
-      dir: pluginsPath,
+      dir: libsPath,
       /**
-       *
+       * Filter to match only plugin files
        * @param {string} p
        */
       matchFilter: (p) => p.endsWith(".plugin.js"),
-      maxDepth: 1,
       options: {
         ...this.#options,
       },

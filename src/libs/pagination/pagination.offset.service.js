@@ -1,4 +1,4 @@
-import { calculatePaginationOffset, createPaginatedResponse } from "#libs/utils/pagination.js";
+import { calculatePaginationOffset, createPaginatedResponse } from "#libs/pagination/pagination.utils.js";
 
 import { PaginationQueryBuilder } from "./pagination.query-builder.js";
 

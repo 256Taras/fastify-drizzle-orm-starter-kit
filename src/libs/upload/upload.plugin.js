@@ -5,7 +5,7 @@ import fp from "fastify-plugin";
 import { STORAGE_CONFIG } from "#configs/storage.config.js";
 import { BAD_REQUEST_400, UNSUPPORTED_MEDIA_TYPE_415 } from "#libs/errors/http.errors.js";
 import { ensureDirectoryExists } from "#libs/utils/files.js";
-import { toServerPath } from "#libs/utils/upload.js";
+import { toServerPath } from "#libs/upload/upload.utils.js";
 
 /**
  * Handles file operations like moving and optionally renaming files.

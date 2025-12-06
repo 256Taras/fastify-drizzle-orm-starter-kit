@@ -73,12 +73,12 @@ import { BadRequestException } from "#libs/errors/domain.errors.js";
 import { BAD_REQUEST_400 } from "#libs/errors/http.errors.js";
 
 // Services
-import encrypterService from "#libs/services/encrypter.service.js";
-import { logger } from "#libs/services/logger.service.js";
+import encrypterService from "#libs/encryption/encrypter.service.js";
+import { logger } from "#libs/logging/logger.service.js";
 
 // Utils
 import { getDirName } from "#libs/utils/files.js";
-import { createPaginatedResponse } from "#libs/utils/pagination.js";
+import { createPaginatedResponse } from "#libs/pagination/pagination.utils.js";
 ```
 
 ## 🎯 Organization Principles

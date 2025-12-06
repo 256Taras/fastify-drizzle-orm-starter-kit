@@ -2,7 +2,7 @@ import { pick } from "rambda";
 
 import { defaultHttpErrorCollection } from "#libs/errors/default-http-error-collection.js";
 import { BadRequestException } from "#libs/errors/domain.errors.js";
-import { generatePaginatedRouteSchema } from "#libs/utils/pagination/index.js";
+import { generatePaginatedRouteSchema } from "#libs/pagination/index.js";
 import { mapHttpErrorsToSchemaErrorCollection, mixinTagForSchema } from "#libs/utils/schemas.js";
 import { USER_OUTPUT_CONTRACT } from "#modules/users/users.contracts.js";
 

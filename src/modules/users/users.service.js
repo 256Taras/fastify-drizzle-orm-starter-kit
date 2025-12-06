@@ -43,8 +43,8 @@ export default function usersService(deps) {
  * @typedef {import("./users.contracts.js").User} User
  * @typedef {import("./users.contracts.js").GetUsersListInputContract} GetUsersListInputContract
  * @typedef {import("./users.contracts.js").GetUsersListOutputContract} GetUsersListOutputContract
- * @typedef {import("#libs/utils/pagination/pagination.types.jsdoc.js").PaginationParams} PaginationParams
- * @typedef {import("#libs/utils/pagination/pagination.types.jsdoc.js").OffsetPaginatedResponse<any>} PaginatedResponse
+ * @typedef {import("#libs/pagination/pagination.types.jsdoc.js").PaginationParams} PaginationParams
+ * @typedef {import("#libs/pagination/pagination.types.jsdoc.js").OffsetPaginatedResponse<any>} PaginatedResponse
  *
  * @typedef {function(Dependencies, string):Promise<User>} FindOneById
  * @typedef {function(Dependencies, PaginationParams):Promise<PaginatedResponse>} FindAll

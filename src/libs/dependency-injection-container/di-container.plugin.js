@@ -5,14 +5,14 @@ import { diContainer, fastifyAwilixPlugin } from "@fastify/awilix";
 import * as awilix from "awilix";
 import fp from "fastify-plugin";
 
-import { logger } from "#libs/services/logger.service.js";
+import { logger } from "#libs/logging/logger.service.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const basePath = path.resolve(__dirname, "../../");
 
 const patterns = {
   modules: "modules/**/*.{service,repository,use-case}.{js,ts}",
-  services: "libs/services/**/*.{service,service.js}",
+  services: "libs/{encryption,session-storage,pagination}/**/*.{service,service.js}",
 };
 
 /**

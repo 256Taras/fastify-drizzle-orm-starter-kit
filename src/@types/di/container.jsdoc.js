@@ -3,9 +3,9 @@
  * Dependency injection container types
  */
 
-import encrypterService from "#libs/services/encrypter.service.js";
-import paginationService from "#libs/services/pagination.service.js";
-import sessionStorageService from "#libs/services/session-storage.service.js";
+import encrypterService from "#libs/encryption/encrypter.service.js";
+import paginationService from "#libs/pagination/pagination.service.js";
+import sessionStorageService from "#libs/session-storage/session-storage.service.js";
 import authTokenService from "#modules/auth/auth-token.service.js";
 import authService from "#modules/auth/auth.service.js";
 import usersService from "#modules/users/users.service.js";

@@ -1,10 +1,9 @@
 import { partial } from "rambda";
 
 import { BadRequestException } from "#libs/errors/domain.errors.js";
-
-import { PAGINATION_STRATEGY } from "./pagination.contracts.js";
-import { paginateCursor } from "./pagination.cursor.service.js";
-import { paginateOffset } from "./pagination.offset.service.js";
+import { PAGINATION_STRATEGY } from "#libs/pagination/pagination.contracts.js";
+import { paginateCursor } from "#libs/pagination/pagination.cursor.service.js";
+import { paginateOffset } from "#libs/pagination/pagination.offset.service.js";
 
 /**
  * @typedef {import("#@types/index.jsdoc.js").Dependencies} Dependencies
@@ -14,10 +13,10 @@ import { paginateOffset } from "./pagination.offset.service.js";
  * Universal pagination function that chooses strategy based on config
  * @template T
  * @param {Dependencies} deps - Dependencies
- * @param {import('./pagination.types.jsdoc.js').PaginationConfig<T>} config - Pagination config
- * @param {import('./pagination.types.jsdoc.js').PaginationParams} paginationParams - Pagination parameters
- * @param {import('./pagination.types.jsdoc.js').PaginationOptions} [options] - Additional options
- * @returns {Promise<import('./pagination.types.jsdoc.js').OffsetPaginatedResponse<any> | import('./pagination.types.jsdoc.js').CursorPaginatedResponse<any>>}
+ * @param {import('#libs/pagination/pagination.types.jsdoc.js').PaginationConfig<T>} config - Pagination config
+ * @param {import('#libs/pagination/pagination.types.jsdoc.js').PaginationParams} paginationParams - Pagination parameters
+ * @param {import('#libs/pagination/pagination.types.jsdoc.js').PaginationOptions} [options] - Additional options
+ * @returns {Promise<import('#libs/pagination/pagination.types.jsdoc.js').OffsetPaginatedResponse<any> | import('#libs/pagination/pagination.types.jsdoc.js').CursorPaginatedResponse<any>>}
  */
 const paginate = async (deps, config, paginationParams, options) => {
   const { strategy = PAGINATION_STRATEGY.offset, table } = config;

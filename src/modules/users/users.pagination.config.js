@@ -1,10 +1,10 @@
-import { FILTER_OPERATORS, PAGINATION_STRATEGY } from "#libs/utils/pagination/pagination.contracts.js";
+import { FILTER_OPERATORS, PAGINATION_STRATEGY } from "#libs/pagination/pagination.contracts.js";
 
 import { users } from "./users.model.js";
 
 /**
  * Pagination configuration for users module
- * @type {import("#libs/utils/pagination/pagination.types.jsdoc.js").PaginationConfig<typeof users>}
+ * @type {import("#libs/pagination/pagination.types.jsdoc.js").PaginationConfig<typeof users>}
  */
 export const USERS_PAGINATION_CONFIG = {
   table: users,
@@ -16,14 +16,14 @@ export const USERS_PAGINATION_CONFIG = {
   filterableColumns: {
     // Email can be filtered with equality, case-insensitive search, or in array
     email: [
-      /** @type {import('#libs/utils/pagination/pagination.types.jsdoc.js').FilterOperator} */ (FILTER_OPERATORS.eq),
-      /** @type {import('#libs/utils/pagination/pagination.types.jsdoc.js').FilterOperator} */ (FILTER_OPERATORS.ilike),
-      /** @type {import('#libs/utils/pagination/pagination.types.jsdoc.js').FilterOperator} */ (FILTER_OPERATORS.in),
+      /** @type {import('#libs/pagination/pagination.types.jsdoc.js').FilterOperator} */ (FILTER_OPERATORS.eq),
+      /** @type {import('#libs/pagination/pagination.types.jsdoc.js').FilterOperator} */ (FILTER_OPERATORS.ilike),
+      /** @type {import('#libs/pagination/pagination.types.jsdoc.js').FilterOperator} */ (FILTER_OPERATORS.in),
     ],
     // Role can only be filtered with equality or in array (no partial search)
     role: [
-      /** @type {import('#libs/utils/pagination/pagination.types.jsdoc.js').FilterOperator} */ (FILTER_OPERATORS.eq),
-      /** @type {import('#libs/utils/pagination/pagination.types.jsdoc.js').FilterOperator} */ (FILTER_OPERATORS.in),
+      /** @type {import('#libs/pagination/pagination.types.jsdoc.js').FilterOperator} */ (FILTER_OPERATORS.eq),
+      /** @type {import('#libs/pagination/pagination.types.jsdoc.js').FilterOperator} */ (FILTER_OPERATORS.in),
     ],
     // Example of nested field filtering (if you had relations):
     // 'student.email': [FILTER_OPERATORS.ilike],
