@@ -15,6 +15,7 @@ export default class extends Generator {
     this.argument("modelAttributes", { required: true, type: String });
   }
 
+
   _parseModelAttributes(modelAttributes) {
     const fields = [];
 

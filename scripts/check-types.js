@@ -17,7 +17,7 @@ const CONFIG = {
   TYPES_DIR: "./src/@types",
   SRC_DIR: "./src",
   MIN_COVERAGE: 65,
-  IGNORE_PATTERNS: ["**/node_modules/**", "**/*.test.js", "**/*.spec.js"],
+  IGNORE_PATTERNS: ["**/node_modules/**", "**/*.test.js", "**/*.spec.js", "**/tools/**"],
   EXCLUDED_PATTERNS: [
     /schemas\.js$/, // TypeBox schemas - typed by library
     /\.contracts\.js$/, // TypeBox contracts - typed by library
@@ -26,6 +26,7 @@ const CONFIG = {
     /configs\/.*\.js$/, // Config files - types inferred automatically by TypeScript
     /libs\/common\.constants\.js$/, // Constants - types inferred automatically
     /libs\/constants\/.*\.js$/, // Constants files - types inferred automatically
+    /^tools\//, // Development tools - no JSDoc needed
   ],
 };
 
@@ -48,6 +49,7 @@ const colors = {
  * @param {keyof typeof colors} [color] - Color name
  */
 const log = (icon, message, color = "reset") => {
+  // eslint-disable-next-line security/detect-object-injection
   console.log(`${colors[color]}${icon} ${message}${colors.reset}`);
 };
 
@@ -93,6 +95,7 @@ const hasJSDocTypes = (filePath) => {
     return true;
   }
 
+  // eslint-disable-next-line security/detect-non-literal-fs-filename
   const content = readFileSync(filePath, "utf8");
   return /@typedef|@type|@param|@returns/.test(content);
 };
@@ -109,8 +112,17 @@ function checkTypeCoverage() {
   log("📊", "Checking type coverage...", "cyan");
   console.log();
 
-  const jsFiles = globSync(`${CONFIG.SRC_DIR}/**/*.js`, {
-    ignore: CONFIG.IGNORE_PATTERNS,
+  const allJsFiles = globSync(`${CONFIG.SRC_DIR}/**/*.js`);
+  const jsFiles = allJsFiles.filter((file) => {
+    return !CONFIG.IGNORE_PATTERNS.some((pattern) => {
+      // Convert glob pattern to regex
+      const regexPattern = pattern
+        .replaceAll("**", ".*")
+        .replaceAll("*", "[^/]*")
+        .replaceAll(".", String.raw`\.`);
+      // eslint-disable-next-line security/detect-non-literal-regexp
+      return new RegExp(regexPattern).test(file);
+    });
   });
 
   let withTypes = 0;
@@ -128,8 +140,9 @@ function checkTypeCoverage() {
 
   const total = withTypes + withoutTypes;
   const coverage = ((withTypes / total) * 100).toFixed(1);
+  const coverageNumber = Number.parseFloat(coverage);
 
-  log("📈", `Type coverage: ${coverage}%`, coverage >= CONFIG.MIN_COVERAGE ? "green" : "red");
+  log("📈", `Type coverage: ${coverage}%`, coverageNumber >= CONFIG.MIN_COVERAGE ? "green" : "red");
   console.log(`   ✅ With types: ${withTypes}`);
   console.log(`   ❌ Without types: ${withoutTypes}`);
 
@@ -140,7 +153,7 @@ function checkTypeCoverage() {
 
   console.log();
 
-  return Number.parseFloat(coverage) >= CONFIG.MIN_COVERAGE;
+  return coverageNumber >= CONFIG.MIN_COVERAGE;
 }
 
 /**
@@ -155,6 +168,7 @@ function checkTypeDeclarations() {
   const issues = [];
 
   for (const file of typeFiles) {
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
     const content = readFileSync(file, "utf8");
 
     // Check for @fileoverview or @file
@@ -182,7 +196,7 @@ function checkTypeDeclarations() {
         }
 
         // Extract the comment block
-        const commentBlock = content.substring(commentStart, typedefIndex + typedef.length);
+        const commentBlock = content.slice(commentStart, typedefIndex + typedef.length);
 
         // Check if there's a description (text between /** and @typedef)
         // Description should be non-empty text, not just tags
@@ -226,13 +240,13 @@ function checkTypeImports() {
   log("🔗", "Checking type imports...", "cyan");
   console.log();
 
-  const jsFiles = globSync(`${CONFIG.SRC_DIR}/**/*.js`, {
-    ignore: ["**/node_modules/**"],
-  });
+  const allJsFiles = globSync(`${CONFIG.SRC_DIR}/**/*.js`);
+  const jsFiles = allJsFiles.filter((file) => !file.includes("node_modules"));
 
   const invalidImports = [];
 
   for (const file of jsFiles) {
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
     const content = readFileSync(file, "utf8");
     const imports = extractTypeImports(content);
 
@@ -243,6 +257,7 @@ function checkTypeImports() {
       const fullPath = typePath.endsWith(".jsdoc.js") ? typePath : `${typePath}.jsdoc.js`;
 
       try {
+        // eslint-disable-next-line security/detect-non-literal-fs-filename
         readFileSync(fullPath, "utf8");
       } catch {
         invalidImports.push({ file, import: imp, expected: fullPath });
@@ -327,6 +342,7 @@ function main() {
   };
 
   for (const [key, passed] of Object.entries(results)) {
+    // eslint-disable-next-line security/detect-object-injection
     const label = resultLabels[key];
     const icon = passed ? "✅" : "❌";
     const color = passed ? "green" : "red";

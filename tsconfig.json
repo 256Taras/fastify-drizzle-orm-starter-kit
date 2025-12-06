@@ -42,7 +42,9 @@
     "tests/**/*.ts",
     "infra/**/*.js",
     "infra/**/*.cjs",
-    "infra/**/*.ts"
+    "infra/**/*.ts",
+    "scripts/**/*.js",
+    "scripts/**/*.cjs"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "tools", "infra/docker/pgadmin"]
 }

@@ -22,7 +22,7 @@
     "database:introspect": "drizzle-kit introspect --config=infra/database/drizzle.config.js",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
-    "prettier:fix": "prettier --write 'src/**/*.{js,cjs}' & prettier --write 'infra/**/*.{js,cjs,ts}' & prettier --write 'tests/**/*.{js,cjs,ts}'",
+    "prettier:fix": "prettier --write 'src/**/*.{js,cjs}' & prettier --write 'infra/**/*.{js,cjs,ts}' & prettier --write 'tests/**/*.{js,cjs,ts}' & prettier --write 'scripts/**/*.{js,cjs}'",
     "prepare": "husky install",
     "precommit": "npm run lint && npm test",
     "prepush": "npm run lint && npm test",

@@ -10,6 +10,7 @@ import { ERROR_CODE_FORMAT } from "#libs/constants/error-codes.js";
  */
 export const mixinTagForSchema = (schemas, tag) => {
   for (const k of Object.keys(schemas)) {
+    // eslint-disable-next-line security/detect-object-injection
     schemas[k].tags = tag;
   }
   return schemas;

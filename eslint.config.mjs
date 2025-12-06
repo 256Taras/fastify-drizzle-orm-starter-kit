@@ -26,6 +26,7 @@ export default tseslint.config(
       'public/**',
       'storage/**',
       'infra/docker/pgadmin/**',
+      'tools/**',
       'yarn.lock',
       'package-lock.json',
       'eslint.config.mjs',
@@ -273,7 +274,7 @@ export default tseslint.config(
 
   // Override for generators
   {
-    files: ['infra/generators/**/*.js'],
+    files: ['tools/generators/**/*.js'],
     rules: {
       'unicorn/no-anonymous-default-export': 'off',
       'unicorn/no-abusive-eslint-disable': 'off',

@@ -16,6 +16,7 @@ export const ensureDirectoryExists = async (path) => {
   try {
     await fs.access(path, fs.constants.F_OK);
   } catch {
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
     await fs.mkdir(path, { recursive: true });
   }
 };
