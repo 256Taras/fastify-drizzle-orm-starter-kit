@@ -64,7 +64,7 @@ function validateRequestPart(req, part) {
       break;
     }
     case "query": {
-      schema = req.routeOptions?.schema?.query;
+      schema = req.routeOptions?.schema?.querystring;
       break;
     }
     default: {

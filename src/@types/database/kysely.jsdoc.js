@@ -7,7 +7,7 @@
  * @see {@link https://github.com/drizzle-team/drizzle-kysely} Official example
  */
 
-import { schema } from "#infra/db-schema.js";
+import { schema } from "#infra/database/db-schema.js";
 
 /**
  * Database interface for Kysely with automatic type inference from Drizzle

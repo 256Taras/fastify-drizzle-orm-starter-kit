@@ -28,7 +28,7 @@ export class RestApiServer {
   /** @type {import("#@types/index.jsdoc.js").Configs} */
   #configs;
 
-  /** @type {import('fastify/types/instance').FastifyInstance} */
+  /** @type {import('@fastify/type-provider-typebox').FastifyInstanceTypebox} */
   #fastify;
 
   /** @type {import("#@types/index.jsdoc.js").ServerOptions} */

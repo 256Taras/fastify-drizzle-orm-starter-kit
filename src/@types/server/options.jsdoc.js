@@ -3,7 +3,7 @@
  * Server options types
  */
 
-import { DatabaseManager } from "#infra/db.js";
+import { DatabaseManager } from "#infra/database/db.js";
 
 /**
  * Options for RestApiServer constructor
@@ -24,3 +24,4 @@ import { DatabaseManager } from "#infra/db.js";
  */
 
 export {};
+

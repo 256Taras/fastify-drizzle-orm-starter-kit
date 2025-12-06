@@ -2,7 +2,7 @@
 import * as configs from "#configs/index.js";
 import { APP_CONFIG, SERVER_CONFIG } from "#configs/index.js";
 import { RestApiServer } from "#infra/api/http/fastify-server.js";
-import { DatabaseManager } from "#infra/db.js";
+import { DatabaseManager } from "#infra/database/db.js";
 import { logger } from "#libs/services/logger.service.js";
 
 /**
