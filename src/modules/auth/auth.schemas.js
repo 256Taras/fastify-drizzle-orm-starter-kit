@@ -1,7 +1,7 @@
 import { Type } from "@sinclair/typebox";
 import { pick } from "rambda";
 
-import { COMMON_CONTRACTS_V1 } from "#libs/common.contracts.js";
+import { COMMON_CONTRACTS_V1 } from "#libs/contracts/v1/index.js";
 import { defaultHttpErrorCollection } from "#libs/errors/default-http-error-collection.js";
 import {
   BadRequestException,

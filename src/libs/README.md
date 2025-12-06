@@ -4,21 +4,23 @@ Centralized library of utilities, services, and constants for the project.
 
 ## 📁 Structure
 
-### Constants
+### Constants (`constants/`)
 Basic constants and configuration values.
 
-- **`common.constants.js`** - Common project constants:
-  - Pagination (LIMIT, OFFSET, ORDER_BY)
+- **`pagination.constants.js`** - Pagination constants (LIMIT, OFFSET, ORDER_BY)
+- **`common.constants.js`** - Common constants:
   - Status (STATUS_SUCCESS, STATUS_FAIL)
   - Session Storage Keys (TOKENS)
   - Database Tables (TABLES)
   - User Roles (ROLES_NAMES)
-  - Error Code Format (ERROR_CODE_FORMAT)
+- **`common.constants.js`** (root) - Re-exports all constants for backward compatibility
 
-### Contracts (`common.contracts.js`)
+### Contracts (`contracts/`)
 TypeBox schemas for API validation.
 
-- **`common.contracts.js`** - Common TypeBox schemas (pagination, headers, status, etc.)
+- **`v1/pagination.contracts.js`** - Pagination schemas (offsetLimit, orderBy, paginationQuery)
+- **`v1/common.contracts.js`** - Common schemas (headers, id, status, timestamp)
+- **`v1/index.js`** - Exports COMMON_CONTRACTS_V1 combining all schemas
 
 ### Errors (`errors/`)
 Error classes and their collections.
@@ -56,11 +58,15 @@ Fastify plugins for application configuration.
 
 ### Direct imports
 ```javascript
-// Constants
-import { LIMIT, TOKENS, ERROR_CODE_FORMAT } from "#libs/common.constants.js";
+// Constants (preferred)
+import { LIMIT, OFFSET, ORDER_BY } from "#libs/constants/pagination.constants.js";
+import { STATUS_SUCCESS, TOKENS } from "#libs/constants/common.constants.js";
+
+// Constants (backward compatible)
+import { LIMIT, TOKENS } from "#libs/common.constants.js";
 
 // Contracts
-import { COMMON_CONTRACTS_V1 } from "#libs/common.contracts.js";
+import { COMMON_CONTRACTS_V1 } from "#libs/contracts/v1/index.js";
 
 // Errors
 import { BadRequestException } from "#libs/errors/domain.errors.js";

@@ -1,6 +1,6 @@
 import { requestContext } from "@fastify/request-context";
 
-import { TOKENS } from "#libs/common.constants.js";
+import { TOKENS } from "#libs/constants/common.constants.js";
 
 /**
  * @returns {{ userId: string, refreshTokenId: string } | undefined}

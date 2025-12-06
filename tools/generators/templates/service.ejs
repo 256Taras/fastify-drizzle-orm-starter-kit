@@ -3,7 +3,7 @@ import { count, eq } from "drizzle-orm";
 
 import { ResourceNotFoundException } from "#libs/errors/domain.errors.js";
 import { calculatePaginationOffset, createPaginatedResponse } from "#libs/utils/pagination.js";
-import { STATUS_SUCCESS } from "#libs/common.constants.js";
+import { STATUS_SUCCESS } from "#libs/constants/common.constants.js";
 
 import { <%= moduleNames.lowerCamelCase %> } from "./<%= moduleNames.kebabCase %>.model.js";
 

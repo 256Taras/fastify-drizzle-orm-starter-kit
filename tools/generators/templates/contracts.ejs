@@ -1,7 +1,7 @@
 import { createSelectSchema, createInsertSchema } from "drizzle-typebox";
 import { Type } from "@sinclair/typebox";
 
-import { COMMON_CONTRACTS_V1 } from "#libs/common.contracnts.js";
+import { COMMON_CONTRACTS_V1 } from "#libs/contracts/v1/index.js";
 import { paginationSchema } from "#libs/utils/schemas.js";
 
 import { <%= moduleNames.lowerCamelCase %> } from "./<%= moduleNames.kebabCase %>.model.js";

@@ -1,7 +1,7 @@
 import { and, eq } from "drizzle-orm";
 import { partial } from "rambda";
 
-import { STATUS_SUCCESS } from "#libs/common.constants.js";
+import { STATUS_SUCCESS } from "#libs/constants/common.constants.js";
 import { ConflictException, ResourceNotFoundException, UnauthorizedException } from "#libs/errors/domain.errors.js";
 import { authTokens } from "#modules/auth/auth-token.model.js";
 import { NON_PASSWORD_COLUMNS, users } from "#modules/users/users.model.js";

@@ -2,7 +2,7 @@ import { getTableColumns } from "drizzle-orm";
 import { pgEnum, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import { omit } from "rambda";
 
-import { ROLES_NAMES } from "#libs/common.constants.js";
+import { ROLES_NAMES } from "#libs/constants/common.constants.js";
 
 export const roleEnum = pgEnum("roles", [ROLES_NAMES.user, ROLES_NAMES.admin]);
 
