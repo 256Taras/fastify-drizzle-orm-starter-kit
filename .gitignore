@@ -115,4 +115,4 @@ public/uploads
 # Docker pgAdmin data
 infra/docker/pgadmin/pgadmin4.db
 infra/docker/pgadmin/sessions/
-infra/docker/pgadmin/storage/
+infra/docker/pgadmin/storage/coverage/

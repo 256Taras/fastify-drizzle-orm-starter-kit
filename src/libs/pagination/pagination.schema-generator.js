@@ -9,6 +9,21 @@ import {
 } from "./pagination.contracts.js";
 
 /**
+ * Documentation for filter operators
+ */
+const OPERATOR_DOCS = {
+  $eq: { label: "Equals", example: "value" },
+  $gt: { label: "Greater than", example: "100" },
+  $gte: { label: "Greater or equal", example: "100" },
+  $lt: { label: "Less than", example: "100" },
+  $lte: { label: "Less or equal", example: "100" },
+  $in: { label: "In list", example: "value1,value2" },
+  $notIn: { label: "Not in list", example: "value1,value2" },
+  $ilike: { label: "Case-insensitive like", example: "%value%" },
+  $like: { label: "Like", example: "%value%" },
+};
+
+/**
  * Validates pagination config
  * @template T
  * @param {import('./pagination.types.jsdoc.js').PaginationConfig<T>} config - Pagination config
@@ -78,7 +93,14 @@ export const generatePaginationQuerySchema = (config) => {
     limit: Type.Optional(
       Type.Integer({
         default: defaultLimit,
-        description: `Number of records per page.\n\nIf provided value is greater than max value, max value will be applied.`,
+        description: [
+          "Number of records per page.",
+          "",
+          `**Range:** 1 to ${maxLimit}`,
+          `**Default:** ${defaultLimit}`,
+          "",
+          "_If provided value exceeds maximum, the maximum value will be applied._",
+        ].join("\n"),
         examples: [defaultLimit, 20, 50],
         maximum: maxLimit,
         minimum: 1,
@@ -91,7 +113,13 @@ export const generatePaginationQuerySchema = (config) => {
     schema.page = Type.Optional(
       Type.Integer({
         default: 1,
-        description: `Page number to retrieve.\n\nIf you provide invalid value the default page number will applied`,
+        description: [
+          "Page number to retrieve.",
+          "",
+          "**Default:** 1",
+          "",
+          "_If invalid value is provided, default will be applied._",
+        ].join("\n"),
         examples: [1, 2, 3],
         minimum: 1,
         title: "Page",
@@ -100,14 +128,26 @@ export const generatePaginationQuerySchema = (config) => {
   } else {
     schema.after = Type.Optional(
       Type.String({
-        description: "Cursor for pagination (get items after this cursor)",
+        description: [
+          "Cursor for forward pagination.",
+          "",
+          "Get items **after** this cursor.",
+          "",
+          "_Cursor is a base64-encoded string._",
+        ].join("\n"),
         examples: ["eyJpZCI6IjEyMyJ9"],
         title: "After Cursor",
       }),
     );
     schema.before = Type.Optional(
       Type.String({
-        description: "Cursor for pagination (get items before this cursor)",
+        description: [
+          "Cursor for backward pagination.",
+          "",
+          "Get items **before** this cursor.",
+          "",
+          "_Cursor is a base64-encoded string._",
+        ].join("\n"),
         examples: ["eyJpZCI6IjEyMyJ9"],
         title: "Before Cursor",
       }),
@@ -117,18 +157,43 @@ export const generatePaginationQuerySchema = (config) => {
   if (sortableColumns.length > 0) {
     const sortPattern = sortableColumns.map((col) => `${col}:(ASC|DESC)`).join("|");
     const sortExamples = sortableColumns.slice(0, 2).map((col) => `${col}:ASC`);
-    const availableSortValues = sortableColumns.flatMap((col) => [`${col}:ASC`, `${col}:DESC`]).join(", ");
+    const availableFields = sortableColumns.map((col) => `- \`${col}\``).join("\n");
 
     schema.sortBy = Type.Optional(
       Type.Array(
         Type.String({
-          description: `Parameter to sort by.\n\nTo sort by multiple fields, just provide query param multiple times. The order in url defines an order of sorting\n\nFormat: fieldName:DIRECTION\n\nExample: sortBy=id:DESC&sortBy=createdAt:ASC`,
+          description: `Format: \`fieldName:DIRECTION\``,
           examples: sortExamples,
           pattern: `^(${sortPattern})$`,
-          title: "Sort By",
+          title: "Sort Field",
         }),
         {
-          description: `Parameter to sort by.\n\nTo sort by multiple fields, just provide query param multiple times. The order in url defines an order of sorting\n\nFormat: fieldName:DIRECTION\n\nExample: sortBy=id:DESC&sortBy=createdAt:ASC\n\nDefault Value: No default sorting specified, the result order is not guaranteed\n\nAvailable Fields\n\n${sortableColumns.map((col) => `    ${col}`).join("\n")}\n\nAvailable values : ${availableSortValues}`,
+          description: [
+            "Sort results by one or more fields.",
+            "",
+            "### Usage",
+            "",
+            "**Single field:**",
+            "```",
+            "sortBy=id:DESC",
+            "```",
+            "",
+            "**Multiple fields:**",
+            "```",
+            "sortBy=id:DESC&sortBy=createdAt:ASC",
+            "```",
+            "",
+            "_The order in URL defines the sorting priority._",
+            "",
+            "### Available Fields",
+            "",
+            availableFields,
+            "",
+            "### Directions",
+            "",
+            "- `ASC` - Ascending order",
+            "- `DESC` - Descending order",
+          ].join("\n"),
           examples: [sortExamples],
           title: "Sort By",
         },
@@ -137,21 +202,68 @@ export const generatePaginationQuerySchema = (config) => {
   }
 
   if (filterableColumnsObj && Object.keys(filterableColumnsObj).length > 0) {
+    // Extract enum values from table schema using createSelectSchema
+    // @ts-expect-error - table is generic type, but createSelectSchema works at runtime
+    const baseSchema = createSelectSchema(config.table);
+    const baseProperties = baseSchema.properties || {};
+
     for (const [column, allowedOperators] of Object.entries(filterableColumnsObj)) {
       const operatorsArray = Array.isArray(allowedOperators) ? allowedOperators : [];
 
-      // Generate examples based on available operators only
-      // Note: examples should be just the value part (without filter. prefix) since the parameter name already includes it
+      // Extract enum values from base schema if column exists
+      let enumValues = [];
+      const columnProperty = baseProperties[column];
+      if (columnProperty) {
+        // Check if property has enum values (from createSelectSchema for pgEnum columns)
+        if (columnProperty.enum && Array.isArray(columnProperty.enum)) {
+          enumValues = columnProperty.enum;
+        }
+        // Check if property has anyOf with const values (Union type from createSelectSchema for pgEnum)
+        // createSelectSchema generates anyOf with const values for enum columns
+        if (columnProperty.anyOf && Array.isArray(columnProperty.anyOf)) {
+          for (const option of columnProperty.anyOf) {
+            // Check for enum array
+            if (option.enum && Array.isArray(option.enum)) {
+              enumValues = option.enum;
+              break;
+            }
+            // Check for const values (createSelectSchema generates const for pgEnum)
+            if (option.const !== undefined) {
+              enumValues.push(option.const);
+            }
+          }
+        }
+      }
+
+      // Generate examples based on available operators and enum values
       const examples = [];
-      if (operatorsArray.includes("$eq")) {
-        examples.push(`$eq:value`);
+      if (enumValues.length > 0) {
+        // Use actual enum values in examples
+        const firstEnumValue = enumValues[0];
+        const secondEnumValue = enumValues[1] || enumValues[0];
+
+        if (operatorsArray.includes("$eq")) {
+          examples.push(`$eq:${firstEnumValue}`);
+        }
+        if (operatorsArray.includes("$in")) {
+          examples.push(`$in:${firstEnumValue},${secondEnumValue}`);
+        }
+        if (operatorsArray.includes("$ilike") || operatorsArray.includes("$like")) {
+          examples.push(`$ilike:%${firstEnumValue}%`);
+        }
+      } else {
+        // Fallback to generic examples if no enum values
+        if (operatorsArray.includes("$eq")) {
+          examples.push(`$eq:value`);
+        }
+        if (operatorsArray.includes("$ilike") || operatorsArray.includes("$like")) {
+          examples.push(`$ilike:%value%`, `$ilike:John`);
+        }
+        if (operatorsArray.includes("$in")) {
+          examples.push(`$in:value1,value2`);
+        }
       }
-      if (operatorsArray.includes("$ilike") || operatorsArray.includes("$like")) {
-        examples.push(`$ilike:%value%`, `$ilike:John`);
-      }
-      if (operatorsArray.includes("$in")) {
-        examples.push(`$in:value1,value2`);
-      }
+
       if (operatorsArray.includes("$gte")) {
         examples.push(`$gte:2024-01-01`);
       }
@@ -168,38 +280,140 @@ export const generatePaginationQuerySchema = (config) => {
         examples.push(`$notIn:value1,value2`);
       }
 
-      // Generate available operations list
+      // Generate available operations list with descriptions
       const availableOperations =
         operatorsArray.length > 0
-          ? operatorsArray.map((op) => `    ${op}`).join("\n")
-          : "    $eq\n    $gt\n    $gte\n    $lt\n    $lte\n    $in\n    $notIn\n    $ilike";
+          ? operatorsArray
+              .map((op) => {
+                const doc = OPERATOR_DOCS[op];
+                return doc ? `- \`${op}\` - ${doc.label}` : `- \`${op}\``;
+              })
+              .join("\n")
+          : Object.entries(OPERATOR_DOCS)
+              .map(([op, doc]) => `- \`${op}\` - ${doc.label}`)
+              .join("\n");
 
-      // Generate example text based on available operators
-      let exampleText = "";
-      if (operatorsArray.includes("$ilike") || operatorsArray.includes("$like")) {
-        exampleText = `Example: filter.${column}=$ilike:John&filter.${column}=$eq:value`;
-      } else if (operatorsArray.includes("$eq") && operatorsArray.includes("$in")) {
-        exampleText = `Example: filter.${column}=$eq:value&filter.${column}=$in:value1,value2`;
-      } else if (operatorsArray.includes("$eq")) {
-        exampleText = `Example: filter.${column}=$eq:value`;
-      } else if (operatorsArray.length > 0) {
-        const firstOp = operatorsArray[0];
-        exampleText = `Example: filter.${column}=${firstOp}:value`;
+      // Generate example text based on available operators and enum values
+      let usageExample = "";
+      if (enumValues.length > 0) {
+        const firstEnumValue = enumValues[0];
+        const secondEnumValue = enumValues[1] || enumValues[0];
+        if (operatorsArray.includes("$eq") && operatorsArray.includes("$in")) {
+          usageExample = [
+            "**Single filter:**",
+            "```",
+            `filter.${column}=$eq:${firstEnumValue}`,
+            "```",
+            "",
+            "**Multiple filters:**",
+            "```",
+            `filter.${column}=$eq:${firstEnumValue}&filter.${column}=$in:${firstEnumValue},${secondEnumValue}`,
+            "```",
+          ].join("\n");
+        } else if (operatorsArray.includes("$eq")) {
+          usageExample = ["**Example:**", "```", `filter.${column}=$eq:${firstEnumValue}`, "```"].join("\n");
+        } else if (operatorsArray.includes("$in")) {
+          usageExample = ["**Example:**", "```", `filter.${column}=$in:${firstEnumValue},${secondEnumValue}`, "```"].join(
+            "\n",
+          );
+        }
+      } else {
+        if (operatorsArray.includes("$ilike") || operatorsArray.includes("$like")) {
+          usageExample = [
+            "**Single filter:**",
+            "```",
+            `filter.${column}=$ilike:%John%`,
+            "```",
+            "",
+            "**Multiple filters:**",
+            "```",
+            `filter.${column}=$ilike:%John%&filter.${column}=$eq:value`,
+            "```",
+          ].join("\n");
+        } else if (operatorsArray.includes("$eq") && operatorsArray.includes("$in")) {
+          usageExample = [
+            "**Single filter:**",
+            "```",
+            `filter.${column}=$eq:value`,
+            "```",
+            "",
+            "**Multiple filters:**",
+            "```",
+            `filter.${column}=$eq:value&filter.${column}=$in:value1,value2`,
+            "```",
+          ].join("\n");
+        } else if (operatorsArray.includes("$eq")) {
+          usageExample = ["**Example:**", "```", `filter.${column}=$eq:value`, "```"].join("\n");
+        } else if (operatorsArray.length > 0) {
+          const firstOp = operatorsArray[0];
+          const doc = OPERATOR_DOCS[firstOp];
+          usageExample = ["**Example:**", "```", `filter.${column}=${firstOp}:${doc?.example || "value"}`, "```"].join("\n");
+        }
       }
 
-      const description = `Filter by ${column} query param.\n\nFormat: filter.${column}=OPERATION:VALUE${exampleText ? `\n\n${exampleText}` : ""}\n\nAvailable Operations\n\n${availableOperations}`;
+      // Build description with enum values if available
+      const descriptionParts = [
+        `Filter results by \`${column}\` field.`,
+        "",
+        "### Format",
+        "",
+        `\`filter.${column}=OPERATION:VALUE\``,
+        "",
+      ];
+
+      if (usageExample) {
+        descriptionParts.push("### Usage", "", usageExample, "");
+      }
+
+      descriptionParts.push("### Available Operations", "", availableOperations);
+
+      if (enumValues.length > 0) {
+        const validValuesList = enumValues.map((val) => `- \`${val}\``).join("\n");
+        descriptionParts.push("", "### Valid Values", "", validValuesList);
+      }
+
+      const description = descriptionParts.join("\n");
+
+      // Generate pattern for enum validation if enum values exist
+      let pattern;
+      if (enumValues.length > 0) {
+        // Pattern for $eq:VALUE or $in:VALUE1,VALUE2,...
+        const enumPattern = enumValues.join("|");
+        if (operatorsArray.includes("$eq") && operatorsArray.includes("$in")) {
+          pattern = String.raw`^(\$eq:(${enumPattern})|\$in:(${enumPattern})(,(${enumPattern}))*)$`;
+        } else if (operatorsArray.includes("$eq")) {
+          pattern = String.raw`^\$eq:(${enumPattern})$`;
+        } else if (operatorsArray.includes("$in")) {
+          pattern = String.raw`^\$in:(${enumPattern})(,(${enumPattern}))*$`;
+        }
+      }
 
       schema[`filter.${column}`] = Type.Optional(
-        Type.Array(
-          Type.String({
-            description,
-            examples: examples.length > 0 ? examples : [`$eq:value`],
-            title: `Filter ${column}`,
-          }),
+        Type.Union(
+          [
+            Type.String({
+              description: `Single filter for ${column}`,
+              examples: examples.length > 0 ? examples.slice(0, 2) : [`$eq:value`],
+              pattern,
+              title: `Filter ${column}`,
+            }),
+            Type.Array(
+              Type.String({
+                description: `Multiple filters for ${column}`,
+                examples: examples.length > 0 ? examples : [`$eq:value`],
+                pattern,
+                title: `Filter ${column}`,
+              }),
+              {
+                description: `Apply multiple filters to ${column}`,
+                examples: examples.length > 1 ? [[examples[0], examples[1]]] : [[examples[0] || `$eq:value`]],
+                title: `Filter ${column} (array)`,
+              },
+            ),
+          ],
           {
             description,
-            examples: [examples.length > 0 ? examples : [`$eq:value`]],
-            title: `Filter ${column}`,
+            title: `Filter by ${column}`,
           },
         ),
       );
@@ -208,38 +422,92 @@ export const generatePaginationQuerySchema = (config) => {
 
   if (selectableColumns.length > 0) {
     const selectExamples = selectableColumns.slice(0, 3);
-    const availableColumnsList = selectableColumns.map((col) => `    ${col}`).join("\n");
+    const availableColumnsList = selectableColumns.map((col) => `- \`${col}\``).join("\n");
 
     schema.select = Type.Optional(
-      Type.Array(
-        Type.String({
-          description: `Column name to select.\n\nAvailable columns:\n${availableColumnsList}`,
-          enum: selectableColumns,
-          examples: selectExamples,
-          title: "Select Column",
-        }),
+      Type.Union(
+        [
+          Type.String({
+            description: "Single column to select",
+            enum: selectableColumns,
+            examples: selectExamples.slice(0, 1),
+            title: "Select Column",
+          }),
+          Type.Array(
+            Type.String({
+              description: "Column name to select",
+              enum: selectableColumns,
+              examples: selectExamples,
+              title: "Select Column",
+            }),
+            {
+              description: [
+                "Select specific columns to include in the response.",
+                "",
+                "### Usage",
+                "",
+                "**Single column:**",
+                "```",
+                "select=email",
+                "```",
+                "",
+                "**Multiple parameters:**",
+                "```",
+                "select=email&select=firstName&select=lastName",
+                "```",
+                "",
+                "**Comma-separated:**",
+                "```",
+                "select=email,firstName,lastName",
+                "```",
+                "",
+                "_By default, all columns are returned._",
+                "",
+                "### Available Columns",
+                "",
+                availableColumnsList,
+              ].join("\n"),
+              examples: [selectExamples],
+              title: "Select Columns",
+            },
+          ),
+        ],
         {
-          description: `Select specific columns to include in the response.\n\nTo select multiple columns, provide the query param multiple times or use comma-separated values.\n\nExample: select=email&select=firstName&select=lastName or select=email,firstName,lastName\n\nAvailable columns:\n${availableColumnsList}`,
-          examples: [selectExamples],
-          title: "Select Columns",
+          description: [
+            "Select specific columns to include in the response.",
+            "",
+            "### Usage",
+            "",
+            "**Single column:**",
+            "```",
+            "select=email",
+            "```",
+            "",
+            "**Multiple parameters:**",
+            "```",
+            "select=email&select=firstName&select=lastName",
+            "```",
+            "",
+            "**Comma-separated:**",
+            "```",
+            "select=email,firstName,lastName",
+            "```",
+            "",
+            "_By default, all columns are returned._",
+            "",
+            "### Available Columns",
+            "",
+            availableColumnsList,
+          ].join("\n"),
+          title: "Select",
         },
       ),
     );
   }
 
-  if (config.searchableColumns && config.searchableColumns.length > 0) {
-    schema.search = Type.Optional(
-      Type.String({
-        description: `Search across searchable columns: ${config.searchableColumns.join(", ")}`,
-        examples: ["john", "example@email.com"],
-        title: "Search",
-      }),
-    );
-  }
-
   return Type.Object(schema, {
     additionalProperties: false,
-    description: `Pagination query parameters for ${strategy === PAGINATION_STRATEGY.cursor ? "cursor" : "offset"} pagination strategy`,
+    description: `Query parameters for ${strategy === PAGINATION_STRATEGY.cursor ? "cursor-based" : "offset-based"} pagination`,
     title: "Pagination Query",
   });
 };
@@ -264,15 +532,30 @@ export const generateItemSchema = (config) => {
     delete properties[column];
   }
 
+  // Make all fields optional to support select parameter
+  // When select is used, only selected fields are returned, so all fields must be optional
+  const optionalProperties = {};
+  for (const [column, property] of Object.entries(properties)) {
+    // Skip if already optional from optionalColumns config
+    optionalProperties[column] = optionalColumns[column] ? property : Type.Optional(property);
+  }
+
+  // Also apply optionalColumns config for fields that should be explicitly optional
   for (const [column, shouldBeOptional] of Object.entries(optionalColumns)) {
-    if (shouldBeOptional && properties[column]) {
-      properties[column] = Type.Optional(properties[column]);
+    if (shouldBeOptional && optionalProperties[column]) {
+      optionalProperties[column] = Type.Optional(optionalProperties[column]);
     }
   }
 
-  return Type.Object(properties, {
+  // Ensure optionalProperties is not empty
+  if (Object.keys(optionalProperties).length === 0) {
+    throw new Error("Cannot create item schema: no properties available after filtering");
+  }
+
+  // @ts-expect-error - TypeScript can't infer that optionalProperties is not empty, but we check above
+  return Type.Object(optionalProperties, {
     additionalProperties: false,
-    description: "Single item from the paginated result",
+    description: "Single item from the paginated result. All fields are optional to support the `select` parameter.",
     title: "Item",
   });
 };
@@ -303,7 +586,7 @@ export const generatePaginatedResponseSchema = (config) => {
     },
     {
       additionalProperties: false,
-      description: `Paginated response with ${strategy === PAGINATION_STRATEGY.cursor ? "cursor" : "offset"} pagination strategy`,
+      description: `Paginated response using ${strategy === PAGINATION_STRATEGY.cursor ? "cursor-based" : "offset-based"} pagination`,
       title: "Paginated Response",
     },
   );
@@ -319,9 +602,18 @@ export const generatePaginatedResponseSchema = (config) => {
  * @param {import("@sinclair/typebox").TSchema} [options.paramsSchema] - Route params schema
  * @param {string} [options.description] - Route description
  * @param {string} [options.summary] - Route summary
+ * @param {string[]} [options.tags] - OpenAPI tags
  * @returns {object} Complete route schema
  */
-export const generatePaginatedRouteSchema = ({ bodySchema, config, description, errorSchemas, paramsSchema, summary }) => {
+export const generatePaginatedRouteSchema = ({
+  bodySchema,
+  config,
+  description,
+  errorSchemas,
+  paramsSchema,
+  summary,
+  tags,
+}) => {
   validatePaginationConfig(config);
 
   /** @type {Record<string, any>} */
@@ -337,6 +629,7 @@ export const generatePaginatedRouteSchema = ({ bodySchema, config, description, 
   if (paramsSchema) schema.params = paramsSchema;
   if (description) schema.description = description;
   if (summary) schema.summary = summary;
+  if (tags) schema.tags = tags;
 
   return schema;
 };

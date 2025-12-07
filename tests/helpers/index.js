@@ -3,5 +3,5 @@
  */
 
 export { dbUtils } from "./db-utils.js";
-export { fixtures, fixtureFactory } from "./fixtures.js";
+export { fixtureFactory, fixtures } from "./fixtures.js";
 export { createTestingApp } from "./testing-app.js";

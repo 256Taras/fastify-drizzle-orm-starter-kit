@@ -92,9 +92,8 @@ export function fixtureFactory(fixture) {
   // @ts-ignore - ignore that returned type is not the same as input, but its specific behavior of Proxy
   return new Proxy(fixture, {
     /**
-     *
-     * @param target
-     * @param prop
+     * @param {object} target - Target object
+     * @param {string | symbol} prop - Property name
      */
     get(target, prop) {
       if (!(prop in target)) {

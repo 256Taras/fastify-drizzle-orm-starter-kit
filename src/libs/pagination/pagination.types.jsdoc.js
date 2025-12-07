@@ -11,8 +11,7 @@
  * @typedef {object} PaginationConfig
  * @property {T} table - Drizzle table
  * @property {string[]} sortableColumns - Columns that can be sorted
- * @property {string[] | Record<string, FilterOperator[]>} [filterableColumns] - Columns that can be filtered. Can be array of column names or object mapping column names to allowed operators
- * @property {string[]} [searchableColumns] - Columns that can be searched
+ * @property {string[] | Record<string, FilterOperator[]>} [filterableColumns] - Columns that can be filtered. Can be array of column names or object mapping column names to allowed operators. Enum values are automatically extracted from table schema.
  * @property {string[]} [selectableColumns] - Columns that can be selected (mutually exclusive with excludeColumns)
  * @property {string[]} [excludeColumns] - Columns to exclude from response and selection (mutually exclusive with selectableColumns)
  * @property {Record<string, boolean>} [optionalColumns] - Columns that should be optional in response {column: true}
@@ -75,7 +74,6 @@
  * @property {OffsetPaginationQuery | CursorPaginationQuery} query - Pagination query
  * @property {Record<string, string | string[]>} [filters] - Filter parameters (can be string or array of strings)
  * @property {string[]} [sortBy] - Sort parameters
- * @property {string} [search] - Search query
  * @property {string[]} [select] - Fields to select from querystring
  */
 

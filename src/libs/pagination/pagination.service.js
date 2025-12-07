@@ -21,6 +21,11 @@ import { paginateOffset } from "#libs/pagination/pagination.offset.service.js";
 const paginate = async (deps, config, paginationParams, options) => {
   const { strategy = PAGINATION_STRATEGY.offset, table } = config;
 
+  if (!paginationParams) {
+    deps.logger.error("paginationParams is undefined in paginate", { config, options });
+    throw new Error("paginationParams is required");
+  }
+
   if (strategy === PAGINATION_STRATEGY.cursor) {
     return paginateCursor(deps, table, config, paginationParams, options);
   }

@@ -6,8 +6,10 @@ import assert from "node:assert/strict";
 import { after, before, beforeEach, describe, it } from "node:test";
 
 import { users } from "#modules/users/users.model.js";
-import { createTestingApp, dbUtils, fixtures as baseFixtures } from "../../helpers/index.js";
-import { getEndpoint, TESTING_METHOD, usersListFixtures as fixtures, validationCases } from "./users.router.v1.fixtures.js";
+
+import { fixtures as baseFixtures, createTestingApp, dbUtils } from "../../helpers/index.js";
+
+import { usersListFixtures as fixtures, getEndpoint, TESTING_METHOD, validationCases } from "./users.router.v1.fixtures.js";
 
 /**
  * Helper to hash passwords in seed data

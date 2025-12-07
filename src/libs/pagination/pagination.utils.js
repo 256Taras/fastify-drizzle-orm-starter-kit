@@ -45,7 +45,7 @@ export const calculatePaginationOffset = ({ limit = 10, page = 1 } = {}) => {
 const createPageDto = (data, meta) => ({ data, meta });
 
 /**
- * Asynchronously creates a paginated response object with entities and pagination metadata.
+ * Creates a paginated response object with entities and pagination metadata.
  * This function encapsulates the process of creating pagination metadata and structuring the paginated response.
  * @template E - The entity type included in the paginated response.
  * @param {object} params - The parameters for creating the paginated response.
@@ -53,7 +53,7 @@ const createPageDto = (data, meta) => ({ data, meta });
  * @param {number} params.itemCount - The total number of entities across all pages.
  * @param {number} params.offset - The offset for the current page.
  * @param {number} params.limit - The limit for the current page.
- * @returns {Promise<{
+ * @returns {{
  *   data: E[],
  *   meta: {
  *     page: number,
@@ -63,9 +63,9 @@ const createPageDto = (data, meta) => ({ data, meta });
  *     hasPreviousPage: boolean,
  *     hasNextPage: boolean
  *   }
- * }>} A promise that resolves to the paginated response object.
+ * }} The paginated response object.
  */
-export const createPaginatedResponse = async ({ entities, itemCount, limit, offset }) => {
+export const createPaginatedResponse = ({ entities, itemCount, limit, offset }) => {
   const pageMetaDto = createPageMetaDto({ itemCount, limit, offset });
   return createPageDto(entities, pageMetaDto);
 };

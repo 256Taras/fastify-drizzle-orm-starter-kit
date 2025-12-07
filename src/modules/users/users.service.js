@@ -6,10 +6,6 @@ import { NON_PASSWORD_COLUMNS, users } from "#modules/users/users.model.js";
 
 import { USERS_PAGINATION_CONFIG } from "./users.pagination.config.js";
 
-/**
- * @typedef {import("#@types/index.jsdoc.js").Dependencies} Dependencies
- */
-
 /** @type {FindOneById} */
 const findOneById = async ({ db, logger }, id) => {
   logger.debug(`Get user with id: ${id}`);
@@ -24,9 +20,28 @@ const findOneById = async ({ db, logger }, id) => {
 
 /** @type {FindAll} */
 const findAll = async ({ logger, paginationService }, paginationParams) => {
-  logger.debug("Get paginated users list", { paginationParams });
-
-  return paginationService.paginate(USERS_PAGINATION_CONFIG, paginationParams);
+  // paginationService.paginate uses partial, so it returns a function
+  // partial(paginate, [deps]) creates: (config, paginationParams, options) => Promise
+  // When we call paginate(config, params), it returns a function that takes options
+  // We need to call it with undefined for options: paginate(config, params)(undefined)
+  const result = await paginationService.paginate(USERS_PAGINATION_CONFIG, paginationParams);
+  logger.debug(
+    "findAll result:",
+    JSON.stringify(
+      {
+        hasData: !!result?.data,
+        dataLength: result?.data?.length,
+        hasMeta: !!result?.meta,
+        result: result ? "exists" : "null",
+      },
+      null,
+      2,
+    ),
+  );
+  if (!result) {
+    logger.error("findAll returned null/undefined!");
+  }
+  return result;
 };
 
 /**
@@ -38,6 +53,8 @@ export default function usersService(deps) {
     findOneById: partial(findOneById, [deps]),
   };
 }
+
+/** @typedef {import("#@types/index.jsdoc.js").Dependencies} Dependencies */
 
 /**
  * @typedef {import("./users.contracts.js").User} User

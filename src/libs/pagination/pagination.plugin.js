@@ -7,7 +7,8 @@ import fp from "fastify-plugin";
 async function paginationPlugin(fastify) {
   fastify.decorateRequest("pagination", null);
 
-  // eslint-disable-next-line complexity -- Complex pagination query parsing logic
+  // Use preHandler hook - it runs after query parsing but before route handler
+  // encapsulate: false ensures hooks work across all route contexts (including routes with prefix)
   fastify.addHook("preHandler", async (request) => {
     /** @type {any} */
     const rawQuery = request.query || {};
@@ -42,9 +43,6 @@ async function paginationPlugin(fastify) {
       sortBy = Array.isArray(rawQuery.sortBy) ? rawQuery.sortBy.map(String) : [String(rawQuery.sortBy)];
     }
 
-    /** @type {string | undefined} */
-    const search = typeof rawQuery.search === "string" ? rawQuery.search : undefined;
-
     /** @type {string[] | undefined} */
     let select;
     if (rawQuery.select) {
@@ -60,7 +58,6 @@ async function paginationPlugin(fastify) {
     request.pagination = {
       filters: Object.keys(filters).length > 0 ? filters : undefined,
       query,
-      search,
       select,
       sortBy,
     };
@@ -69,4 +66,5 @@ async function paginationPlugin(fastify) {
 
 export default fp(paginationPlugin, {
   name: "pagination",
+  encapsulate: false, // Allow hooks to work across route contexts (e.g., routes with prefix)
 });

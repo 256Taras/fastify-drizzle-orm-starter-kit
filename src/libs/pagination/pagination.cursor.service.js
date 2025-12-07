@@ -40,7 +40,7 @@ const decodeCursor = (cursor) => {
  * @returns {Promise<import('./pagination.types.jsdoc.js').CursorPaginatedResponse<any>>}
  */
 export const paginateCursor = async ({ db, logger }, table, config, paginationParams, options = {}) => {
-  const { filters, query, search, select: selectFields, sortBy } = paginationParams;
+  const { filters, query, select: selectFields, sortBy } = paginationParams;
   const { queryBuilder, select: optionsSelect } = options;
   /** @type {import('./pagination.types.jsdoc.js').CursorPaginationQuery} */
   const cursorQuery = query;
@@ -60,7 +60,7 @@ export const paginateCursor = async ({ db, logger }, table, config, paginationPa
     builder.applySelect(selectFields);
   }
 
-  builder.applyFilters(filters).applySearch(search).applySorting(sortBy);
+  builder.applyFilters(filters).applySorting(sortBy);
 
   if (after) {
     const decoded = decodeCursor(after);

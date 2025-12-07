@@ -1,6 +1,26 @@
 import { and, asc, count, desc, eq, gt, gte, ilike, inArray, lt, lte, notInArray, or } from "drizzle-orm";
+import { createSelectSchema } from "drizzle-typebox";
 
 import { BadRequestException } from "#libs/errors/domain.errors.js";
+
+/**
+ * Valid filter operators
+ */
+const FILTER_OPERATORS = {
+  $eq: eq,
+  $gt: gt,
+  $gte: gte,
+  $ilike: ilike,
+  $in: inArray,
+  $lt: lt,
+  $lte: lte,
+  $notIn: notInArray,
+};
+
+/**
+ * Default allowed operators for all filterable columns
+ */
+const DEFAULT_OPERATORS = ["$eq", "$gt", "$gte", "$lt", "$lte", "$in", "$notIn", "$ilike"];
 
 /**
  * Query builder class for chainable API
@@ -50,128 +70,21 @@ export class PaginationQueryBuilder {
    * @param {Record<string, string | string[]>} [filters] - Filter params (can be string or array of strings)
    * @returns {PaginationQueryBuilder}
    */
-  // eslint-disable-next-line complexity -- Complex filter application logic with multiple operators
   applyFilters(filters) {
     if (!filters || Object.keys(filters).length === 0) return this;
 
-    const { filterableColumns: filterableColumnsConfig = [] } = this.#config;
+    const filterableColumnsObj = this.#normalizeFilterableColumns();
 
-    // Normalize filterableColumns - convert array to object if needed
-    const filterableColumnsObj = Array.isArray(filterableColumnsConfig)
-      ? Object.fromEntries(
-          filterableColumnsConfig.map((col) => [col, ["$eq", "$gt", "$gte", "$lt", "$lte", "$in", "$notIn", "$ilike"]]),
-        )
-      : filterableColumnsConfig;
-
-    for (const [key, value] of Object.entries(filters)) {
-      if (!(key in filterableColumnsObj)) {
-        throw new BadRequestException(`Column "${key}" is not filterable`);
-      }
-
-      const allowedOperators = filterableColumnsObj[key];
-      if (!Array.isArray(allowedOperators) || allowedOperators.length === 0) {
-        throw new BadRequestException(`No operators allowed for filter '${key}'`);
-      }
+    for (const [columnName, filterValue] of Object.entries(filters)) {
+      this.#validateFilterColumn(columnName, filterableColumnsObj);
+      const allowedOperators = filterableColumnsObj[columnName];
 
       // eslint-disable-next-line security/detect-object-injection
-      const column = this.#table[key];
+      const column = this.#table[columnName];
       if (!column) continue;
 
-      // Handle both single value and array of values
-      const filterValues = Array.isArray(value) ? value : [value];
-      /** @type {import("drizzle-orm").SQL[]} */
-      const filterConditions = [];
-
-      for (const filterValue of filterValues) {
-        const { operator, value: parsedValue } = this.#parseFilterValue(filterValue);
-
-        // Check if operator is allowed for this column
-        if (!allowedOperators.includes(operator)) {
-          throw new BadRequestException(
-            `Operator "${operator}" is not allowed for column "${key}". Allowed operators: ${allowedOperators.join(", ")}`,
-          );
-        }
-
-        let condition;
-        switch (operator) {
-          case "$eq": {
-            condition = eq(column, parsedValue);
-            break;
-          }
-          case "$gt": {
-            condition = gt(column, parsedValue);
-            break;
-          }
-          case "$gte": {
-            condition = gte(column, parsedValue);
-            break;
-          }
-          case "$ilike": {
-            condition = ilike(column, `%${parsedValue}%`);
-            break;
-          }
-          case "$in": {
-            condition = inArray(column, parsedValue);
-            break;
-          }
-          case "$lt": {
-            condition = lt(column, parsedValue);
-            break;
-          }
-          case "$lte": {
-            condition = lte(column, parsedValue);
-            break;
-          }
-          case "$notIn": {
-            condition = notInArray(column, parsedValue);
-            break;
-          }
-          default: {
-            throw new BadRequestException(`Unknown filter operator: ${operator}`);
-          }
-        }
-
-        // All cases in switch return a condition, so condition is always defined
-        filterConditions.push(/** @type {import("drizzle-orm").SQL} */ condition);
-      }
-
-      // If multiple filter values for same column, combine with OR
-      if (filterConditions.length === 1) {
-        this.where(filterConditions[0]);
-      } else if (filterConditions.length > 1) {
-        // @ts-expect-error - TypeScript doesn't understand that filterConditions only contains valid SQL conditions
-        this.where(or(...filterConditions));
-      }
-    }
-
-    return this;
-  }
-
-  /**
-   * Apply search across searchable columns (protected by config)
-   * @param {string} [searchQuery] - Search query
-   * @returns {PaginationQueryBuilder}
-   */
-  applySearch(searchQuery) {
-    if (!searchQuery) return this;
-
-    const { searchableColumns = [] } = this.#config;
-    if (searchableColumns.length === 0) return this;
-
-    const searchConditions = searchableColumns
-      .map((columnName) => {
-        // eslint-disable-next-line security/detect-object-injection
-        const column = this.#table[columnName];
-        return column ? ilike(column, `%${searchQuery}%`) : null;
-      })
-      .filter((condition) => condition !== null)
-      .map((condition) => /** @type {import("drizzle-orm").SQL} */ condition);
-
-    if (searchConditions.length > 0) {
-      const condition = searchConditions.length === 1 ? searchConditions[0] : or(...searchConditions);
-      if (condition) {
-        this.where(condition);
-      }
+      const conditions = this.#buildFilterConditions(column, columnName, filterValue, allowedOperators);
+      this.#applyFilterConditions(conditions);
     }
 
     return this;
@@ -185,34 +98,12 @@ export class PaginationQueryBuilder {
   applySelect(selectFields) {
     if (!selectFields || selectFields.length === 0) return this;
 
-    const { excludeColumns = [], selectableColumns = [] } = this.#config;
-
-    let allowedColumns = [];
-
-    if (selectableColumns.length > 0) {
-      allowedColumns = selectableColumns;
-    } else if (excludeColumns.length > 0) {
-      const allColumns = Object.keys(this.#table);
-      allowedColumns = allColumns.filter((col) => !excludeColumns.includes(col));
-    }
-
+    const allowedColumns = this.#getAllowedSelectColumns();
     if (allowedColumns.length === 0) return this;
 
-    for (const field of selectFields) {
-      if (!allowedColumns.includes(field)) {
-        throw new BadRequestException(`Column "${field}" is not selectable`);
-      }
-    }
+    this.#validateSelectFields(selectFields, allowedColumns);
 
-    const selectObject = {};
-    for (const field of selectFields) {
-      // eslint-disable-next-line security/detect-object-injection
-      const column = this.#table[field];
-      if (column) {
-        selectObject[field] = column;
-      }
-    }
-
+    const selectObject = this.#buildSelectObject(selectFields);
     if (Object.keys(selectObject).length > 0) {
       this.#selectColumns = selectObject;
     }
@@ -228,15 +119,10 @@ export class PaginationQueryBuilder {
   applySorting(sortBy) {
     const { defaultSortBy, sortableColumns } = this.#config;
 
-    const sortParams =
-      sortBy && sortBy.length > 0
-        ? sortBy.map(this.#parseSortParam.bind(this))
-        : (defaultSortBy || []).map(([column, direction]) => ({ column, direction }));
+    const sortParams = this.#resolveSortParams(sortBy, defaultSortBy);
 
     for (const { column, direction } of sortParams) {
-      if (!sortableColumns.includes(column)) {
-        throw new BadRequestException(`Column "${column}" is not sortable`);
-      }
+      this.#validateSortColumn(column, sortableColumns);
 
       // eslint-disable-next-line security/detect-object-injection
       const tableColumn = this.#table[column];
@@ -256,16 +142,21 @@ export class PaginationQueryBuilder {
    * @returns {Promise<import('./pagination.types.jsdoc.js').QueryExecutionResult>}
    */
   async execute({ limit, offset }) {
-    const dataQuery = this.#buildQuery()
-      .orderBy(...this.#orderByConditions)
-      .limit(limit)
-      .offset(offset);
+    try {
+      const dataQuery = this.#buildQuery()
+        .orderBy(...this.#orderByConditions)
+        .limit(limit)
+        .offset(offset);
 
-    const countQuery = this.#buildCountQuery();
+      const countQuery = this.#buildCountQuery();
 
-    const [[{ itemCount }], entities] = await Promise.all([countQuery, dataQuery]);
+      const [[{ itemCount }], entities] = await Promise.all([countQuery, dataQuery]);
 
-    return { entities, itemCount };
+      return { entities, itemCount };
+    } catch (error) {
+      this.#handleDatabaseError(error);
+      throw error; // Re-throw after handling
+    }
   }
 
   /**
@@ -334,8 +225,10 @@ export class PaginationQueryBuilder {
     return this;
   }
 
+  // ==================== PRIVATE METHODS ====================
+
   /**
-   * Add ORDER BY (internal use only, protected by config)
+   * Add ORDER BY condition
    * @param {any} column - Column to sort
    * @param {'ASC' | 'DESC'} direction - Sort direction
    */
@@ -344,62 +237,120 @@ export class PaginationQueryBuilder {
   }
 
   /**
-   * Build count query
+   * Apply filter conditions (OR for multiple, single for one)
+   * @param {import("drizzle-orm").SQL[]} conditions - Filter conditions
+   */
+  #applyFilterConditions(conditions) {
+    if (conditions.length === 1) {
+      this.where(conditions[0]);
+    } else if (conditions.length > 1) {
+      // @ts-expect-error - TypeScript doesn't understand that conditions only contains valid SQL
+      this.where(or(...conditions));
+    }
+  }
+
+  /**
+   * Apply all JOIN clauses to query
+   * @param {any} query - Query builder
+   * @returns {any} Query with joins applied
+   */
+  #applyJoins(query) {
+    for (const { condition, table, type } of this.#joinClauses) {
+      query = type === "left" ? query.leftJoin(table, condition) : query.innerJoin(table, condition);
+    }
+    return query;
+  }
+
+  /**
+   * Build count query with proper GROUP BY support
    * @returns {any} Count query builder
    */
   #buildCountQuery() {
     let query = this.#db.select({ itemCount: count() }).from(this.#table);
 
-    for (const { condition, table, type } of this.#joinClauses) {
-      query = type === "left" ? query.leftJoin(table, condition) : query.innerJoin(table, condition);
-    }
+    query = this.#applyJoins(query);
 
     if (this.#whereConditions.length > 0) {
-      const whereCondition = this.#whereConditions.length === 1 ? this.#whereConditions[0] : and(...this.#whereConditions);
-      query = query.where(whereCondition);
+      const combinedCondition = this.#combineConditions(this.#whereConditions);
+      if (combinedCondition) {
+        query = query.where(combinedCondition);
+      }
     }
 
+    // Handle GROUP BY with subquery
     if (this.#groupByColumns.length > 0) {
-      const subquery = this.#db.select({ id: this.#table.id }).from(this.#table);
-
-      for (const { condition, table, type } of this.#joinClauses) {
-        if (type === "left") {
-          subquery.leftJoin(table, condition);
-        } else {
-          subquery.innerJoin(table, condition);
-        }
-      }
-
-      if (this.#whereConditions.length > 0) {
-        subquery.where(and(...this.#whereConditions));
-      }
-
-      subquery.groupBy(...this.#groupByColumns);
-
-      if (this.#havingConditions.length > 0) {
-        subquery.having(and(...this.#havingConditions));
-      }
-
-      return this.#db.select({ itemCount: count() }).from(subquery.as("grouped"));
+      return this.#buildGroupedCountQuery();
     }
 
     return query;
   }
 
   /**
-   * Build final query
+   * Build filter conditions for a column
+   * @param {any} column - Drizzle column
+   * @param {string} columnName - Column name
+   * @param {string | string[]} filterValue - Filter value(s)
+   * @param {string[]} allowedOperators - Allowed operators
+   * @returns {import("drizzle-orm").SQL[]} Filter conditions
+   */
+  #buildFilterConditions(column, columnName, filterValue, allowedOperators) {
+    const filterValues = Array.isArray(filterValue) ? filterValue : [filterValue];
+    /** @type {import("drizzle-orm").SQL[]} */
+    const conditions = [];
+
+    for (const value of filterValues) {
+      const { operator, value: parsedValue } = this.#parseFilterValue(value);
+      this.#validateOperator(operator, columnName, allowedOperators);
+
+      const condition = this.#createFilterCondition(column, operator, parsedValue);
+      conditions.push(condition);
+    }
+
+    return conditions;
+  }
+
+  /**
+   * Build grouped count query using subquery
+   * @returns {any} Grouped count query
+   */
+  #buildGroupedCountQuery() {
+    const subquery = this.#db.select({ id: this.#table.id }).from(this.#table);
+
+    for (const { condition, table, type } of this.#joinClauses) {
+      if (type === "left") {
+        subquery.leftJoin(table, condition);
+      } else {
+        subquery.innerJoin(table, condition);
+      }
+    }
+
+    if (this.#whereConditions.length > 0) {
+      subquery.where(and(...this.#whereConditions));
+    }
+
+    subquery.groupBy(...this.#groupByColumns);
+
+    if (this.#havingConditions.length > 0) {
+      subquery.having(and(...this.#havingConditions));
+    }
+
+    return this.#db.select({ itemCount: count() }).from(subquery.as("grouped"));
+  }
+
+  /**
+   * Build final query with all conditions
    * @returns {any} Query builder
    */
   #buildQuery() {
     let query = this.#db.select(this.#selectColumns || undefined).from(this.#table);
 
-    for (const { condition, table, type } of this.#joinClauses) {
-      query = type === "left" ? query.leftJoin(table, condition) : query.innerJoin(table, condition);
-    }
+    query = this.#applyJoins(query);
 
     if (this.#whereConditions.length > 0) {
-      const whereCondition = this.#whereConditions.length === 1 ? this.#whereConditions[0] : and(...this.#whereConditions);
-      query = query.where(whereCondition);
+      const combinedCondition = this.#combineConditions(this.#whereConditions);
+      if (combinedCondition) {
+        query = query.where(combinedCondition);
+      }
     }
 
     if (this.#groupByColumns.length > 0) {
@@ -407,50 +358,206 @@ export class PaginationQueryBuilder {
     }
 
     if (this.#havingConditions.length > 0) {
-      const havingCondition =
-        this.#havingConditions.length === 1 ? this.#havingConditions[0] : and(...this.#havingConditions);
-      query = query.having(havingCondition);
+      const combinedCondition = this.#combineConditions(this.#havingConditions);
+      if (combinedCondition) {
+        query = query.having(combinedCondition);
+      }
     }
 
     return query;
   }
 
   /**
-   * Parse filter value
-   * @param {string} value - Filter value
-   * @returns {import('./pagination.types.jsdoc.js').ParsedFilterValue}
+   * Build select object from field names
+   * @param {string[]} selectFields - Field names to select
+   * @returns {Record<string, any>} Select object
+   */
+  #buildSelectObject(selectFields) {
+    const selectObject = {};
+    for (const field of selectFields) {
+      // eslint-disable-next-line security/detect-object-injection
+      const column = this.#table[field];
+      if (column) {
+        selectObject[field] = column;
+      }
+    }
+    return selectObject;
+  }
+
+  /**
+   * Combine multiple conditions with AND
+   * @param {import("drizzle-orm").SQL[]} conditions - Conditions to combine
+   * @returns {import("drizzle-orm").SQL | undefined} Combined condition
+   */
+  #combineConditions(conditions) {
+    if (conditions.length === 0) return;
+    if (conditions.length === 1) return conditions[0];
+    return and(...conditions);
+  }
+
+  /**
+   * Create filter condition based on operator
+   * @param {any} column - Drizzle column
+   * @param {import('./pagination.types.jsdoc.js').FilterOperator} operator - Filter operator
+   * @param {any} value - Filter value
+   * @returns {import("drizzle-orm").SQL} SQL condition
+   */
+  #createFilterCondition(column, operator, value) {
+    // Special handling for $ilike - wrap value with %
+    if (operator === "$ilike") {
+      return ilike(column, `%${value}%`);
+    }
+
+    // Use operator map for other operators
+    const operatorFn = FILTER_OPERATORS[operator];
+    if (!operatorFn) {
+      throw new BadRequestException(`Unknown filter operator: ${operator}`);
+    }
+
+    // @ts-expect-error - Drizzle operators have different signatures, but we handle them correctly
+    return operatorFn(column, value);
+  }
+
+  /**
+   * Extract enum values from schema for better error messages
+   * @returns {string[]} Enum values or empty array
+   */
+  #extractEnumValues() {
+    try {
+      const baseSchema = createSelectSchema(this.#config.table);
+      const baseProperties = baseSchema.properties || {};
+
+      for (const columnProperty of Object.values(baseProperties)) {
+        if (columnProperty.enum && Array.isArray(columnProperty.enum)) {
+          return columnProperty.enum;
+        }
+
+        if (columnProperty.anyOf && Array.isArray(columnProperty.anyOf)) {
+          const enumValues = [];
+          for (const option of columnProperty.anyOf) {
+            if (option.enum && Array.isArray(option.enum)) {
+              return option.enum;
+            }
+            if (option.const !== undefined) {
+              enumValues.push(option.const);
+            }
+          }
+          if (enumValues.length > 0) return enumValues;
+        }
+      }
+    } catch {
+      // Schema extraction is optional, fail silently
+    }
+
+    return [];
+  }
+
+  /**
+   * Get allowed columns for select
+   * @returns {string[]} Allowed column names
+   */
+  #getAllowedSelectColumns() {
+    const { excludeColumns = [], selectableColumns = [] } = this.#config;
+
+    if (selectableColumns.length > 0) {
+      return selectableColumns;
+    }
+
+    if (excludeColumns.length > 0) {
+      const allColumns = Object.keys(this.#table);
+      return allColumns.filter((col) => !excludeColumns.includes(col));
+    }
+
+    return [];
+  }
+
+  /**
+   * Handle database errors and convert to user-friendly exceptions
+   * @param {any} error - Database error
+   * @throws {BadRequestException} User-friendly error
+   */
+  #handleDatabaseError(error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+
+    const cause = /** @type {any} */ error?.cause || error;
+    const causeMessage = cause instanceof Error ? cause.message : String(cause);
+
+    // PostgreSQL enum validation error (code 22P02)
+    if (errorMessage.includes("invalid input value for enum") || causeMessage.includes("invalid input value for enum")) {
+      const fullMessage = errorMessage + " " + causeMessage;
+      const enumMatch = fullMessage.match(/invalid input value for enum (\w+): "([^"]+)"/);
+
+      if (enumMatch) {
+        const [, enumName, invalidValue] = enumMatch;
+        const validValues = this.#extractEnumValues();
+        const validValuesText = validValues.length > 0 ? ` Valid values: ${validValues.join(", ")}.` : "";
+
+        throw new BadRequestException(`Invalid value "${invalidValue}" for enum "${enumName}".${validValuesText}`);
+      }
+
+      throw new BadRequestException("Invalid enum value provided in filter");
+    }
+
+    // Re-throw other errors as-is
+    throw error;
+  }
+
+  /**
+   * Normalize filterableColumns config to object format
+   * @returns {Record<string, string[]>} Normalized filterable columns
+   */
+  #normalizeFilterableColumns() {
+    const { filterableColumns: filterableColumnsConfig = [] } = this.#config;
+
+    return Array.isArray(filterableColumnsConfig)
+      ? Object.fromEntries(filterableColumnsConfig.map((col) => [col, DEFAULT_OPERATORS]))
+      : filterableColumnsConfig;
+  }
+
+  /**
+   * Parse filter value into operator and value
+   * @param {string} value - Filter value string
+   * @returns {import('./pagination.types.jsdoc.js').ParsedFilterValue} Parsed filter
    */
   #parseFilterValue(value) {
     if (!value) return { operator: "$eq", value };
 
+    // Match operator pattern: $operator:value
     const operatorMatch = value.match(/^(\$\w+):(.+)$/);
     if (operatorMatch) {
       const [, operator, val] = operatorMatch;
-      const validOperators = ["$eq", "$ilike", "$gt", "$gte", "$lt", "$lte", "$in", "$notIn"];
-      if (!validOperators.includes(operator)) {
-        return { operator: "$eq", value };
+
+      // Validate operator
+      if (!Object.keys(FILTER_OPERATORS).includes(operator)) {
+        return /** @type {import('./pagination.types.jsdoc.js').ParsedFilterValue} */ { operator: "$eq", value };
       }
-      // TypeScript type narrowing after includes check
+
       const op = /** @type {import('./pagination.types.jsdoc.js').FilterOperator} */ operator;
+
+      // Parse array values for $in and $notIn
       if (op === "$in" || op === "$notIn") {
-        return { operator: op, value: val.split(",") };
+        return /** @type {import('./pagination.types.jsdoc.js').ParsedFilterValue} */ {
+          operator: op,
+          value: val.split(","),
+        };
       }
-      // TypeScript doesn't narrow the type after if check, so we need explicit cast
-      const finalOp = /** @type {import('./pagination.types.jsdoc.js').FilterOperator} */ (op);
-      return { operator: finalOp, value: val };
+
+      return /** @type {import('./pagination.types.jsdoc.js').ParsedFilterValue} */ { operator: op, value: val };
     }
 
+    // Legacy support: $value → $ilike:value
     if (value.startsWith("$")) {
       return { operator: "$ilike", value: value.slice(1) };
     }
 
+    // Default to equality
     return { operator: "$eq", value };
   }
 
   /**
-   * Parse sort param
-   * @param {string} sortParam - Sort parameter
-   * @returns {import('./pagination.types.jsdoc.js').SortParam}
+   * Parse sort parameter string
+   * @param {string} sortParam - Sort parameter (e.g., "name:DESC")
+   * @returns {import('./pagination.types.jsdoc.js').SortParam} Parsed sort param
    */
   #parseSortParam(sortParam) {
     const [column, direction = "ASC"] = sortParam.split(":");
@@ -458,5 +565,81 @@ export class PaginationQueryBuilder {
     /** @type {'ASC' | 'DESC'} */
     const dir = upperDir === "ASC" || upperDir === "DESC" ? upperDir : "ASC";
     return { column, direction: dir };
+  }
+
+  /**
+   * Resolve sort parameters from query or defaults
+   * @param {string[]} [sortBy] - Sort params from query
+   * @param {Array<[string, 'ASC' | 'DESC']>} [defaultSortBy] - Default sort config
+   * @returns {import('./pagination.types.jsdoc.js').SortParam[]} Resolved sort params
+   */
+  #resolveSortParams(sortBy, defaultSortBy) {
+    if (sortBy && sortBy.length > 0) {
+      return sortBy.map(this.#parseSortParam.bind(this));
+    }
+
+    if (defaultSortBy && defaultSortBy.length > 0) {
+      return defaultSortBy.map(([column, direction]) => ({ column, direction }));
+    }
+
+    return [];
+  }
+
+  /**
+   * Validate filter column is allowed
+   * @param {string} columnName - Column name
+   * @param {Record<string, string[]>} filterableColumns - Allowed filterable columns
+   * @throws {BadRequestException} If column is not filterable
+   */
+  #validateFilterColumn(columnName, filterableColumns) {
+    if (!(columnName in filterableColumns)) {
+      throw new BadRequestException(`Column "${columnName}" is not filterable`);
+    }
+
+    const allowedOperators = filterableColumns[columnName];
+    if (!Array.isArray(allowedOperators) || allowedOperators.length === 0) {
+      throw new BadRequestException(`No operators allowed for filter '${columnName}'`);
+    }
+  }
+
+  /**
+   * Validate operator is allowed for column
+   * @param {string} operator - Operator to validate
+   * @param {string} columnName - Column name
+   * @param {string[]} allowedOperators - Allowed operators
+   * @throws {BadRequestException} If operator is not allowed
+   */
+  #validateOperator(operator, columnName, allowedOperators) {
+    if (!allowedOperators.includes(operator)) {
+      throw new BadRequestException(
+        `Operator "${operator}" is not allowed for column "${columnName}". Allowed: ${allowedOperators.join(", ")}`,
+      );
+    }
+  }
+
+  /**
+   * Validate select fields are allowed
+   * @param {string[]} selectFields - Fields to validate
+   * @param {string[]} allowedColumns - Allowed columns
+   * @throws {BadRequestException} If field is not selectable
+   */
+  #validateSelectFields(selectFields, allowedColumns) {
+    for (const field of selectFields) {
+      if (!allowedColumns.includes(field)) {
+        throw new BadRequestException(`Column "${field}" is not selectable`);
+      }
+    }
+  }
+
+  /**
+   * Validate sort column is allowed
+   * @param {string} column - Column name
+   * @param {string[]} sortableColumns - Allowed sortable columns
+   * @throws {BadRequestException} If column is not sortable
+   */
+  #validateSortColumn(column, sortableColumns) {
+    if (!sortableColumns.includes(column)) {
+      throw new BadRequestException(`Column "${column}" is not sortable`);
+    }
   }
 }

@@ -12,7 +12,11 @@ import { PaginationQueryBuilder } from "./pagination.query-builder.js";
  * @returns {Promise<import('./pagination.types.jsdoc.js').OffsetPaginatedResponse<any>>}
  */
 export const paginateOffset = async ({ db, logger }, table, config, paginationParams, options = {}) => {
-  const { filters, query, search, select: selectFields, sortBy } = paginationParams;
+  if (!paginationParams) {
+    logger.error("paginationParams is undefined in paginateOffset", { table, config, options });
+    throw new Error("paginationParams is required");
+  }
+  const { filters, query, select: selectFields, sortBy } = paginationParams;
   const { queryBuilder, select: optionsSelect } = options;
 
   /** @type {import('./pagination.types.jsdoc.js').OffsetPaginationQuery} */
@@ -31,7 +35,7 @@ export const paginateOffset = async ({ db, logger }, table, config, paginationPa
     builder.applySelect(selectFields);
   }
 
-  builder.applyFilters(filters).applySearch(search).applySorting(sortBy);
+  builder.applyFilters(filters).applySorting(sortBy);
 
   if (queryBuilder) {
     queryBuilder(builder);
@@ -39,12 +43,16 @@ export const paginateOffset = async ({ db, logger }, table, config, paginationPa
 
   const { entities, itemCount } = await builder.execute({ limit, offset });
 
-  logger.debug(`Found ${itemCount} items`);
+  logger.debug(`Found ${itemCount} items, entities length: ${entities?.length}`);
 
-  return createPaginatedResponse({
+  const response = createPaginatedResponse({
     entities,
     itemCount,
     limit,
     offset,
   });
+
+  logger.debug(`paginateOffset: found ${itemCount} items, returning ${entities.length}`);
+
+  return response;
 };

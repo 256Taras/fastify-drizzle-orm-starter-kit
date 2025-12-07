@@ -21,6 +21,7 @@ import fastifyAuth from "@fastify/auth";
 import { FASTIFY_CORS_CONFIG } from "#configs/index.js";
 import { globalHttpFastify404ErrorHandler, globalHttpFastifyErrorHandler } from "#infra/api/http/fastify-error-handler.js";
 import defaultLogger, { logger } from "#libs/logging/logger.service.js";
+import { paginationPlugin } from "#libs/pagination/index.js";
 import { getDirName } from "#libs/utils/files.js";
 import sharedHealthCheckRouter from "#modules/health-check/router.js";
 
@@ -61,6 +62,8 @@ export class RestApiServer {
     this.#fastify.register(fastifySwaggerUiPlugin, this.#configs.OPENAPI_CONFIG);
     // RequestContext plugin provides context storage across async operations during request/response lifecycle.
     this.#fastify.register(fastifyRequestContextPlugin, { defaultStoreValues: { logger: defaultLogger } });
+    // Register pagination plugin explicitly before autoload to ensure it's available for all routes
+    this.#fastify.register(paginationPlugin);
     // Autoload plugin to load custom plugins from a directory.
     this.#autoLoadPlugins();
     // RateLimit plugin for limiting request rates.
@@ -86,6 +89,14 @@ export class RestApiServer {
     this.#fastify.register(sharedHealthCheckRouter, { prefix: "/api" });
 
     this.#autoLoadRoutes();
+  }
+
+  /**
+   * Gets the Fastify instance (for testing)
+   * @returns {import('@fastify/type-provider-typebox').FastifyInstanceTypebox}
+   */
+  getFastifyInstance() {
+    return this.#fastify;
   }
 
   /**
@@ -133,10 +144,11 @@ export class RestApiServer {
     this.#fastify.register(fastifyAutoLoad, {
       dir: libsPath,
       /**
-       * Filter to match only plugin files
+       * Filter to match only plugin files, but exclude pagination.plugin.js
+       * as it's registered explicitly before autoload
        * @param {string} p
        */
-      matchFilter: (p) => p.endsWith(".plugin.js"),
+      matchFilter: (p) => p.endsWith(".plugin.js") && !p.includes("pagination.plugin.js"),
       options: {
         ...this.#options,
       },
