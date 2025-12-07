@@ -52,6 +52,7 @@ const getSelectableColumns = (config) => {
  * @param {import('./pagination.types.jsdoc.js').PaginationConfig<T>} config - Pagination config
  * @returns {import("@sinclair/typebox").TObject} TypeBox querystring schema
  */
+// eslint-disable-next-line complexity -- Complex dynamic schema generation based on config
 export const generatePaginationQuerySchema = (config) => {
   validatePaginationConfig(config);
 

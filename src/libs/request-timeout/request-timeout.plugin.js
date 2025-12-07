@@ -85,9 +85,22 @@ async function requestTimeoutPlugin(app, options) {
     done(null, payload);
   };
 
+  /**
+   * Handles errors and cleans up resources.
+   * Must call done() to allow error handler to process the error.
+   * @param {import('fastify').FastifyRequest} request
+   * @param {import('fastify').FastifyReply} reply
+   * @param {Error} error
+   * @param {(err?: Error) => void} done
+   */
+  const handleError = (request, reply, error, done) => {
+    performCleanup();
+    done(); // Must call done() to allow error handler to process the error
+  };
+
   app.addHook("onRequest", setupRequestTimeout);
   app.addHook("onSend", cleanupResources);
-  app.addHook("onError", performCleanup);
+  app.addHook("onError", handleError);
 }
 
 // @ts-expect-error - FastifyInstanceExtended is used for JSDoc documentation, but fp() expects base FastifyInstance type. At runtime, the instance will have all extended properties.

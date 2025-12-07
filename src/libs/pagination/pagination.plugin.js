@@ -7,6 +7,7 @@ import fp from "fastify-plugin";
 async function paginationPlugin(fastify) {
   fastify.decorateRequest("pagination", null);
 
+  // eslint-disable-next-line complexity -- Complex pagination query parsing logic
   fastify.addHook("preHandler", async (request) => {
     /** @type {any} */
     const rawQuery = request.query || {};
@@ -49,7 +50,9 @@ async function paginationPlugin(fastify) {
     if (rawQuery.select) {
       select = Array.isArray(rawQuery.select)
         ? rawQuery.select.map(String)
-        : String(rawQuery.select).split(",").map((s) => s.trim());
+        : String(rawQuery.select)
+            .split(",")
+            .map((s) => s.trim());
     }
 
     /** @type {import('./pagination.types.jsdoc.js').PaginationParams} */

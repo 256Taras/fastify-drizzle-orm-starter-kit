@@ -9,4 +9,10 @@ export default defineConfig({
   dialect: "postgresql",
   out: "infra/database/migrations",
   schema: "src/**/*.model.js",
+  migrations: {
+    table: "__drizzle_migrations",
+    schema: "public",
+  },
+  verbose: true,
+  strict: true,
 });

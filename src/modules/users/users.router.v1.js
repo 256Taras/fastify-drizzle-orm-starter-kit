@@ -20,7 +20,7 @@ export default async function usersRouterV1(app) {
     schema: usersSchemas.getList,
 
     async handler(req) {
-      // @ts-expect-error - req.pagination is added by pagination plugin
+      // @ts-expect-error - pagination is added by paginationPlugin decorator
       return usersService.findAll(req.pagination);
     },
   });

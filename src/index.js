@@ -80,6 +80,7 @@ class Application {
     try {
       // Initialize database
       this.#database = new DatabaseManager({ configs });
+      await this.#database.initialize();
 
       // Initialize REST API
       this.#restApi = new RestApiServer({

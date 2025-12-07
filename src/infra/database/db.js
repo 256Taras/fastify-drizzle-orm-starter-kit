@@ -29,19 +29,6 @@ export class DatabaseManager {
     this.drizzle = drizzle(this.postgres, {
       logger: APP_CONFIG?.isEnabledDbLogging ? databaseLogger : false,
     });
-
-    // @ts-ignore
-    return this.testConnection()
-      .then(() => {
-        logger.info("Database connection established successfully.");
-        this.isInitialized = true;
-        Object.freeze(this);
-        return this;
-      })
-      .catch((error) => {
-        logger.error(error.message);
-        return this;
-      });
   }
 
   /**
@@ -71,6 +58,28 @@ export class DatabaseManager {
       throw new Error(`Database error: ${notice.message || "Unknown database error"}`);
     } else {
       logger.warn("Database notice:", notice);
+    }
+  }
+
+  /**
+   * Initializes database connection asynchronously
+   * @returns {Promise<DatabaseManager>}
+   */
+  async initialize() {
+    if (this.isInitialized) {
+      return this;
+    }
+
+    try {
+      await this.testConnection();
+      logger.info("Database connection established successfully.");
+      this.isInitialized = true;
+      Object.freeze(this);
+      return this;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error(`Database initialization failed: ${errorMessage}`);
+      throw error;
     }
   }
 

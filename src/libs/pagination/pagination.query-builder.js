@@ -50,6 +50,7 @@ export class PaginationQueryBuilder {
    * @param {Record<string, string | string[]>} [filters] - Filter params (can be string or array of strings)
    * @returns {PaginationQueryBuilder}
    */
+  // eslint-disable-next-line complexity -- Complex filter application logic with multiple operators
   applyFilters(filters) {
     if (!filters || Object.keys(filters).length === 0) return this;
 
@@ -430,11 +431,13 @@ export class PaginationQueryBuilder {
         return { operator: "$eq", value };
       }
       // TypeScript type narrowing after includes check
-      const op = /** @type {import('./pagination.types.jsdoc.js').FilterOperator} */ (operator);
+      const op = /** @type {import('./pagination.types.jsdoc.js').FilterOperator} */ operator;
       if (op === "$in" || op === "$notIn") {
         return { operator: op, value: val.split(",") };
       }
-      return { operator: op, value: val };
+      // TypeScript doesn't narrow the type after if check, so we need explicit cast
+      const finalOp = /** @type {import('./pagination.types.jsdoc.js').FilterOperator} */ (op);
+      return { operator: finalOp, value: val };
     }
 
     if (value.startsWith("$")) {

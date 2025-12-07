@@ -13,17 +13,18 @@ export const USERS_PAGINATION_CONFIG = {
   excludeColumns: ["password"],
   // Filterable columns with allowed operators per column
   // Supports both simple columns and nested fields (e.g., 'student.email', 'course.id')
+  // @ts-expect-error - TypeScript doesn't infer FilterOperator[] from type assertions, but runtime values are correct
   filterableColumns: {
     // Email can be filtered with equality, case-insensitive search, or in array
     email: [
-      /** @type {import('#libs/pagination/pagination.types.jsdoc.js').FilterOperator} */ (FILTER_OPERATORS.eq),
-      /** @type {import('#libs/pagination/pagination.types.jsdoc.js').FilterOperator} */ (FILTER_OPERATORS.ilike),
-      /** @type {import('#libs/pagination/pagination.types.jsdoc.js').FilterOperator} */ (FILTER_OPERATORS.in),
+      /** @type {import('#libs/pagination/pagination.types.jsdoc.js').FilterOperator} */ FILTER_OPERATORS.eq,
+      /** @type {import('#libs/pagination/pagination.types.jsdoc.js').FilterOperator} */ FILTER_OPERATORS.ilike,
+      /** @type {import('#libs/pagination/pagination.types.jsdoc.js').FilterOperator} */ FILTER_OPERATORS.in,
     ],
     // Role can only be filtered with equality or in array (no partial search)
     role: [
-      /** @type {import('#libs/pagination/pagination.types.jsdoc.js').FilterOperator} */ (FILTER_OPERATORS.eq),
-      /** @type {import('#libs/pagination/pagination.types.jsdoc.js').FilterOperator} */ (FILTER_OPERATORS.in),
+      /** @type {import('#libs/pagination/pagination.types.jsdoc.js').FilterOperator} */ FILTER_OPERATORS.eq,
+      /** @type {import('#libs/pagination/pagination.types.jsdoc.js').FilterOperator} */ FILTER_OPERATORS.in,
     ],
     // Example of nested field filtering (if you had relations):
     // 'student.email': [FILTER_OPERATORS.ilike],
