@@ -23,11 +23,27 @@ const FILTER_OPERATORS = {
 const DEFAULT_OPERATORS = ["$eq", "$gt", "$gte", "$lt", "$lte", "$in", "$notIn", "$ilike"];
 
 /**
+ * Operators that expect array values
+ */
+const ARRAY_OPERATORS = new Set(["$in", "$notIn"]);
+
+/**
+ * Legacy operator prefix for backward compatibility
+ */
+const LEGACY_OPERATOR_PREFIX = "$";
+
+/**
  * Query builder class for chainable API
+ * @template {any} TTable - Drizzle table type
+ * @template {'offset' | 'cursor'} [TStrategy='offset'] - Pagination strategy type
  */
 export class PaginationQueryBuilder {
-  /** @type {import('./pagination.types.jsdoc.js').PaginationConfig<any>} */
+  /** @type {import('./pagination.types.jsdoc.js').PaginationConfig<TTable, TStrategy>} */
   #config;
+
+  /**
+   * @typedef {import('./pagination.types.jsdoc.js').PaginationStrategy} PaginationStrategy
+   */
 
   /** @type {any} */
   #db;
@@ -47,7 +63,7 @@ export class PaginationQueryBuilder {
   /** @type {Record<string, any> | undefined} */
   #selectColumns;
 
-  /** @type {any} */
+  /** @type {TTable} */
   #table;
 
   /** @type {import("drizzle-orm").SQL[]} */
@@ -55,8 +71,8 @@ export class PaginationQueryBuilder {
 
   /**
    * @param {any} db - Drizzle database instance
-   * @param {any} table - Table to query
-   * @param {import('./pagination.types.jsdoc.js').PaginationConfig<any>} config - Pagination config
+   * @param {TTable} table - Table to query
+   * @param {import('./pagination.types.jsdoc.js').PaginationConfig<TTable, TStrategy>} config - Pagination config
    */
   constructor(db, table, config) {
     this.#db = db;
@@ -68,7 +84,7 @@ export class PaginationQueryBuilder {
   /**
    * Apply filters from query params (protected by config)
    * @param {Record<string, string | string[]>} [filters] - Filter params (can be string or array of strings)
-   * @returns {PaginationQueryBuilder}
+   * @returns {this}
    */
   applyFilters(filters) {
     if (!filters || Object.keys(filters).length === 0) return this;
@@ -93,10 +109,10 @@ export class PaginationQueryBuilder {
   /**
    * Apply select from querystring (protected by config)
    * @param {string[]} [selectFields] - Fields to select from querystring
-   * @returns {PaginationQueryBuilder}
+   * @returns {this}
    */
   applySelect(selectFields) {
-    if (!selectFields || selectFields.length === 0) return this;
+    if (!selectFields?.length) return this;
 
     const allowedColumns = this.#getAllowedSelectColumns();
     if (allowedColumns.length === 0) return this;
@@ -114,11 +130,10 @@ export class PaginationQueryBuilder {
   /**
    * Apply sorting (protected by config)
    * @param {string[]} [sortBy] - Sort params
-   * @returns {PaginationQueryBuilder}
+   * @returns {this}
    */
   applySorting(sortBy) {
     const { defaultSortBy, sortableColumns } = this.#config;
-
     const sortParams = this.#resolveSortParams(sortBy, defaultSortBy);
 
     for (const { column, direction } of sortParams) {
@@ -155,14 +170,14 @@ export class PaginationQueryBuilder {
       return { entities, itemCount };
     } catch (error) {
       this.#handleDatabaseError(error);
-      throw error; // Re-throw after handling
+      throw error;
     }
   }
 
   /**
    * Add GROUP BY
    * @param {...import("drizzle-orm").Column} columns - Columns to group by
-   * @returns {PaginationQueryBuilder}
+   * @returns {this}
    */
   groupBy(...columns) {
     this.#groupByColumns.push(...columns);
@@ -172,7 +187,7 @@ export class PaginationQueryBuilder {
   /**
    * Add HAVING condition
    * @param {import("drizzle-orm").SQL} condition - Having condition
-   * @returns {PaginationQueryBuilder}
+   * @returns {this}
    */
   having(condition) {
     if (condition) {
@@ -185,7 +200,7 @@ export class PaginationQueryBuilder {
    * Add INNER JOIN
    * @param {any} table - Table to join
    * @param {import("drizzle-orm").SQL} condition - Join condition
-   * @returns {PaginationQueryBuilder}
+   * @returns {this}
    */
   innerJoin(table, condition) {
     this.#joinClauses.push({ condition, table, type: "inner" });
@@ -196,7 +211,7 @@ export class PaginationQueryBuilder {
    * Add LEFT JOIN
    * @param {any} table - Table to join
    * @param {import("drizzle-orm").SQL} condition - Join condition
-   * @returns {PaginationQueryBuilder}
+   * @returns {this}
    */
   leftJoin(table, condition) {
     this.#joinClauses.push({ condition, table, type: "left" });
@@ -206,7 +221,7 @@ export class PaginationQueryBuilder {
   /**
    * Set select columns
    * @param {Record<string, any>} columns - Columns to select
-   * @returns {PaginationQueryBuilder}
+   * @returns {this}
    */
   select(columns) {
     this.#selectColumns = columns;
@@ -216,7 +231,7 @@ export class PaginationQueryBuilder {
   /**
    * Add WHERE condition
    * @param {import("drizzle-orm").SQL} condition - SQL condition
-   * @returns {PaginationQueryBuilder}
+   * @returns {this}
    */
   where(condition) {
     if (condition) {
@@ -241,12 +256,10 @@ export class PaginationQueryBuilder {
    * @param {import("drizzle-orm").SQL[]} conditions - Filter conditions
    */
   #applyFilterConditions(conditions) {
-    if (conditions.length === 1) {
-      this.where(conditions[0]);
-    } else if (conditions.length > 1) {
-      // @ts-expect-error - TypeScript doesn't understand that conditions only contains valid SQL
-      this.where(or(...conditions));
-    }
+    if (conditions.length === 0) return;
+
+    // @ts-expect-error - TypeScript doesn't understand that conditions only contains valid SQL
+    this.where(conditions.length === 1 ? conditions[0] : or(...conditions));
   }
 
   /**
@@ -266,20 +279,16 @@ export class PaginationQueryBuilder {
    * @returns {any} Count query builder
    */
   #buildCountQuery() {
-    let query = this.#db.select({ itemCount: count() }).from(this.#table);
-
-    query = this.#applyJoins(query);
-
-    if (this.#whereConditions.length > 0) {
-      const combinedCondition = this.#combineConditions(this.#whereConditions);
-      if (combinedCondition) {
-        query = query.where(combinedCondition);
-      }
-    }
-
-    // Handle GROUP BY with subquery
     if (this.#groupByColumns.length > 0) {
       return this.#buildGroupedCountQuery();
+    }
+
+    let query = this.#db.select({ itemCount: count() }).from(this.#table);
+    query = this.#applyJoins(query);
+
+    const whereCondition = this.#combineConditions(this.#whereConditions);
+    if (whereCondition) {
+      query = query.where(whereCondition);
     }
 
     return query;
@@ -295,18 +304,12 @@ export class PaginationQueryBuilder {
    */
   #buildFilterConditions(column, columnName, filterValue, allowedOperators) {
     const filterValues = Array.isArray(filterValue) ? filterValue : [filterValue];
-    /** @type {import("drizzle-orm").SQL[]} */
-    const conditions = [];
 
-    for (const value of filterValues) {
+    return filterValues.map((value) => {
       const { operator, value: parsedValue } = this.#parseFilterValue(value);
       this.#validateOperator(operator, columnName, allowedOperators);
-
-      const condition = this.#createFilterCondition(column, operator, parsedValue);
-      conditions.push(condition);
-    }
-
-    return conditions;
+      return this.#createFilterCondition(column, operator, parsedValue);
+    });
   }
 
   /**
@@ -314,24 +317,19 @@ export class PaginationQueryBuilder {
    * @returns {any} Grouped count query
    */
   #buildGroupedCountQuery() {
-    const subquery = this.#db.select({ id: this.#table.id }).from(this.#table);
+    // @ts-expect-error - table structure is dynamic, id column may not exist in type but exists at runtime
+    let subquery = this.#db.select({ id: this.#table.id }).from(this.#table);
 
-    for (const { condition, table, type } of this.#joinClauses) {
-      if (type === "left") {
-        subquery.leftJoin(table, condition);
-      } else {
-        subquery.innerJoin(table, condition);
-      }
-    }
+    subquery = this.#applyJoins(subquery);
 
     if (this.#whereConditions.length > 0) {
-      subquery.where(and(...this.#whereConditions));
+      subquery = subquery.where(and(...this.#whereConditions));
     }
 
-    subquery.groupBy(...this.#groupByColumns);
+    subquery = subquery.groupBy(...this.#groupByColumns);
 
     if (this.#havingConditions.length > 0) {
-      subquery.having(and(...this.#havingConditions));
+      subquery = subquery.having(and(...this.#havingConditions));
     }
 
     return this.#db.select({ itemCount: count() }).from(subquery.as("grouped"));
@@ -346,22 +344,18 @@ export class PaginationQueryBuilder {
 
     query = this.#applyJoins(query);
 
-    if (this.#whereConditions.length > 0) {
-      const combinedCondition = this.#combineConditions(this.#whereConditions);
-      if (combinedCondition) {
-        query = query.where(combinedCondition);
-      }
+    const whereCondition = this.#combineConditions(this.#whereConditions);
+    if (whereCondition) {
+      query = query.where(whereCondition);
     }
 
     if (this.#groupByColumns.length > 0) {
       query = query.groupBy(...this.#groupByColumns);
     }
 
-    if (this.#havingConditions.length > 0) {
-      const combinedCondition = this.#combineConditions(this.#havingConditions);
-      if (combinedCondition) {
-        query = query.having(combinedCondition);
-      }
+    const havingCondition = this.#combineConditions(this.#havingConditions);
+    if (havingCondition) {
+      query = query.having(havingCondition);
     }
 
     return query;
@@ -373,15 +367,14 @@ export class PaginationQueryBuilder {
    * @returns {Record<string, any>} Select object
    */
   #buildSelectObject(selectFields) {
-    const selectObject = {};
-    for (const field of selectFields) {
+    return selectFields.reduce((acc, field) => {
       // eslint-disable-next-line security/detect-object-injection
       const column = this.#table[field];
       if (column) {
-        selectObject[field] = column;
+        acc[field] = column;
       }
-    }
-    return selectObject;
+      return acc;
+    }, {});
   }
 
   /**
@@ -391,8 +384,7 @@ export class PaginationQueryBuilder {
    */
   #combineConditions(conditions) {
     if (conditions.length === 0) return;
-    if (conditions.length === 1) return conditions[0];
-    return and(...conditions);
+    return conditions.length === 1 ? conditions[0] : and(...conditions);
   }
 
   /**
@@ -403,12 +395,10 @@ export class PaginationQueryBuilder {
    * @returns {import("drizzle-orm").SQL} SQL condition
    */
   #createFilterCondition(column, operator, value) {
-    // Special handling for $ilike - wrap value with %
     if (operator === "$ilike") {
       return ilike(column, `%${value}%`);
     }
 
-    // Use operator map for other operators
     const operatorFn = FILTER_OPERATORS[operator];
     if (!operatorFn) {
       throw new BadRequestException(`Unknown filter operator: ${operator}`);
@@ -424,6 +414,7 @@ export class PaginationQueryBuilder {
    */
   #extractEnumValues() {
     try {
+      // @ts-expect-error - createSelectSchema accepts any table type at runtime
       const baseSchema = createSelectSchema(this.#config.table);
       const baseProperties = baseSchema.properties || {};
 
@@ -433,15 +424,16 @@ export class PaginationQueryBuilder {
         }
 
         if (columnProperty.anyOf && Array.isArray(columnProperty.anyOf)) {
-          const enumValues = [];
-          for (const option of columnProperty.anyOf) {
+          const enumValues = columnProperty.anyOf.reduce((acc, option) => {
             if (option.enum && Array.isArray(option.enum)) {
               return option.enum;
             }
             if (option.const !== undefined) {
-              enumValues.push(option.const);
+              acc.push(option.const);
             }
-          }
+            return acc;
+          }, []);
+
           if (enumValues.length > 0) return enumValues;
         }
       }
@@ -464,8 +456,8 @@ export class PaginationQueryBuilder {
     }
 
     if (excludeColumns.length > 0) {
-      const allColumns = Object.keys(this.#table);
-      return allColumns.filter((col) => !excludeColumns.includes(col));
+      // @ts-expect-error - table is an object at runtime, Object.keys works
+      return Object.keys(this.#table).filter((col) => !excludeColumns.includes(col));
     }
 
     return [];
@@ -478,13 +470,12 @@ export class PaginationQueryBuilder {
    */
   #handleDatabaseError(error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-
     const cause = /** @type {any} */ error?.cause || error;
     const causeMessage = cause instanceof Error ? cause.message : String(cause);
+    const fullMessage = `${errorMessage} ${causeMessage}`;
 
     // PostgreSQL enum validation error (code 22P02)
-    if (errorMessage.includes("invalid input value for enum") || causeMessage.includes("invalid input value for enum")) {
-      const fullMessage = errorMessage + " " + causeMessage;
+    if (fullMessage.includes("invalid input value for enum")) {
       const enumMatch = fullMessage.match(/invalid input value for enum (\w+): "([^"]+)"/);
 
       if (enumMatch) {
@@ -527,26 +518,23 @@ export class PaginationQueryBuilder {
     if (operatorMatch) {
       const [, operator, val] = operatorMatch;
 
-      // Validate operator
+      // Validate operator exists
       if (!Object.keys(FILTER_OPERATORS).includes(operator)) {
-        return /** @type {import('./pagination.types.jsdoc.js').ParsedFilterValue} */ { operator: "$eq", value };
+        return { operator: "$eq", value };
       }
 
       const op = /** @type {import('./pagination.types.jsdoc.js').FilterOperator} */ operator;
 
       // Parse array values for $in and $notIn
-      if (op === "$in" || op === "$notIn") {
-        return /** @type {import('./pagination.types.jsdoc.js').ParsedFilterValue} */ {
-          operator: op,
-          value: val.split(","),
-        };
+      if (ARRAY_OPERATORS.has(op)) {
+        return { operator: op, value: val.split(",") };
       }
 
-      return /** @type {import('./pagination.types.jsdoc.js').ParsedFilterValue} */ { operator: op, value: val };
+      return { operator: op, value: val };
     }
 
     // Legacy support: $value → $ilike:value
-    if (value.startsWith("$")) {
+    if (value.startsWith(LEGACY_OPERATOR_PREFIX)) {
       return { operator: "$ilike", value: value.slice(1) };
     }
 
@@ -574,11 +562,11 @@ export class PaginationQueryBuilder {
    * @returns {import('./pagination.types.jsdoc.js').SortParam[]} Resolved sort params
    */
   #resolveSortParams(sortBy, defaultSortBy) {
-    if (sortBy && sortBy.length > 0) {
-      return sortBy.map(this.#parseSortParam.bind(this));
+    if (sortBy?.length > 0) {
+      return sortBy.map((param) => this.#parseSortParam(param));
     }
 
-    if (defaultSortBy && defaultSortBy.length > 0) {
+    if (defaultSortBy?.length > 0) {
       return defaultSortBy.map(([column, direction]) => ({ column, direction }));
     }
 

@@ -35,6 +35,7 @@
  * @typedef {import("./fastify/plugin.jsdoc.js").FastifyPluginAsyncTypeboxExtended} FastifyPluginTypebox
  */
 
+
 /**
  * Fastify request with typed querystring
  * @template {import('@sinclair/typebox').TSchema} TQuery
@@ -52,6 +53,13 @@
  * @template {import('@sinclair/typebox').TSchema} TQuery
  * @template {import('@sinclair/typebox').TSchema} TBody
  * @typedef {import("./fastify/request.jsdoc.js").FastifyRequestWithQueryAndBody<TQuery, TBody>} FastifyRequestQueryBody
+ */
+
+/**
+ * Extended FastifyRequest with pagination property
+ * Automatically includes pagination in all route handlers when paginationPlugin is registered
+ * @template {import('fastify').RouteGenericInterface} [TRouteGeneric=import('fastify').RouteGenericInterface]
+ * @typedef {import("./fastify/request.jsdoc.js").FastifyRequestExtended<TRouteGeneric>} FastifyRequestExtended
  */
 
 // ============================================================================

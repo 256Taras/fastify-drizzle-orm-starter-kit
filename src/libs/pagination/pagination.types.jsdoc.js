@@ -7,9 +7,10 @@
  */
 
 /**
- * @template T
+ * @template {any} TTable - Drizzle table type
+ * @template {'offset' | 'cursor'} [TStrategy='offset'] - Pagination strategy type
  * @typedef {object} PaginationConfig
- * @property {T} table - Drizzle table
+ * @property {TTable} table - Drizzle table instance
  * @property {string[]} sortableColumns - Columns that can be sorted
  * @property {string[] | Record<string, FilterOperator[]>} [filterableColumns] - Columns that can be filtered. Can be array of column names or object mapping column names to allowed operators. Enum values are automatically extracted from table schema.
  * @property {string[]} [selectableColumns] - Columns that can be selected (mutually exclusive with excludeColumns)
@@ -18,7 +19,7 @@
  * @property {number} [defaultLimit=10] - Default items per page
  * @property {number} [maxLimit=100] - Maximum items per page
  * @property {Array<[string, 'ASC' | 'DESC']>} [defaultSortBy] - Default sorting
- * @property {PaginationStrategy} [strategy='offset'] - Pagination strategy
+ * @property {TStrategy} [strategy='offset'] - Pagination strategy
  * @property {string} [cursorColumn='id'] - Column to use for cursor (cursor strategy only)
  */
 
@@ -56,22 +57,30 @@
  */
 
 /**
- * @template T
+ * @template {any} TItem - Item type in the response
  * @typedef {object} OffsetPaginatedResponse
- * @property {T[]} data - Array of items
+ * @property {TItem[]} data - Array of items
  * @property {OffsetPaginationMeta} meta - Pagination metadata
  */
 
 /**
- * @template T
+ * @template {any} TItem - Item type in the response
  * @typedef {object} CursorPaginatedResponse
- * @property {T[]} data - Array of items
+ * @property {TItem[]} data - Array of items
  * @property {CursorPaginationMeta} meta - Pagination metadata
  */
 
 /**
+ * Union type for paginated response (depends on strategy)
+ * @template {any} TItem - Item type in the response
+ * @template {'offset' | 'cursor'} [TStrategy='offset'] - Pagination strategy
+ * @typedef {TStrategy extends 'offset' ? OffsetPaginatedResponse<TItem> : TStrategy extends 'cursor' ? CursorPaginatedResponse<TItem> : OffsetPaginatedResponse<TItem> | CursorPaginatedResponse<TItem>} PaginatedResponse
+ */
+
+/**
+ * @template {'offset' | 'cursor'} [TStrategy='offset'] - Pagination strategy
  * @typedef {object} PaginationParams
- * @property {OffsetPaginationQuery | CursorPaginationQuery} query - Pagination query
+ * @property {TStrategy extends 'offset' ? OffsetPaginationQuery : TStrategy extends 'cursor' ? CursorPaginationQuery : OffsetPaginationQuery | CursorPaginationQuery} query - Pagination query (type depends on strategy)
  * @property {Record<string, string | string[]>} [filters] - Filter parameters (can be string or array of strings)
  * @property {string[]} [sortBy] - Sort parameters
  * @property {string[]} [select] - Fields to select from querystring

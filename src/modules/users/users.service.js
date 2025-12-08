@@ -19,29 +19,8 @@ const findOneById = async ({ db, logger }, id) => {
 };
 
 /** @type {FindAll} */
-const findAll = async ({ logger, paginationService }, paginationParams) => {
-  // paginationService.paginate uses partial, so it returns a function
-  // partial(paginate, [deps]) creates: (config, paginationParams, options) => Promise
-  // When we call paginate(config, params), it returns a function that takes options
-  // We need to call it with undefined for options: paginate(config, params)(undefined)
-  const result = await paginationService.paginate(USERS_PAGINATION_CONFIG, paginationParams);
-  logger.debug(
-    "findAll result:",
-    JSON.stringify(
-      {
-        hasData: !!result?.data,
-        dataLength: result?.data?.length,
-        hasMeta: !!result?.meta,
-        result: result ? "exists" : "null",
-      },
-      null,
-      2,
-    ),
-  );
-  if (!result) {
-    logger.error("findAll returned null/undefined!");
-  }
-  return result;
+const findAll = async ({ paginationService }, paginationParams) => {
+  return paginationService.paginate(USERS_PAGINATION_CONFIG, paginationParams);
 };
 
 /**

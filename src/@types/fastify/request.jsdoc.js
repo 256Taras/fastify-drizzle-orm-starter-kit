@@ -33,8 +33,18 @@
 /**
  * Fastify request with pagination property
  * @typedef {import('fastify').FastifyRequest & {
- *   pagination: import('#libs/pagination/pagination.types.jsdoc.js').PaginationParams
+ *   pagination: import('#libs/pagination/pagination.types.jsdoc.js').PaginationParams | undefined
  * }} FastifyRequestWithPagination
+ */
+
+/**
+ * Extended FastifyRequest that always includes pagination property
+ * This type extends the base FastifyRequest to include pagination
+ * Use this type in route handlers when paginationPlugin is registered
+ * @template {import('fastify').RouteGenericInterface} [TRouteGeneric=import('fastify').RouteGenericInterface]
+ * @typedef {import('fastify').FastifyRequest<TRouteGeneric> & {
+ *   pagination: import('#libs/pagination/pagination.types.jsdoc.js').PaginationParams | undefined
+ * }} FastifyRequestExtended
  */
 
 export {};

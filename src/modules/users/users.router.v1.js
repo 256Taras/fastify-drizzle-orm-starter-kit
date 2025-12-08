@@ -20,13 +20,8 @@ export default async function usersRouterV1(app) {
     schema: usersSchemas.getList,
 
     async handler(req) {
-      // @ts-expect-error - pagination is added by paginationPlugin decorator
-      // usersService.findAll uses partial, so it already has deps bound and takes paginationParams
-      // partial(findAll, [deps]) creates a function that takes (paginationParams) and returns Promise
-      const { pagination } = req;
-      if (!pagination) {
-        throw new Error("req.pagination is undefined - pagination plugin may not be registered");
-      }
+      const pagination = app.transformers.getPaginationQuery(req);
+
       const result = await usersService.findAll(pagination);
       return result;
     },

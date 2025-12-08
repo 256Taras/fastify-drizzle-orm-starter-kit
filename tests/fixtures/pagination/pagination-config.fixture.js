@@ -77,3 +77,4 @@ export const OPTIONAL_COLUMNS_CONFIG = {
     updatedAt: true,
   },
 };
+

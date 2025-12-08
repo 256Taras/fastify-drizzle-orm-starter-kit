@@ -21,5 +21,5 @@ export const USERS_PAGINATION_CONFIG = {
   },
   sortableColumns: ["email", "firstName", "lastName", "createdAt", "updatedAt"],
   // @ts-expect-error - PAGINATION_STRATEGY.offset is a string literal, but TypeScript sees it as string
-  strategy: PAGINATION_STRATEGY.offset,
+  strategy: PAGINATION_STRATEGY.cursor,
 };

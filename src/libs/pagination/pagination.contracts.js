@@ -4,14 +4,14 @@ import { Type } from "@sinclair/typebox";
  * Filter operators for different data types
  */
 export const FILTER_OPERATORS = {
-  eq: "$eq",
-  gt: "$gt",
-  gte: "$gte",
-  ilike: "$ilike",
-  in: "$in",
-  lt: "$lt",
-  lte: "$lte",
-  notIn: "$notIn",
+  $eq: "$eq",
+  $gt: "$gt",
+  $gte: "$gte",
+  $ilike: "$ilike",
+  $in: "$in",
+  $lt: "$lt",
+  $lte: "$lte",
+  $notIn: "$notIn",
 };
 
 /**
@@ -23,7 +23,7 @@ export const PAGINATION_STRATEGY = {
 };
 
 /**
- * Base pagination meta
+ * Base pagination meta fields shared between strategies
  */
 const basePaginationMeta = {
   itemCount: Type.Integer({
@@ -46,14 +46,6 @@ const basePaginationMeta = {
 export const OFFSET_PAGINATION_META_CONTRACT = Type.Object(
   {
     ...basePaginationMeta,
-    hasNextPage: Type.Boolean({
-      description: "Whether there is a next page available",
-      title: "Has Next Page",
-    }),
-    hasPreviousPage: Type.Boolean({
-      description: "Whether there is a previous page available",
-      title: "Has Previous Page",
-    }),
     page: Type.Integer({
       description: "Current page number (1-based)",
       examples: [1, 2, 3],
@@ -66,8 +58,20 @@ export const OFFSET_PAGINATION_META_CONTRACT = Type.Object(
       minimum: 0,
       title: "Page Count",
     }),
+    hasPreviousPage: Type.Boolean({
+      description: "Whether there is a previous page available",
+      title: "Has Previous Page",
+    }),
+    hasNextPage: Type.Boolean({
+      description: "Whether there is a next page available",
+      title: "Has Next Page",
+    }),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: "Metadata for offset-based pagination",
+    title: "Offset Pagination Meta",
+  },
 );
 
 /**
@@ -76,21 +80,6 @@ export const OFFSET_PAGINATION_META_CONTRACT = Type.Object(
 export const CURSOR_PAGINATION_META_CONTRACT = Type.Object(
   {
     ...basePaginationMeta,
-    endCursor: Type.Optional(
-      Type.String({
-        description: "Cursor pointing to the last item in the current page",
-        examples: ["eyJpZCI6IjEyMyJ9"],
-        title: "End Cursor",
-      }),
-    ),
-    hasNextPage: Type.Boolean({
-      description: "Whether there is a next page available",
-      title: "Has Next Page",
-    }),
-    hasPreviousPage: Type.Boolean({
-      description: "Whether there is a previous page available",
-      title: "Has Previous Page",
-    }),
     startCursor: Type.Optional(
       Type.String({
         description: "Cursor pointing to the first item in the current page",
@@ -98,6 +87,25 @@ export const CURSOR_PAGINATION_META_CONTRACT = Type.Object(
         title: "Start Cursor",
       }),
     ),
+    endCursor: Type.Optional(
+      Type.String({
+        description: "Cursor pointing to the last item in the current page",
+        examples: ["eyJpZCI6IjEyMyJ9"],
+        title: "End Cursor",
+      }),
+    ),
+    hasPreviousPage: Type.Boolean({
+      description: "Whether there is a previous page available",
+      title: "Has Previous Page",
+    }),
+    hasNextPage: Type.Boolean({
+      description: "Whether there is a next page available",
+      title: "Has Next Page",
+    }),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: "Metadata for cursor-based pagination",
+    title: "Cursor Pagination Meta",
+  },
 );
