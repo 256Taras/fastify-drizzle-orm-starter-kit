@@ -1,5 +1,7 @@
 import fp from "fastify-plugin";
 
+import { BadRequestException } from "#libs/errors/domain.errors.js";
+
 /**
  * Parse select parameter - supports both comma-separated and multiple params
  * @param {string | string[] | undefined} selectParam - Select parameter
@@ -118,6 +120,20 @@ async function paginationPlugin(fastify) {
   // Decorate app with transformers object containing pagination helper
   fastify.decorate("transformers", {
     getPaginationQuery,
+  });
+
+  // Add preValidation hook to validate mutually exclusive cursors before schema validation
+  fastify.addHook("preValidation", async (request) => {
+    /** @type {Record<string, any>} */
+    const rawQuery = request.query || {};
+
+    // Validate mutually exclusive cursors for cursor pagination
+    const after = typeof rawQuery.after === "string" ? rawQuery.after : undefined;
+    const before = typeof rawQuery.before === "string" ? rawQuery.before : undefined;
+
+    if (after && before) {
+      throw new BadRequestException("Cannot use both 'after' and 'before' cursors simultaneously");
+    }
   });
 
   // Add preHandler hook to parse pagination params

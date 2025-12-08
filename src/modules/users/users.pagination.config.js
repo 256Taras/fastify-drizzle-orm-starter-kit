@@ -8,8 +8,12 @@ import { users } from "./users.model.js";
  */
 export const USERS_PAGINATION_CONFIG = {
   table: users,
+  cursorColumn: "id",
   defaultLimit: 10,
-  defaultSortBy: [["createdAt", "DESC"]],
+  defaultSortBy: [
+    ["createdAt", "DESC"],
+    ["id", "DESC"],
+  ],
   excludeColumns: ["password"],
   filterableColumns: {
     email: ["$eq", "$ilike", "$in"],
@@ -19,7 +23,7 @@ export const USERS_PAGINATION_CONFIG = {
   optionalColumns: {
     deletedAt: true,
   },
-  sortableColumns: ["email", "firstName", "lastName", "createdAt", "updatedAt"],
+  sortableColumns: ["email", "firstName", "lastName", "createdAt", "updatedAt", "id"],
   // @ts-expect-error - PAGINATION_STRATEGY.offset is a string literal, but TypeScript sees it as string
   strategy: PAGINATION_STRATEGY.cursor,
 };

@@ -67,40 +67,23 @@ const applyCursorCondition = (builder, table, cursorColumn, cursor, type) => {
 };
 
 /**
- * Cursor-based pagination service
+ * Build query builder for cursor pagination
  * @template {any} TTable - Drizzle table type
- * @template {any} [TItem=any] - Item type in the response
  * @param {import("#@types/index.jsdoc.js").Dependencies} deps - Dependencies
  * @param {TTable} table - Table to paginate
- * @param {import('./pagination.types.jsdoc.js').PaginationConfig<TTable, 'cursor'>} config - Pagination config (must have strategy 'cursor')
- * @param {import('./pagination.types.jsdoc.js').PaginationParams<'cursor'>} paginationParams - Pagination parameters (must have CursorPaginationQuery)
- * @param {import('./pagination.types.jsdoc.js').PaginationOptions} [options] - Additional options
- * @returns {Promise<import('./pagination.types.jsdoc.js').CursorPaginatedResponse<TItem>>}
+ * @param {import('./pagination.types.jsdoc.js').PaginationConfig<TTable, 'cursor'>} config - Pagination config
+ * @param {import('./pagination.types.jsdoc.js').PaginationParams<'cursor'>} paginationParams - Pagination parameters
+ * @param {import('./pagination.types.jsdoc.js').PaginationOptions} options - Additional options
+ * @param {string} cursorColumn - Cursor column name
+ * @param {string} [after] - After cursor
+ * @param {string} [before] - Before cursor
+ * @returns {import('./pagination.query-builder.js').PaginationQueryBuilder<TTable, 'cursor'>} Configured query builder
  */
-export const paginateCursor = async ({ db, logger }, table, config, paginationParams, options = {}) => {
-  const { filters, query, select: selectFields, sortBy } = paginationParams;
+const buildCursorQuery = (deps, table, config, paginationParams, options, cursorColumn, after, before) => {
+  const { db } = deps;
+  const { filters, select: selectFields, sortBy } = paginationParams;
   const { queryBuilder, select: optionsSelect } = options;
 
-  /** @type {import('./pagination.types.jsdoc.js').CursorPaginationQuery} */
-  const cursorQuery = query;
-  const { after, before, limit: requestedLimit } = cursorQuery;
-
-  // Validate mutually exclusive cursors
-  if (after && before) {
-    throw new BadRequestException("Cannot use both 'after' and 'before' cursors simultaneously");
-  }
-
-  const limit = Math.min(requestedLimit || config.defaultLimit || 10, config.maxLimit || 100);
-  const cursorColumn = config.cursorColumn || "id";
-
-  logger.debug("Cursor pagination started", {
-    after: after || null,
-    before: before || null,
-    cursorColumn,
-    limit,
-  });
-
-  // Build query
   const builder = new PaginationQueryBuilder(db, table, config);
 
   if (optionsSelect) {
@@ -124,6 +107,55 @@ export const paginateCursor = async ({ db, logger }, table, config, paginationPa
     queryBuilder(builder);
   }
 
+  return builder;
+};
+
+/**
+ * Generate cursors from entities
+ * @param {any[]} entities - Entities to generate cursors from
+ * @param {string} cursorColumn - Cursor column name
+ * @returns {{startCursor?: string, endCursor?: string}} Cursors
+ */
+const generateCursors = (entities, cursorColumn) => {
+  if (entities.length === 0) {
+    return { startCursor: undefined, endCursor: undefined };
+  }
+
+  return {
+    endCursor: encodeCursor(entities.at(-1), cursorColumn),
+    startCursor: encodeCursor(entities[0], cursorColumn),
+  };
+};
+
+/**
+ * Cursor-based pagination service
+ * @template {any} TTable - Drizzle table type
+ * @template {any} [TItem=any] - Item type in the response
+ * @param {import("#@types/index.jsdoc.js").Dependencies} deps - Dependencies
+ * @param {TTable} table - Table to paginate
+ * @param {import('./pagination.types.jsdoc.js').PaginationConfig<TTable, 'cursor'>} config - Pagination config (must have strategy 'cursor')
+ * @param {import('./pagination.types.jsdoc.js').PaginationParams<'cursor'>} paginationParams - Pagination parameters (must have CursorPaginationQuery)
+ * @param {import('./pagination.types.jsdoc.js').PaginationOptions} [options] - Additional options
+ * @returns {Promise<import('./pagination.types.jsdoc.js').CursorPaginatedResponse<TItem>>}
+ */
+export const paginateCursor = async ({ db, logger }, table, config, paginationParams, options = {}) => {
+  /** @type {import('./pagination.types.jsdoc.js').CursorPaginationQuery} */
+  const cursorQuery = paginationParams.query;
+  const { after, before, limit: requestedLimit } = cursorQuery;
+
+  // Note: Mutual exclusivity validation is done in pagination.plugin.js preHandler hook
+  const limit = Math.min(requestedLimit || config.defaultLimit || 10, config.maxLimit || 100);
+  const cursorColumn = config.cursorColumn || "id";
+
+  logger.debug("Cursor pagination started", {
+    after: after || null,
+    before: before || null,
+    cursorColumn,
+    limit,
+  });
+
+  const builder = buildCursorQuery({ db, logger }, table, config, paginationParams, options, cursorColumn, after, before);
+
   // Fetch one extra item to determine hasNextPage
   const fetchLimit = limit + 1;
   const { entities: rawEntities, itemCount } = await builder.execute({
@@ -135,9 +167,7 @@ export const paginateCursor = async ({ db, logger }, table, config, paginationPa
   const hasMoreItems = rawEntities.length > limit;
   const entities = hasMoreItems ? rawEntities.slice(0, limit) : rawEntities;
 
-  // Generate cursors
-  const startCursor = entities.length > 0 ? encodeCursor(entities[0], cursorColumn) : undefined;
-  const endCursor = entities.length > 0 ? encodeCursor(entities.at(-1), cursorColumn) : undefined;
+  const { endCursor, startCursor } = generateCursors(entities, cursorColumn);
 
   logger.debug("Cursor pagination completed", {
     entitiesReturned: entities.length,

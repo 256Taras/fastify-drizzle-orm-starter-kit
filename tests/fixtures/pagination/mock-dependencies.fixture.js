@@ -95,4 +95,3 @@ export const MOCK_TABLE = {
   updatedAt: { name: "updated_at" },
   password: { name: "password" },
 };
-

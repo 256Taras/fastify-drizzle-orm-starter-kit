@@ -527,10 +527,10 @@ export class PaginationQueryBuilder {
 
       // Parse array values for $in and $notIn
       if (ARRAY_OPERATORS.has(op)) {
-        return { operator: op, value: val.split(",") };
+        return { operator: /** @type {import('./pagination.types.jsdoc.js').FilterOperator} */ op, value: val.split(",") };
       }
 
-      return { operator: op, value: val };
+      return { operator: /** @type {import('./pagination.types.jsdoc.js').FilterOperator} */ op, value: val };
     }
 
     // Legacy support: $value → $ilike:value
@@ -562,11 +562,11 @@ export class PaginationQueryBuilder {
    * @returns {import('./pagination.types.jsdoc.js').SortParam[]} Resolved sort params
    */
   #resolveSortParams(sortBy, defaultSortBy) {
-    if (sortBy?.length > 0) {
+    if (sortBy && sortBy.length > 0) {
       return sortBy.map((param) => this.#parseSortParam(param));
     }
 
-    if (defaultSortBy?.length > 0) {
+    if (defaultSortBy && defaultSortBy.length > 0) {
       return defaultSortBy.map(([column, direction]) => ({ column, direction }));
     }
 

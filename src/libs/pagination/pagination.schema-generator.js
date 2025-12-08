@@ -12,15 +12,15 @@ import {
  * Documentation for filter operators
  */
 const OPERATOR_DOCS = {
-  $eq: { label: "Equals", example: "value" },
-  $gt: { label: "Greater than", example: "100" },
-  $gte: { label: "Greater or equal", example: "100" },
-  $lt: { label: "Less than", example: "100" },
-  $lte: { label: "Less or equal", example: "100" },
-  $in: { label: "In list", example: "value1,value2" },
-  $notIn: { label: "Not in list", example: "value1,value2" },
-  $ilike: { label: "Case-insensitive like", example: "%value%" },
-  $like: { label: "Like", example: "%value%" },
+  $eq: { description: "Exact match", example: "active", label: "Equals" },
+  $gt: { description: "Value must be greater than provided", example: "100", label: "Greater than" },
+  $gte: { description: "Value must be greater than or equal to provided", example: "100", label: "Greater or equal" },
+  $ilike: { description: "Case-insensitive pattern matching with %", example: "john", label: "Case-insensitive like" },
+  $in: { description: "Value must be in the provided list", example: "active,pending", label: "In list" },
+  $like: { description: "Case-sensitive pattern matching with %", example: "John", label: "Like" },
+  $lt: { description: "Value must be less than provided", example: "100", label: "Less than" },
+  $lte: { description: "Value must be less than or equal to provided", example: "100", label: "Less or equal" },
+  $notIn: { description: "Value must not be in the provided list", example: "inactive,deleted", label: "Not in list" },
 };
 
 /**
@@ -60,6 +60,221 @@ const getSelectableColumns = (config) => {
 
   return [];
 };
+/**
+ * Build cursor description for pagination
+ * @param {'after' | 'before'} type - Cursor type
+ * @returns {string} Formatted description
+ */
+const buildCursorDescription = (type) => {
+  const isAfter = type === "after";
+  const cursorField = isAfter ? "endCursor" : "startCursor";
+  const direction = isAfter ? "next" : "previous";
+  const directionTitle = isAfter ? "Next" : "Previous";
+
+  return [
+    `**Cursor for ${direction} page (${isAfter ? "forward" : "backward"} pagination)**`,
+    "",
+    "### How to use:",
+    "",
+    ...(isAfter
+      ? [
+          "1. **First page** - don't provide `after` or `before` parameters",
+          "   ```",
+          "   GET /v1/users?limit=10",
+          "   ```",
+          "",
+          `2. **${directionTitle} page** - use \`${cursorField}\` from the previous response`,
+        ]
+      : [`**${directionTitle} page** - use \`${cursorField}\` from the previous response`]),
+    "   ```",
+    `   GET /v1/users?limit=10&${type}=<${cursorField}>`,
+    "   ```",
+    `   Where \`<${cursorField}>\` is the value of \`meta.${cursorField}\` from the previous response`,
+    "",
+    "**⚠️ Important:** You cannot use `after` and `before` simultaneously!",
+  ].join("\n");
+};
+/**
+ * Build filter usage examples
+ * @param {string} column - Column name
+ * @param {string[]} operators - Available operators
+ * @param {string[]} enumValues - Enum values if available
+ * @returns {string} Formatted usage examples
+ */
+const buildFilterUsageExamples = (column, operators, enumValues) => {
+  const hasEnum = enumValues.length > 0;
+  const firstValue = hasEnum ? enumValues[0] : "value";
+  const secondValue = hasEnum ? enumValues[1] || enumValues[0] : "value2";
+
+  const examples = [];
+
+  // Build examples based on available operators
+  if (operators.includes("$ilike")) {
+    examples.push({
+      multi: [
+        "**Multiple filters (OR logic):**",
+        "```",
+        `${column}=$ilike:john&${column}=$eq:admin`,
+        "```",
+        "_Returns records matching ANY of the conditions_",
+      ].join("\n"),
+      single: ["**Single filter:**", "```", `${column}=$ilike:john`, "```"].join("\n"),
+    });
+  } else if (operators.includes("$eq") && operators.includes("$in")) {
+    examples.push({
+      multi: [
+        "**Multiple filters (OR logic):**",
+        "```",
+        `${column}=$eq:${firstValue}&${column}=$in:${firstValue},${secondValue}`,
+        "```",
+        "_Returns records matching ANY of the conditions_",
+      ].join("\n"),
+      single: ["**Single filter:**", "```", `${column}=$eq:${firstValue}`, "```"].join("\n"),
+    });
+  } else if (operators.includes("$eq")) {
+    examples.push({
+      single: ["**Example:**", "```", `${column}=$eq:${firstValue}`, "```"].join("\n"),
+    });
+  } else if (operators.includes("$in")) {
+    examples.push({
+      single: ["**Example:**", "```", `${column}=$in:${firstValue},${secondValue}`, "```"].join("\n"),
+    });
+  } else if (operators.length > 0) {
+    const firstOp = operators[0];
+    const doc = OPERATOR_DOCS[firstOp];
+    examples.push({
+      single: ["**Example:**", "```", `${column}=${firstOp}:${doc?.example || "value"}`, "```"].join("\n"),
+    });
+  }
+
+  if (examples.length === 0) return "";
+
+  const parts = ["### Usage", ""];
+  if (examples[0].single) {
+    parts.push(examples[0].single);
+  }
+  if (examples[0].multi) {
+    parts.push("", examples[0].multi);
+  }
+
+  return parts.join("\n");
+};
+
+/**
+ * Build available operations list
+ * @param {string[]} operators - Available operators
+ * @returns {string} Formatted operations list
+ */
+const buildOperationsList = (operators) => {
+  if (operators.length === 0) {
+    return Object.entries(OPERATOR_DOCS)
+      .map(([op, doc]) => `- \`${op}\` - ${doc.label}: ${doc.description}`)
+      .join("\n");
+  }
+
+  return operators
+    .map((op) => {
+      const doc = OPERATOR_DOCS[op];
+      return doc ? `- \`${op}\` - ${doc.label}: ${doc.description}` : `- \`${op}\``;
+    })
+    .join("\n");
+};
+
+/**
+ * Build enum pattern for validation
+ * @param {string[]} enumValues - Enum values
+ * @param {string[]} operators - Available operators
+ * @returns {string | undefined} Regex pattern
+ */
+const buildEnumPattern = (enumValues, operators) => {
+  if (enumValues.length === 0) return;
+
+  const enumPattern = enumValues.map((v) => v.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`)).join("|");
+  const hasEq = operators.includes("$eq");
+  const hasIn = operators.includes("$in");
+
+  if (hasEq && hasIn) {
+    return String.raw`^(\$eq:(${enumPattern})|\$in:(${enumPattern})(,(${enumPattern}))*)$`;
+  }
+  if (hasEq) {
+    return String.raw`^\$eq:(${enumPattern})$`;
+  }
+  if (hasIn) {
+    return String.raw`^\$in:(${enumPattern})(,(${enumPattern}))*$`;
+  }
+
+  return;
+};
+
+/**
+ * Generate filter examples
+ * @param {string[]} operators - Available operators
+ * @param {string[]} enumValues - Enum values if available
+ * @returns {string[]} Example values
+ */
+const generateFilterExamples = (operators, enumValues) => {
+  const examples = [];
+  const hasEnum = enumValues.length > 0;
+  const firstValue = hasEnum ? enumValues[0] : "value";
+  const secondValue = hasEnum ? enumValues[1] || enumValues[0] : "value2";
+
+  if (operators.includes("$eq")) {
+    examples.push(`$eq:${firstValue}`);
+  }
+  if (operators.includes("$in")) {
+    examples.push(`$in:${firstValue},${secondValue}`);
+  }
+  if (operators.includes("$ilike")) {
+    examples.push(hasEnum ? `$ilike:${firstValue}` : `$ilike:john`);
+  }
+  if (operators.includes("$gte")) {
+    examples.push(`$gte:2024-01-01`);
+  }
+  if (operators.includes("$lte")) {
+    examples.push(`$lte:2024-12-31`);
+  }
+  if (operators.includes("$gt")) {
+    examples.push(`$gt:100`);
+  }
+  if (operators.includes("$lt")) {
+    examples.push(`$lt:100`);
+  }
+  if (operators.includes("$notIn")) {
+    examples.push(`$notIn:${firstValue},${secondValue}`);
+  }
+
+  return examples.length > 0 ? examples : ["$eq:value"];
+};
+
+/**
+ * Extract enum values from column property
+ * @param {any} columnProperty - Column property from schema
+ * @returns {string[]} Enum values
+ */
+const extractEnumValues = (columnProperty) => {
+  if (!columnProperty) return [];
+
+  // Check if property has enum values
+  if (columnProperty.enum && Array.isArray(columnProperty.enum)) {
+    return columnProperty.enum;
+  }
+
+  // Check if property has anyOf with const values
+  if (columnProperty.anyOf && Array.isArray(columnProperty.anyOf)) {
+    const enumValues = [];
+    for (const option of columnProperty.anyOf) {
+      if (option.enum && Array.isArray(option.enum)) {
+        return option.enum;
+      }
+      if (option.const !== undefined) {
+        enumValues.push(option.const);
+      }
+    }
+    return enumValues;
+  }
+
+  return [];
+};
 
 /**
  * Generates TypeBox schema for pagination querystring based on config
@@ -94,12 +309,12 @@ export const generatePaginationQuerySchema = (config) => {
       Type.Integer({
         default: defaultLimit,
         description: [
-          "Number of records per page.",
+          "Number of records to return per page.",
           "",
           `**Range:** 1 to ${maxLimit}`,
           `**Default:** ${defaultLimit}`,
           "",
-          "_If provided value exceeds maximum, the maximum value will be applied._",
+          "_If the provided value exceeds the maximum, the maximum value will be applied._",
         ].join("\n"),
         examples: [defaultLimit, 20, 50],
         maximum: maxLimit,
@@ -109,16 +324,22 @@ export const generatePaginationQuerySchema = (config) => {
     ),
   };
 
+  // Add pagination strategy specific fields
   if (strategy === PAGINATION_STRATEGY.offset) {
     schema.page = Type.Optional(
       Type.Integer({
         default: 1,
         description: [
-          "Page number to retrieve.",
+          "Page number to retrieve (1-indexed).",
           "",
           "**Default:** 1",
           "",
-          "_If invalid value is provided, default will be applied._",
+          "### Examples:",
+          "- `page=1` - First page",
+          "- `page=2` - Second page",
+          "- `page=3` - Third page",
+          "",
+          "_If an invalid value is provided, the default will be applied._",
         ].join("\n"),
         examples: [1, 2, 3],
         minimum: 1,
@@ -128,32 +349,23 @@ export const generatePaginationQuerySchema = (config) => {
   } else {
     schema.after = Type.Optional(
       Type.String({
-        description: [
-          "Cursor for forward pagination.",
-          "",
-          "Get items **after** this cursor.",
-          "",
-          "_Cursor is a base64-encoded string._",
-        ].join("\n"),
-        examples: ["eyJpZCI6IjEyMyJ9"],
+        description: buildCursorDescription("after"),
+        // eslint-disable-next-line no-secrets/no-secrets
+        examples: ["eyJpZCI6IjVjYzA5NmE2LTI3OGMtNGE1My1iNGZjLWMwNjRmMDI3M2QyMyJ9"],
         title: "After Cursor",
       }),
     );
     schema.before = Type.Optional(
       Type.String({
-        description: [
-          "Cursor for backward pagination.",
-          "",
-          "Get items **before** this cursor.",
-          "",
-          "_Cursor is a base64-encoded string._",
-        ].join("\n"),
-        examples: ["eyJpZCI6IjEyMyJ9"],
+        description: buildCursorDescription("before"),
+        // eslint-disable-next-line no-secrets/no-secrets
+        examples: ["eyJpZCI6ImVlYTA4MDExLTJlNDQtNDk4Yi05NWRkLWYxZjE3ZmRkMWUzOSJ9"],
         title: "Before Cursor",
       }),
     );
   }
 
+  // Add sorting
   if (sortableColumns.length > 0) {
     const sortPattern = sortableColumns.map((col) => `${col}:(ASC|DESC)`).join("|");
     const sortExamples = sortableColumns.slice(0, 2).map((col) => `${col}:ASC`);
@@ -162,7 +374,7 @@ export const generatePaginationQuerySchema = (config) => {
     schema.sortBy = Type.Optional(
       Type.Array(
         Type.String({
-          description: `Format: \`fieldName:DIRECTION\``,
+          description: "Format: `fieldName:DIRECTION`",
           examples: sortExamples,
           pattern: `^(${sortPattern})$`,
           title: "Sort Field",
@@ -175,15 +387,14 @@ export const generatePaginationQuerySchema = (config) => {
             "",
             "**Single field:**",
             "```",
-            "sortBy=id:DESC",
+            `sortBy=${sortableColumns[0]}:DESC`,
             "```",
             "",
             "**Multiple fields:**",
             "```",
-            "sortBy=id:DESC&sortBy=createdAt:ASC",
+            `sortBy=${sortableColumns[0]}:DESC&sortBy=${sortableColumns[1] || sortableColumns[0]}:ASC`,
             "```",
-            "",
-            "_The order in URL defines the sorting priority._",
+            "_The order in the URL defines the sorting priority._",
             "",
             "### Available Fields",
             "",
@@ -191,8 +402,8 @@ export const generatePaginationQuerySchema = (config) => {
             "",
             "### Directions",
             "",
-            "- `ASC` - Ascending order",
-            "- `DESC` - Descending order",
+            "- `ASC` - Ascending order (A-Z, 0-9, oldest first)",
+            "- `DESC` - Descending order (Z-A, 9-0, newest first)",
           ].join("\n"),
           examples: [sortExamples],
           title: "Sort By",
@@ -201,218 +412,65 @@ export const generatePaginationQuerySchema = (config) => {
     );
   }
 
+  // Add filtering
   if (filterableColumnsObj && Object.keys(filterableColumnsObj).length > 0) {
-    // Extract enum values from table schema using createSelectSchema
     // @ts-expect-error - table is generic type, but createSelectSchema works at runtime
     const baseSchema = createSelectSchema(config.table);
     const baseProperties = baseSchema.properties || {};
 
     for (const [column, allowedOperators] of Object.entries(filterableColumnsObj)) {
-      const operatorsArray = Array.isArray(allowedOperators) ? allowedOperators : [];
+      const operators = Array.isArray(allowedOperators) ? allowedOperators : [];
+      const enumValues = extractEnumValues(baseProperties[column]);
+      const examples = generateFilterExamples(operators, enumValues);
 
-      // Extract enum values from base schema if column exists
-      let enumValues = [];
-      const columnProperty = baseProperties[column];
-      if (columnProperty) {
-        // Check if property has enum values (from createSelectSchema for pgEnum columns)
-        if (columnProperty.enum && Array.isArray(columnProperty.enum)) {
-          enumValues = columnProperty.enum;
-        }
-        // Check if property has anyOf with const values (Union type from createSelectSchema for pgEnum)
-        // createSelectSchema generates anyOf with const values for enum columns
-        if (columnProperty.anyOf && Array.isArray(columnProperty.anyOf)) {
-          for (const option of columnProperty.anyOf) {
-            // Check for enum array
-            if (option.enum && Array.isArray(option.enum)) {
-              enumValues = option.enum;
-              break;
-            }
-            // Check for const values (createSelectSchema generates const for pgEnum)
-            if (option.const !== undefined) {
-              enumValues.push(option.const);
-            }
-          }
-        }
-      }
-
-      // Generate examples based on available operators and enum values
-      const examples = [];
-      if (enumValues.length > 0) {
-        // Use actual enum values in examples
-        const firstEnumValue = enumValues[0];
-        const secondEnumValue = enumValues[1] || enumValues[0];
-
-        if (operatorsArray.includes("$eq")) {
-          examples.push(`$eq:${firstEnumValue}`);
-        }
-        if (operatorsArray.includes("$in")) {
-          examples.push(`$in:${firstEnumValue},${secondEnumValue}`);
-        }
-        if (operatorsArray.includes("$ilike") || operatorsArray.includes("$like")) {
-          examples.push(`$ilike:%${firstEnumValue}%`);
-        }
-      } else {
-        // Fallback to generic examples if no enum values
-        if (operatorsArray.includes("$eq")) {
-          examples.push(`$eq:value`);
-        }
-        if (operatorsArray.includes("$ilike") || operatorsArray.includes("$like")) {
-          examples.push(`$ilike:%value%`, `$ilike:John`);
-        }
-        if (operatorsArray.includes("$in")) {
-          examples.push(`$in:value1,value2`);
-        }
-      }
-
-      if (operatorsArray.includes("$gte")) {
-        examples.push(`$gte:2024-01-01`);
-      }
-      if (operatorsArray.includes("$lte")) {
-        examples.push(`$lte:2024-12-31`);
-      }
-      if (operatorsArray.includes("$gt")) {
-        examples.push(`$gt:100`);
-      }
-      if (operatorsArray.includes("$lt")) {
-        examples.push(`$lt:100`);
-      }
-      if (operatorsArray.includes("$notIn")) {
-        examples.push(`$notIn:value1,value2`);
-      }
-
-      // Generate available operations list with descriptions
-      const availableOperations =
-        operatorsArray.length > 0
-          ? operatorsArray
-              .map((op) => {
-                const doc = OPERATOR_DOCS[op];
-                return doc ? `- \`${op}\` - ${doc.label}` : `- \`${op}\``;
-              })
-              .join("\n")
-          : Object.entries(OPERATOR_DOCS)
-              .map(([op, doc]) => `- \`${op}\` - ${doc.label}`)
-              .join("\n");
-
-      // Generate example text based on available operators and enum values
-      let usageExample = "";
-      if (enumValues.length > 0) {
-        const firstEnumValue = enumValues[0];
-        const secondEnumValue = enumValues[1] || enumValues[0];
-        if (operatorsArray.includes("$eq") && operatorsArray.includes("$in")) {
-          usageExample = [
-            "**Single filter:**",
-            "```",
-            `filter.${column}=$eq:${firstEnumValue}`,
-            "```",
-            "",
-            "**Multiple filters:**",
-            "```",
-            `filter.${column}=$eq:${firstEnumValue}&filter.${column}=$in:${firstEnumValue},${secondEnumValue}`,
-            "```",
-          ].join("\n");
-        } else if (operatorsArray.includes("$eq")) {
-          usageExample = ["**Example:**", "```", `filter.${column}=$eq:${firstEnumValue}`, "```"].join("\n");
-        } else if (operatorsArray.includes("$in")) {
-          usageExample = ["**Example:**", "```", `filter.${column}=$in:${firstEnumValue},${secondEnumValue}`, "```"].join(
-            "\n",
-          );
-        }
-      } else {
-        if (operatorsArray.includes("$ilike") || operatorsArray.includes("$like")) {
-          usageExample = [
-            "**Single filter:**",
-            "```",
-            `filter.${column}=$ilike:%John%`,
-            "```",
-            "",
-            "**Multiple filters:**",
-            "```",
-            `filter.${column}=$ilike:%John%&filter.${column}=$eq:value`,
-            "```",
-          ].join("\n");
-        } else if (operatorsArray.includes("$eq") && operatorsArray.includes("$in")) {
-          usageExample = [
-            "**Single filter:**",
-            "```",
-            `filter.${column}=$eq:value`,
-            "```",
-            "",
-            "**Multiple filters:**",
-            "```",
-            `filter.${column}=$eq:value&filter.${column}=$in:value1,value2`,
-            "```",
-          ].join("\n");
-        } else if (operatorsArray.includes("$eq")) {
-          usageExample = ["**Example:**", "```", `filter.${column}=$eq:value`, "```"].join("\n");
-        } else if (operatorsArray.length > 0) {
-          const firstOp = operatorsArray[0];
-          const doc = OPERATOR_DOCS[firstOp];
-          usageExample = ["**Example:**", "```", `filter.${column}=${firstOp}:${doc?.example || "value"}`, "```"].join("\n");
-        }
-      }
-
-      // Build description with enum values if available
+      // Build description
       const descriptionParts = [
         `Filter results by \`${column}\` field.`,
         "",
         "### Format",
         "",
-        `\`filter.${column}=OPERATION:VALUE\``,
+        `\`${column}=OPERATION:VALUE\``,
         "",
       ];
 
+      const usageExample = buildFilterUsageExamples(column, operators, enumValues);
       if (usageExample) {
-        descriptionParts.push("### Usage", "", usageExample, "");
+        descriptionParts.push(usageExample, "");
       }
 
-      descriptionParts.push("### Available Operations", "", availableOperations);
+      descriptionParts.push("### Available Operations", "", buildOperationsList(operators));
 
       if (enumValues.length > 0) {
-        const validValuesList = enumValues.map((val) => `- \`${val}\``).join("\n");
-        descriptionParts.push("", "### Valid Values", "", validValuesList);
+        descriptionParts.push("", "### Valid Values", "", enumValues.map((val) => `- \`${val}\``).join("\n"));
       }
 
-      const description = descriptionParts.join("\n");
-
-      // Generate pattern for enum validation if enum values exist
-      let pattern;
-      if (enumValues.length > 0) {
-        // Pattern for $eq:VALUE or $in:VALUE1,VALUE2,...
-        const enumPattern = enumValues.join("|");
-        if (operatorsArray.includes("$eq") && operatorsArray.includes("$in")) {
-          pattern = String.raw`^(\$eq:(${enumPattern})|\$in:(${enumPattern})(,(${enumPattern}))*)$`;
-        } else if (operatorsArray.includes("$eq")) {
-          pattern = String.raw`^\$eq:(${enumPattern})$`;
-        } else if (operatorsArray.includes("$in")) {
-          pattern = String.raw`^\$in:(${enumPattern})(,(${enumPattern}))*$`;
-        }
-      }
+      const pattern = buildEnumPattern(enumValues, operators);
 
       schema[`filter.${column}`] = Type.Optional(
         Type.Union(
           [
             Type.String({
               description: `Single filter for ${column}`,
-              examples: examples.length > 0 ? examples.slice(0, 2) : [`$eq:value`],
-              pattern,
+              examples: examples.slice(0, 2),
+              ...(pattern && { pattern }),
               title: `Filter ${column}`,
             }),
             Type.Array(
               Type.String({
-                description: `Multiple filters for ${column}`,
-                examples: examples.length > 0 ? examples : [`$eq:value`],
-                pattern,
+                description: `Multiple filters for ${column} (OR logic)`,
+                examples,
+                ...(pattern && { pattern }),
                 title: `Filter ${column}`,
               }),
               {
-                description: `Apply multiple filters to ${column}`,
-                examples: examples.length > 1 ? [[examples[0], examples[1]]] : [[examples[0] || `$eq:value`]],
+                description: `Apply multiple filters to ${column}. All conditions are combined with OR logic.`,
+                examples: examples.length > 1 ? [[examples[0], examples[1]]] : [[examples[0]]],
                 title: `Filter ${column} (array)`,
               },
             ),
           ],
           {
-            description,
+            description: descriptionParts.join("\n"),
             title: `Filter by ${column}`,
           },
         ),
@@ -420,6 +478,7 @@ export const generatePaginationQuerySchema = (config) => {
     }
   }
 
+  // Add select
   if (selectableColumns.length > 0) {
     const selectExamples = selectableColumns.slice(0, 3);
     const availableColumnsList = selectableColumns.map((col) => `- \`${col}\``).join("\n");
@@ -448,17 +507,17 @@ export const generatePaginationQuerySchema = (config) => {
                 "",
                 "**Single column:**",
                 "```",
-                "select=email",
+                `select=${selectableColumns[0]}`,
                 "```",
                 "",
                 "**Multiple parameters:**",
                 "```",
-                "select=email&select=firstName&select=lastName",
+                `select=${selectableColumns[0]}&select=${selectableColumns[1]}&select=${selectableColumns[2]}`,
                 "```",
                 "",
                 "**Comma-separated:**",
                 "```",
-                "select=email,firstName,lastName",
+                `select=${selectableColumns[0]},${selectableColumns[1]},${selectableColumns[2]}`,
                 "```",
                 "",
                 "_By default, all columns are returned._",
@@ -475,23 +534,6 @@ export const generatePaginationQuerySchema = (config) => {
         {
           description: [
             "Select specific columns to include in the response.",
-            "",
-            "### Usage",
-            "",
-            "**Single column:**",
-            "```",
-            "select=email",
-            "```",
-            "",
-            "**Multiple parameters:**",
-            "```",
-            "select=email&select=firstName&select=lastName",
-            "```",
-            "",
-            "**Comma-separated:**",
-            "```",
-            "select=email,firstName,lastName",
-            "```",
             "",
             "_By default, all columns are returned._",
             "",
@@ -528,31 +570,22 @@ export const generateItemSchema = (config) => {
 
   const properties = { ...baseSchema.properties };
 
+  // Remove excluded columns
   for (const column of excludeColumns) {
     delete properties[column];
   }
 
   // Make all fields optional to support select parameter
-  // When select is used, only selected fields are returned, so all fields must be optional
-  const optionalProperties = {};
-  for (const [column, property] of Object.entries(properties)) {
-    // Skip if already optional from optionalColumns config
-    optionalProperties[column] = optionalColumns[column] ? property : Type.Optional(property);
-  }
+  const optionalProperties = Object.entries(properties).reduce((acc, [column, property]) => {
+    acc[column] = optionalColumns[column] ? property : Type.Optional(property);
+    return acc;
+  }, {});
 
-  // Also apply optionalColumns config for fields that should be explicitly optional
-  for (const [column, shouldBeOptional] of Object.entries(optionalColumns)) {
-    if (shouldBeOptional && optionalProperties[column]) {
-      optionalProperties[column] = Type.Optional(optionalProperties[column]);
-    }
-  }
-
-  // Ensure optionalProperties is not empty
+  // Ensure we have properties
   if (Object.keys(optionalProperties).length === 0) {
     throw new Error("Cannot create item schema: no properties available after filtering");
   }
 
-  // @ts-expect-error - TypeScript can't infer that optionalProperties is not empty, but we check above
   return Type.Object(optionalProperties, {
     additionalProperties: false,
     description: "Single item from the paginated result. All fields are optional to support the `select` parameter.",
@@ -570,9 +603,7 @@ export const generatePaginatedResponseSchema = (config) => {
   validatePaginationConfig(config);
 
   const { strategy = PAGINATION_STRATEGY.offset } = config;
-
   const itemSchema = generateItemSchema(config);
-
   const metaSchema =
     strategy === PAGINATION_STRATEGY.cursor ? CURSOR_PAGINATION_META_CONTRACT : OFFSET_PAGINATION_META_CONTRACT;
 

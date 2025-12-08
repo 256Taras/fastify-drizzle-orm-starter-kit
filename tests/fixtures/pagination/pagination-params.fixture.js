@@ -119,4 +119,3 @@ export const COMPLEX_PARAMS = {
   select: ["id", "email", "firstName", "lastName"],
   sortBy: ["email:ASC", "createdAt:DESC"],
 };
-

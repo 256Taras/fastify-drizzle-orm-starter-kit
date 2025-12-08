@@ -5,4 +5,3 @@ export const COMMON_CONTRACTS_V1 = {
   ...CommonContracts,
   ...PaginationContracts,
 };
-

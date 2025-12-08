@@ -35,7 +35,6 @@
  * @typedef {import("./fastify/plugin.jsdoc.js").FastifyPluginAsyncTypeboxExtended} FastifyPluginTypebox
  */
 
-
 /**
  * Fastify request with typed querystring
  * @template {import('@sinclair/typebox').TSchema} TQuery

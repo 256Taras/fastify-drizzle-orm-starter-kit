@@ -46,4 +46,3 @@ export const paginationQuery = Type.Object({
 
 export const offsetLimit = OffsetLimitSchema;
 export const orderBy = OrderBySchema;
-
