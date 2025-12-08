@@ -32,7 +32,6 @@ export const CONFIG_SCHEMA = Type.Object(
     JWT_REFRESH_TOKEN_EXPIRATION_TIME: Type.String(),
     JWT_REFRESH_TOKEN_SECRET: Type.String(),
     LOG_LEVEL: Type.Union(["trace", "debug", "info", "warn", "error", "fatal"].map((i) => Type.Literal(i))),
-    NODE_ENV: Type.String(), // add enum
     RATE_LIMIT_MAX: Type.Integer(),
     RATE_LIMIT_TIME_WINDOW: Type.Integer(),
     REQUEST_TIMEOUT: Type.Integer(),
@@ -42,10 +41,18 @@ export const CONFIG_SCHEMA = Type.Object(
   { additionalProperties: false },
 );
 
+const getEnvFilePath = () => {
+  const env = process.env.ENV_NAME || "development";
+  return `configs/.env.${env}`;
+};
+
 /** @type {import("#@types/index.jsdoc.js").Env} */
 export const ENV_CONFIG = envSchema({
-  dotenv: {
-    path: "configs/.env",
-  },
+  dotenv: { path: getEnvFilePath() },
   schema: CONFIG_SCHEMA,
 });
+
+// Environment helpers
+export const isDev = () => ENV_CONFIG.ENV_NAME === "development";
+export const isTest = () => ENV_CONFIG.ENV_NAME === "test";
+export const isProd = () => ENV_CONFIG.ENV_NAME === "production";

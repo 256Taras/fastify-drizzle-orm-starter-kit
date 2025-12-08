@@ -1,0 +1,23 @@
+FROM node:24-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package.json yarn.lock* ./
+
+# Install dependencies (including dev dependencies for tests)
+RUN yarn install --frozen-lockfile
+
+# Copy source code
+COPY . .
+
+# Set test environment
+ENV ENV_NAME=test
+ENV NODE_ENV=test
+
+# Expose port (if needed for tests)
+EXPOSE 8001
+
+# Default command (can be overridden in docker-compose)
+CMD ["npm", "test"]
+

@@ -1,4 +1,4 @@
-import { ENV_CONFIG } from "./env.config.js";
+import { ENV_CONFIG, isDev, isProd, isTest } from "./env.config.js";
 
 export const APP_CONFIG = {
   applicationName: ENV_CONFIG.APPLICATION_NAME,
@@ -9,4 +9,7 @@ export const APP_CONFIG = {
   isEnabledDbLogging: ENV_CONFIG.ENABLE_DB_LOGGING === 1,
   isSeedsEnabled: ENV_CONFIG.ENABLE_SEEDS === 1,
   version: ENV_CONFIG.VERSION ?? "latest",
+  isDev: isDev(),
+  isProd: isProd(),
+  isTest: isTest(),
 };

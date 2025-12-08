@@ -13,7 +13,7 @@ import { logger } from "#libs/logging/logger.service.js";
  * @returns {Promise<void>}
  */
 export async function cleanUp(db) {
-  const isTestEnvironment = ENV_CONFIG.NODE_ENV === "test" || ENV_CONFIG.NODE_ENV === "development";
+  const isTestEnvironment = ENV_CONFIG.ENV_NAME === "test" || ENV_CONFIG.ENV_NAME === "development";
 
   if (!isTestEnvironment) {
     throw new Error("It's forbidden to clean non-test DB!");

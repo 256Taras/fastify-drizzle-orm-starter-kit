@@ -1,0 +1,43 @@
+services:
+  # PostgreSQL database container for tests
+  db-test:
+    container_name: postgresql-test
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: test_user
+      POSTGRES_DB: test_db
+      POSTGRES_PASSWORD: test_password
+    ports:
+      - 5434:5432
+    networks:
+      - test-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test_user -d test_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Node.js application container for CI tests
+  app-test:
+    build:
+      context: ../../
+      dockerfile: ./infra/docker/Dockerfile.test
+    container_name: node-test
+    environment:
+      ENV_NAME: test
+      DATABASE_URL: postgresql://test_user:test_password@db-test:5432/test_db
+    depends_on:
+      db-test:
+        condition: service_healthy
+    networks:
+      - test-network
+    profiles:
+      - ci
+    command: npm test
+
+networks:
+  test-network:
+    name: test-network
+    driver: bridge
+

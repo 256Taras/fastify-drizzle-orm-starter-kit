@@ -7,8 +7,7 @@ This documentation outlines the environment variables and configuration settings
 - `APPLICATION_NAME`: The name of the application. Default is `starter-kit`.
 - `APPLICATION_URL`: The base URL of the application. Default is `http://localhost:8000`.
 - `APPLICATION_DOMAIN`: The domain under which the application is accessible. Default is `http://localhost:8000`.
-- `ENV_NAME`: The environment name, e.g., `development`.
-- `NODE_ENV`: Node.js environment setting. Default is `test`.
+- `ENV_NAME`: The environment name. Supported values: `development`, `test`, `production`. Default is `development`.
 - `VERSION`: The version of the application. Default is `latest`.
 - `IP`: IP configuration for the server accessibility. Use `127.0.0.1` for local access, `0.0.0.0` for external access.
 - `HTTP_PORT`: The HTTP port the application listens on. Default is `8000`.

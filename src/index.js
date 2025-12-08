@@ -100,7 +100,7 @@ class Application {
       this.#state = "running";
       logger.info(`[${APP_CONFIG.applicationName}] Application running on ${SERVER_CONFIG.ip}:${SERVER_CONFIG.port}`);
 
-      if (APP_CONFIG.env === "development") {
+      if (APP_CONFIG.isDev) {
         logger.info(`[${APP_CONFIG.applicationName}] Documentation: ${APP_CONFIG.applicationUrl}/docs`);
       }
     } catch (error) {

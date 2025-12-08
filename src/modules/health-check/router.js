@@ -5,6 +5,7 @@ import { performance } from "node:perf_hooks";
 
 import { sql } from "drizzle-orm";
 
+import { ENV_CONFIG } from "#configs/env.config.js";
 import schemas from "#modules/health-check/schemas.js";
 
 //const version = "1.0.0";
@@ -154,7 +155,7 @@ export default async (fastify) => {
           status: dbStatus ? "connected" : "disconnected",
         },
         diskSpace,
-        environment: process.env.NODE_ENV || "development",
+        environment: ENV_CONFIG.ENV_NAME,
         eventLoopLag,
         memoryUsage: process.memoryUsage(),
         osLoad: os.loadavg(),
