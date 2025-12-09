@@ -79,13 +79,13 @@ const buildCursorDescription = (type) => {
     "",
     ...(isAfter
       ? [
-        "1. **First page** - don't provide `after` or `before` parameters",
-        "   ```",
-        "   GET /v1/users?limit=10",
-        "   ```",
-        "",
-        `2. **${directionTitle} page** - use \`${cursorField}\` from the previous response`,
-      ]
+          "1. **First page** - don't provide `after` or `before` parameters",
+          "   ```",
+          "   GET /v1/users?limit=10",
+          "   ```",
+          "",
+          `2. **${directionTitle} page** - use \`${cursorField}\` from the previous response`,
+        ]
       : [`**${directionTitle} page** - use \`${cursorField}\` from the previous response`]),
     "   ```",
     `   GET /v1/users?limit=10&${type}=<${cursorField}>`,
@@ -309,8 +309,8 @@ export const generatePaginationQuerySchema = (config) => {
   // Normalize filterableColumns - convert array to object if needed
   const filterableColumnsObj = Array.isArray(filterableColumnsConfig)
     ? Object.fromEntries(
-      filterableColumnsConfig.map((col) => [col, ["$eq", "$gt", "$gte", "$lt", "$lte", "$in", "$notIn", "$ilike"]]),
-    )
+        filterableColumnsConfig.map((col) => [col, ["$eq", "$gt", "$gte", "$lt", "$lte", "$in", "$notIn", "$ilike"]]),
+      )
     : filterableColumnsConfig;
 
   const selectableColumns = getSelectableColumns(config);
@@ -647,14 +647,14 @@ export const generatePaginatedResponseSchema = (config) => {
  * @returns {object} Complete route schema
  */
 export const generatePaginatedRouteSchema = ({
-                                               bodySchema,
-                                               config,
-                                               description,
-                                               errorSchemas,
-                                               paramsSchema,
-                                               summary,
-                                               tags,
-                                             }) => {
+  bodySchema,
+  config,
+  description,
+  errorSchemas,
+  paramsSchema,
+  summary,
+  tags,
+}) => {
   validatePaginationConfig(config);
 
   /** @type {Record<string, any>} */

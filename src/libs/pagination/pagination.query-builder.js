@@ -520,9 +520,12 @@ export class PaginationQueryBuilder {
       const [, operator, val] = operatorMatch;
 
       // Validate operator exists in FILTER_OPERATORS
-      if (!Object.keys(FILTER_OPERATORS).includes(operator)) {
+      const validOperators = /** @type {Array<import('./pagination.types.jsdoc.js').FilterOperator>} */ (
+        Object.keys(FILTER_OPERATORS)
+      );
+      if (!validOperators.includes(/** @type {import('./pagination.types.jsdoc.js').FilterOperator} */ (operator))) {
         throw new BadRequestException(
-          `Unknown filter operator: ${operator}. Valid operators: ${Object.keys(FILTER_OPERATORS).join(", ")}`,
+          `Unknown filter operator: ${operator}. Valid operators: ${validOperators.join(", ")}`,
         );
       }
 

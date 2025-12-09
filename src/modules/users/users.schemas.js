@@ -12,9 +12,7 @@ const usersSchemas = {
   getList: generatePaginatedRouteSchema({
     config: USERS_PAGINATION_CONFIG,
     description: "Get paginated list of users with filtering, sorting, and search",
-    errorSchemas: mapHttpErrorsToSchemaErrorCollection(
-      pick([BadRequestException.name], defaultHttpErrorCollection),
-    ),
+    errorSchemas: mapHttpErrorsToSchemaErrorCollection(pick([BadRequestException.name], defaultHttpErrorCollection)),
     summary: "Get users list",
   }),
 
