@@ -4,8 +4,6 @@
  */
 
 import { requestContext } from "@fastify/request-context";
-
-import { APP_CONFIG } from "#configs/index.js";
 import { defaultHttpErrorCollection } from "#libs/errors/default-http-error-collection.js";
 import {
   BAD_REQUEST_400,
@@ -21,6 +19,13 @@ import {
 import { logger } from "#libs/logging/logger.service.js";
 
 class ErrorHandler {
+  #LOCATION_MAP = {
+    querystring: "query",
+    body: "body",
+    params: "params",
+    headers: "headers",
+  };
+
   #USER_MESSAGES = {
     /**
      *
@@ -110,7 +115,6 @@ class ErrorHandler {
       // @ts-ignore
       traceId: requestContext.get("traceId"),
       ...httpErrorResponseTemplate,
-      developerMessage: APP_CONFIG.isDeveloperMessageEnabled ? httpErrorResponseTemplate.developerMessage : undefined,
     };
   }
 
@@ -120,6 +124,9 @@ class ErrorHandler {
    */
   #mapAjvErrorToUserFriendly(err) {
     if (!err.validation) return [];
+
+    const location = this.#LOCATION_MAP[err.validationContext] || err.validationContext;
+
     return err.validation.map((validationError) => {
       const field = String(
         validationError.params?.missingProperty ?? validationError.instancePath?.replace(/^\//, "") ?? "",
@@ -128,7 +135,7 @@ class ErrorHandler {
 
       return {
         field,
-        location: err.validationContext,
+        location,
         message: userMessage || validationError.message,
         type: userMessage ? "userMessage" : "developerMessage",
       };
