@@ -1,8 +1,6 @@
 import { Type } from "@sinclair/typebox";
 
-/**
- * Filter operators for different data types
- */
+/** Filter operators for different data types */
 export const FILTER_OPERATORS = {
   $eq: "$eq",
   $gt: "$gt",
@@ -14,17 +12,13 @@ export const FILTER_OPERATORS = {
   $notIn: "$notIn",
 };
 
-/**
- * Pagination strategies
- */
+/** Pagination strategies */
 export const PAGINATION_STRATEGY = {
   cursor: "cursor",
   offset: "offset",
 };
 
-/**
- * Base pagination meta fields shared between strategies
- */
+/** Base pagination meta fields shared between strategies */
 const basePaginationMeta = {
   itemCount: Type.Integer({
     description: "Total number of items across all pages",
@@ -40,9 +34,7 @@ const basePaginationMeta = {
   }),
 };
 
-/**
- * Offset pagination meta contract
- */
+/** Offset pagination meta contract */
 export const OFFSET_PAGINATION_META_CONTRACT = Type.Object(
   {
     ...basePaginationMeta,
@@ -74,9 +66,7 @@ export const OFFSET_PAGINATION_META_CONTRACT = Type.Object(
   },
 );
 
-/**
- * Cursor pagination meta contract
- */
+/** Cursor pagination meta contract */
 export const CURSOR_PAGINATION_META_CONTRACT = Type.Object(
   {
     ...basePaginationMeta,

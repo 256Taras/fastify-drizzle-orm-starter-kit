@@ -8,11 +8,22 @@ const ACCESS_DENIED_MESSAGE = "Access denied";
 
 /**
  * A Fastify plugin to handle JWT authentication and authorization.
- * @type {(app: import("#@types/index.jsdoc.js").FastifyInstance, options?: { infra?: { authService?: { verifyJwt?: import("#@types/fastify/auth-types.jsdoc.js").FastifyAuthFunction; verifyJwtRefreshToken?: import("#@types/fastify/auth-types.jsdoc.js").FastifyAuthFunction } } }) => Promise<void>}
+ *
+ * @type {(
+ *   app: import("#@types/index.jsdoc.js").FastifyInstance,
+ *   options?: {
+ *     infra?: {
+ *       authService?: {
+ *         verifyJwt?: import("#@types/fastify/auth-types.jsdoc.js").FastifyAuthFunction;
+ *         verifyJwtRefreshToken?: import("#@types/fastify/auth-types.jsdoc.js").FastifyAuthFunction;
+ *       };
+ *     };
+ *   },
+ * ) => Promise<void>}
  */
 async function authPlugin(app, options) {
   /**
-   * @param {import('fastify').FastifyRequest} request
+   * @param {import("fastify").FastifyRequest} request
    * @throws {UNAUTHORIZED_ACCESS_401} If access token is missing or invalid
    */
   const defaultVerifyJwt = (request) => {
@@ -28,7 +39,7 @@ async function authPlugin(app, options) {
   };
 
   /**
-   * @param {import('fastify').FastifyRequest} request
+   * @param {import("fastify").FastifyRequest} request
    * @throws {UNAUTHORIZED_ACCESS_401} If refresh token is missing or invalid
    */
   const defaultVerifyJwtRefreshToken = (request) => {

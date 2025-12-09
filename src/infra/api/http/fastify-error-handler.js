@@ -1,9 +1,7 @@
-/**
- * API layer errors/exceptions
- * Implement Fastify HTTP errors mapping using OOP in ES2023.
- */
+/** API layer errors/exceptions Implement Fastify HTTP errors mapping using OOP in ES2023. */
 
 import { requestContext } from "@fastify/request-context";
+
 import { defaultHttpErrorCollection } from "#libs/errors/default-http-error-collection.js";
 import {
   BAD_REQUEST_400,
@@ -28,41 +26,41 @@ class ErrorHandler {
 
   #USER_MESSAGES = {
     /**
-     *
      * @param {string} _
      * @param {number} limit
      */
     maxLength: (_, limit) => `Field should be no longer than ${limit} characters`,
     /**
-     *
      * @param {string} _
      * @param {number} limit
      */
     minLength: (_, limit) => `Field should be at least ${limit} characters`,
-    /**
-     *
-     */
     pattern: () => `Field does not match the required format`,
-    /**
-     *
-     */
     required: () => `Field is required`,
   };
 
   /**
-   *
-   * @param {object} errorCollectionOverride
+   * @typedef {object} HttpErrorResponse
+   * @property {string | number} code - Error code
+   * @property {string} developerMessage - Message for developers
+   * @property {string} userMessage - Message for users
+   * @property {number} statusCode - HTTP status code
+   * @property {string} [url] - Request URL
+   * @property {{ field: string; location: string; message: string; type: string }[]} [errorDetails] - Error details
    */
+
+  /** @param {Record<string, HttpErrorResponse>} errorCollectionOverride */
   constructor(errorCollectionOverride = defaultHttpErrorCollection) {
+    /** @type {Record<string, HttpErrorResponse>} */
     this.errorCollectionOverride = errorCollectionOverride;
   }
 
   /**
-   *
-   * @param {import('fastify').FastifyRequest} request
-   * @param {import('fastify').FastifyReply} reply
+   * @param {import("fastify").FastifyRequest} request
+   * @param {import("fastify").FastifyReply} reply
    */
   async handle404Error(request, reply) {
+    /** @type {HttpErrorResponse} */
     const httpErrorResponse = this.errorCollectionOverride[ENDPOINT_NOT_FOUND_404.name];
     httpErrorResponse.userMessage = `Endpoint '${request.method} ${request.url}' is not found`;
     httpErrorResponse.developerMessage = `Endpoint '${request.method} ${request.url}' is not found. Please, check if the requested URI is correct`;
@@ -71,10 +69,9 @@ class ErrorHandler {
   }
 
   /**
-   *
-   * @param {import('fastify').FastifyError} fastifyError
-   * @param {import('fastify').FastifyRequest} _
-   * @param {import('fastify').FastifyReply} reply
+   * @param {import("fastify").FastifyError} fastifyError
+   * @param {import("fastify").FastifyRequest} _
+   * @param {import("fastify").FastifyReply} reply
    */
   async handleFastifyError(fastifyError, _, reply) {
     logger.debug(fastifyError);
@@ -85,22 +82,24 @@ class ErrorHandler {
   }
 
   /**
-   *
-   * @param {object} validationError
+   * @param {{ keyword: string; params?: { limit?: number; format?: string; type?: string } }} validationError
    * @param {string} field
    */
   #formatErrorMessage(validationError, field) {
-    const formatter = this.#USER_MESSAGES[validationError.keyword];
+    const keyword = validationError.keyword;
+    // @ts-ignore - keyword is checked to be valid before usage
+    const formatter = this.#USER_MESSAGES[keyword];
     if (!formatter) return null;
 
-    const additionalParam = validationError.params.limit ?? (validationError.params.format || validationError.params.type);
+    const additionalParam =
+      validationError.params?.limit ?? (validationError.params?.format || validationError.params?.type);
     return formatter(field, additionalParam);
   }
 
   /**
-   *
-   * @param {import('fastify').FastifyError} fastifyError
-   * @param {object} httpErrorResponseTemplate
+   * @param {import("fastify").FastifyError} fastifyError
+   * @param {HttpErrorResponse} httpErrorResponseTemplate
+   * @returns {HttpErrorResponse}
    */
   #formatErrorResponse(fastifyError, httpErrorResponseTemplate) {
     if (!fastifyError || !httpErrorResponseTemplate?.developerMessage) return httpErrorResponseTemplate;
@@ -118,14 +117,13 @@ class ErrorHandler {
     };
   }
 
-  /**
-   *
-   * @param {import('fastify').FastifyError} err
-   */
+  /** @param {import("fastify").FastifyError & { validationContext?: string }} err */
   #mapAjvErrorToUserFriendly(err) {
     if (!err.validation) return [];
 
-    const location = this.#LOCATION_MAP[err.validationContext] || err.validationContext;
+    const location = err.validationContext
+      ? this.#LOCATION_MAP[/** @type {keyof typeof this.#LOCATION_MAP} */ err.validationContext] || err.validationContext
+      : "unknown";
 
     return err.validation.map((validationError) => {
       const field = String(
@@ -143,12 +141,13 @@ class ErrorHandler {
   }
 
   /**
-   *
-   * @param {import('fastify').FastifyError} fastifyError
+   * @param {import("fastify").FastifyError & { serialization?: boolean }} fastifyError
+   * @returns {HttpErrorResponse}
    */
   #mapFastifyErrorToHttpErrorResponse(fastifyError) {
     if (!fastifyError) return this.errorCollectionOverride[INTERNAL_SERVER_ERROR_500.name];
 
+    /** @type {Record<number, HttpErrorResponse>} */
     const errorMapping = {
       400: this.errorCollectionOverride[INVALID_JSON_SYNTAX_400.name],
       406: this.errorCollectionOverride[RESOURCE_NOT_ACCEPTABLE_406.name],
@@ -157,11 +156,12 @@ class ErrorHandler {
       429: this.errorCollectionOverride[TOO_MANY_REQUESTS_429.name],
     };
 
-    if (errorMapping[fastifyError.statusCode]) return errorMapping[fastifyError.statusCode];
+    if (fastifyError.statusCode && errorMapping[fastifyError.statusCode]) return errorMapping[fastifyError.statusCode];
     if (fastifyError.validation) return this.errorCollectionOverride[BAD_REQUEST_400.name];
-    // @ts-ignore - serialization is a custom property on FastifyError
     if (fastifyError.serialization) return this.errorCollectionOverride[FAILED_ON_SERIALIZATION_VALIDATION_500.name];
-    return this.errorCollectionOverride[fastifyError.name] ?? this.errorCollectionOverride[INTERNAL_SERVER_ERROR_500.name];
+    return (
+      this.errorCollectionOverride[fastifyError.name || ""] ?? this.errorCollectionOverride[INTERNAL_SERVER_ERROR_500.name]
+    );
   }
 }
 

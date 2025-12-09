@@ -5,8 +5,8 @@ import { authTokens } from "#modules/auth/auth-token.model.js";
 
 /**
  * @param {Dependencies} deps
- * @param {object} user
- * @returns {Promise<{ refreshToken: string, accessToken: string, user: object }>}
+ * @param {import("#modules/users/users.contracts.js").User} user
+ * @returns {Promise<import("#modules/auth/auth.contracts.js").Credentials>}
  */
 const generateTokens = async ({ db, encrypterService, jwtService }, user) => {
   const refreshHash = encrypterService.randomBytes(32);
@@ -33,6 +33,4 @@ export default function authTokenService(deps) {
     generateTokens: partial(generateTokens, [deps]),
   };
 }
-/**
- * @typedef {import("#@types/index.jsdoc.js").Dependencies} Dependencies
- */
+/** @typedef {import("#@types/index.jsdoc.js").Dependencies} Dependencies */

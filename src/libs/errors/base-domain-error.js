@@ -1,7 +1,4 @@
-/**
- * Base class for all domain errors
- * Reduces code duplication and provides consistent error structure
- */
+/** Base class for all domain errors Reduces code duplication and provides consistent error structure */
 export class BaseDomainError extends Error {
   /**
    * @param {string} message
@@ -14,6 +11,7 @@ export class BaseDomainError extends Error {
 
   /**
    * Factory method to create and reject with error
+   *
    * @param {string} message
    * @returns {Promise<never>}
    */

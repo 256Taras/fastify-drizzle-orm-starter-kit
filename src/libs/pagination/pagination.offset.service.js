@@ -3,14 +3,17 @@ import { calculatePaginationOffset, createPaginatedResponse } from "./pagination
 
 /**
  * Offset-based pagination service
- * @template {any} TTable - Drizzle table type
- * @template {any} [TItem=any] - Item type in the response
+ *
+ * @template TTable - Drizzle table type (PgTable or similar)
+ * @template TItem - Item type in the response (inferred from table)
  * @param {import("#@types/index.jsdoc.js").Dependencies} deps - Dependencies
  * @param {TTable} table - Table to paginate
- * @param {import('./pagination.types.jsdoc.js').PaginationConfig<TTable, 'offset'>} config - Pagination config (must have strategy 'offset')
- * @param {import('./pagination.types.jsdoc.js').PaginationParams<'offset'>} paginationParams - Pagination parameters (must have OffsetPaginationQuery)
- * @param {import('./pagination.types.jsdoc.js').PaginationOptions} [options] - Additional options
- * @returns {Promise<import('./pagination.types.jsdoc.js').OffsetPaginatedResponse<TItem>>}
+ * @param {import("./pagination.types.jsdoc.js").PaginationConfig<TTable, "offset">} config - Pagination config (must have
+ *   strategy 'offset')
+ * @param {import("./pagination.types.jsdoc.js").PaginationParams<"offset">} paginationParams - Pagination parameters (must
+ *   have OffsetPaginationQuery)
+ * @param {import("./pagination.types.jsdoc.js").PaginationOptions} [options] - Additional options
+ * @returns {Promise<import("./pagination.types.jsdoc.js").OffsetPaginatedResponse<TItem>>}
  */
 export const paginateOffset = async ({ db, logger }, table, config, paginationParams, options = {}) => {
   if (!paginationParams) {
@@ -21,7 +24,7 @@ export const paginateOffset = async ({ db, logger }, table, config, paginationPa
   const { filters, query, select: selectFields, sortBy } = paginationParams;
   const { queryBuilder, select: optionsSelect } = options;
 
-  /** @type {import('./pagination.types.jsdoc.js').OffsetPaginationQuery} */
+  /** @type {import("./pagination.types.jsdoc.js").OffsetPaginationQuery} */
   const offsetQuery = query;
   const limit = Math.min(offsetQuery.limit || config.defaultLimit || 10, config.maxLimit || 100);
   const page = Math.max(offsetQuery.page || 1, 1); // Ensure page is at least 1
@@ -44,7 +47,7 @@ export const paginateOffset = async ({ db, logger }, table, config, paginationPa
 
   // Apply custom query builder
   if (queryBuilder) {
-    queryBuilder(builder);
+    /** @type {import("./pagination.types.jsdoc.js").QueryBuilderFunction<TTable, "offset">} */ queryBuilder(builder);
   }
 
   // Execute query

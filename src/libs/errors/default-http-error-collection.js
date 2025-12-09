@@ -24,6 +24,7 @@ import {
 
 /**
  * HTTP error entry structure
+ *
  * @typedef {{
  *   code: number;
  *   developerMessage: string;
@@ -33,8 +34,8 @@ import {
  */
 
 /**
- * Collection of default HTTP error definitions
- * Maps error class names to their HTTP error entry configurations
+ * Collection of default HTTP error definitions Maps error class names to their HTTP error entry configurations
+ *
  * @type {Record<string, HttpErrorEntry>}
  */
 export const defaultHttpErrorCollection = {

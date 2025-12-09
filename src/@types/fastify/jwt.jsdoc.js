@@ -1,10 +1,8 @@
-/**
- * @file
- * FastifyInstance with JWT token management
- */
+/** @file FastifyInstance with JWT token management */
 
 /**
  * FastifyInstance with JWT token management
+ *
  * @typedef {import("./auth.jsdoc.js").FastifyInstanceWithAuth & {
  *   jwt: {
  *     accessToken: {

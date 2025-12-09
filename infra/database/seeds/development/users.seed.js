@@ -6,8 +6,9 @@ import { users } from "#modules/users/users.model.js";
 
 /**
  * Seed users table with initial data
- * @param {import('drizzle-orm/postgres-js').PostgresJsDatabase} db - Drizzle database instance
- * @param {import('pino').Logger} [logger] - Optional logger instance
+ *
+ * @param {import("drizzle-orm/postgres-js").PostgresJsDatabase} db - Drizzle database instance
+ * @param {import("pino").Logger} [logger] - Optional logger instance
  */
 export default async function seedUsers(db, logger) {
   // Initialize encrypter service (it doesn't need dependencies)

@@ -26,4 +26,5 @@ const usersSchemas = {
   },
 };
 
+// @ts-ignore - Fastify schema types are complex, auto-inference works correctly at runtime
 export default mixinTagForSchema(usersSchemas, ["users"]);

@@ -5,20 +5,16 @@ import { RestApiServer } from "#infra/api/http/fastify-server.js";
 import { DatabaseManager } from "#infra/database/db.js";
 import { logger } from "#libs/logging/logger.service.js";
 
-/**
- * @typedef {'idle' | 'starting' | 'running' | 'stopping' | 'stopped'} AppState
- */
+/** @typedef {"idle" | "starting" | "running" | "stopping" | "stopped"} AppState */
 
-/**
- * Application lifecycle manager
- * Handles initialization, graceful shutdown, and error handling
- */
+/** Application lifecycle manager Handles initialization, graceful shutdown, and error handling */
 class Application {
   /** Signals to listen for graceful shutdown */
   static SHUTDOWN_SIGNALS = ["SIGTERM", "SIGINT", "SIGHUP"];
 
   /**
    * Checks if application is running
+   *
    * @returns {boolean}
    */
   get isRunning() {
@@ -27,6 +23,7 @@ class Application {
 
   /**
    * Gets current application state
+   *
    * @returns {AppState}
    */
   get state() {
@@ -48,15 +45,14 @@ class Application {
   /** @type {AppState} */
   #state = "idle";
 
-  /**
-   * Private constructor - use Application.create() instead
-   */
+  /** Private constructor - use Application.create() instead */
   constructor() {
     this.#setupProcessHandlers();
   }
 
   /**
    * Creates and starts the application
+   *
    * @returns {Promise<Application>}
    */
   static async create() {
@@ -67,6 +63,7 @@ class Application {
 
   /**
    * Starts the application
+   *
    * @returns {Promise<void>}
    */
   async start() {
@@ -115,6 +112,7 @@ class Application {
 
   /**
    * Gracefully stops the application
+   *
    * @returns {Promise<void>}
    */
   async stop() {
@@ -155,9 +153,7 @@ class Application {
     }
   }
 
-  /**
-   * Clears force shutdown timer
-   */
+  /** Clears force shutdown timer */
   #clearForceShutdown() {
     if (this.#forceShutdownTimer) {
       clearTimeout(this.#forceShutdownTimer);
@@ -167,6 +163,7 @@ class Application {
 
   /**
    * Initializes application infrastructure
+   *
    * @returns {Promise<void>}
    */
   async #initInfrastructure() {
@@ -181,9 +178,7 @@ class Application {
     logger.info(`[${APP_CONFIG.applicationName}] Infrastructure initialized`);
   }
 
-  /**
-   * Sets up process-level event handlers
-   */
+  /** Sets up process-level event handlers */
   #setupProcessHandlers() {
     // Handle shutdown signals
     for (const signal of Application.SHUTDOWN_SIGNALS) {
@@ -228,6 +223,7 @@ class Application {
 
   /**
    * Stops all infrastructure components in reverse order
+   *
    * @returns {Promise<void>}
    */
   async #stopInfrastructure() {
@@ -270,9 +266,7 @@ class Application {
 // Bootstrap
 // ============================================================================
 
-/**
- * Application entry point
- */
+/** Application entry point */
 try {
   await Application.create();
 } catch (error) {

@@ -3,7 +3,14 @@ import fp from "fastify-plugin";
 import { BadRequestException } from "#libs/errors/domain.errors.js";
 
 /**
+ * @typedef {import("./pagination.common-types.jsdoc.js").QueryParams} QueryParams
+ *
+ * @typedef {import("./pagination.common-types.jsdoc.js").FilterParams} FilterParams
+ */
+
+/**
  * Parse select parameter - supports both comma-separated and multiple params
+ *
  * @param {string | string[] | undefined} selectParam - Select parameter
  * @returns {string[] | undefined} Parsed select fields
  */
@@ -30,6 +37,7 @@ const parseSelectParameter = (selectParam) => {
 
 /**
  * Parse sort parameter
+ *
  * @param {string | string[] | undefined} sortParam - Sort parameter
  * @returns {string[] | undefined} Parsed sort fields
  */
@@ -40,7 +48,8 @@ const parseSortParameter = (sortParam) => {
 
 /**
  * Parse filter parameters
- * @param {Record<string, any>} rawQuery - Raw query object
+ *
+ * @param {Record<string, string | string[] | undefined>} rawQuery - Raw query object
  * @returns {Record<string, string | string[]> | undefined} Parsed filters
  */
 const parseFilterParameters = (rawQuery) => {
@@ -67,8 +76,9 @@ const parseFilterParameters = (rawQuery) => {
 
 /**
  * Parse pagination query parameters
- * @param {any} rawQuery - Raw query object
- * @returns {import('./pagination.types.jsdoc.js').PaginationParams['query']} Parsed query
+ *
+ * @param {Record<string, string | string[] | undefined>} rawQuery - Raw query object
+ * @returns {import("./pagination.types.jsdoc.js").PaginationParams["query"]} Parsed query
  */
 const parsePaginationQuery = (rawQuery) => {
   const query = {
@@ -90,15 +100,19 @@ const parsePaginationQuery = (rawQuery) => {
 };
 
 /**
- * Get pagination query from request
- * This helper function ensures proper type inference for req.pagination
- * Works for both offset and cursor pagination strategies
- * @template {import('fastify').RouteGenericInterface} TRouteGeneric
- * @template {'offset' | 'cursor'} [TStrategy='offset'] - Pagination strategy (optional, for type inference)
- * @param {import('fastify').FastifyRequest<TRouteGeneric> & {
- *   pagination?: import('./pagination.types.jsdoc.js').PaginationParams<TStrategy> | undefined
- * }} req - Fastify request with pagination property
- * @returns {import('./pagination.types.jsdoc.js').PaginationParams<TStrategy>} Pagination parameters (works for both offset and cursor)
+ * Get pagination query from request This helper function ensures proper type inference for req.pagination Works for both
+ * offset and cursor pagination strategies
+ *
+ * @template {import("fastify").RouteGenericInterface} TRouteGeneric
+ * @template {"offset" | "cursor"} [TStrategy='offset'] - Pagination strategy (optional, for type inference). Default is
+ *   `'offset'`
+ * @param {import("fastify").FastifyRequest<TRouteGeneric> & {
+ *   pagination?: import("./pagination.types.jsdoc.js").PaginationParams<TStrategy> | undefined;
+ * }} req
+ *   - Fastify request with pagination property
+ *
+ * @returns {import("./pagination.types.jsdoc.js").PaginationParams<TStrategy>} Pagination parameters (works for both offset
+ *   and cursor)
  * @throws {Error} If pagination is undefined (plugin may not be registered)
  */
 const getPaginationQuery = (req) => {
@@ -111,6 +125,7 @@ const getPaginationQuery = (req) => {
 
 /**
  * Fastify plugin that extracts all pagination params into req.pagination
+ *
  * @type {import("fastify").FastifyPluginAsync}
  */
 async function paginationPlugin(fastify) {
@@ -124,8 +139,7 @@ async function paginationPlugin(fastify) {
 
   // Add preValidation hook to validate mutually exclusive cursors before schema validation
   fastify.addHook("preValidation", async (request) => {
-    /** @type {Record<string, any>} */
-    const rawQuery = request.query || {};
+    const rawQuery = /** @type {QueryParams} */ request.query ?? {};
 
     // Validate mutually exclusive cursors for cursor pagination
     const after = typeof rawQuery.after === "string" ? rawQuery.after : undefined;
@@ -138,8 +152,7 @@ async function paginationPlugin(fastify) {
 
   // Add preHandler hook to parse pagination params
   fastify.addHook("preHandler", async (request) => {
-    /** @type {Record<string, any>} */
-    const rawQuery = request.query || {};
+    const rawQuery = /** @type {QueryParams} */ request.query ?? {};
 
     // @ts-ignore - pagination is decorated on request
     request.pagination = {

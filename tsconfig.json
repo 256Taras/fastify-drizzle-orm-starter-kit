@@ -17,7 +17,7 @@
     "alwaysStrict": true,
     "allowUnreachableCode": true,
     "allowUnusedLabels": true,
-    "noImplicitAny": false,
+    "noImplicitAny": true,
     "noImplicitReturns": true,
     "resolveJsonModule": true,
     "declaration": true,

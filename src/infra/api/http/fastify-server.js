@@ -27,7 +27,7 @@ export class RestApiServer {
   /** @type {import("#@types/index.jsdoc.js").Configs} */
   #configs;
 
-  /** @type {import('@fastify/type-provider-typebox').FastifyInstanceTypebox} */
+  /** @type {import("@fastify/type-provider-typebox").FastifyInstanceTypebox} */
   #fastify;
 
   /** @type {import("#@types/index.jsdoc.js").ServerOptions} */
@@ -35,6 +35,7 @@ export class RestApiServer {
 
   /**
    * Creates a new instance of RestApiServer
+   *
    * @param {import("#@types/index.jsdoc.js").ServerOptions} options - Server options containing configs and database
    */
   constructor(options = {}) {
@@ -45,8 +46,8 @@ export class RestApiServer {
   }
 
   /**
-   * Builds and configures the Fastify server application
-   * Registers all plugins, error handlers, and routes
+   * Builds and configures the Fastify server application Registers all plugins, error handlers, and routes
+   *
    * @returns {Promise<void>}
    */
   async buildServerApp() {
@@ -87,7 +88,8 @@ export class RestApiServer {
 
   /**
    * Gets the Fastify instance (for testing)
-   * @returns {import('@fastify/type-provider-typebox').FastifyInstanceTypebox}
+   *
+   * @returns {import("@fastify/type-provider-typebox").FastifyInstanceTypebox}
    */
   getFastifyInstance() {
     return this.#fastify;
@@ -95,6 +97,7 @@ export class RestApiServer {
 
   /**
    * Starts the Fastify server on the specified IP and port.
+   *
    * @async
    * @param {object} param0 - Server start parameters.
    * @param {string} param0.ip - IP address to bind.
@@ -116,6 +119,7 @@ export class RestApiServer {
 
   /**
    * Stops the Fastify server gracefully.
+   *
    * @async
    * @returns {Promise<void>}
    */
@@ -128,8 +132,7 @@ export class RestApiServer {
   }
 
   /**
-   * Auto-loads plugins from the libs directory
-   * Recursively loads all files matching *.plugin.js pattern from libs directory
+   * Auto-loads plugins from the libs directory Recursively loads all files matching *.plugin.js pattern from libs directory
    * Passes options (configs and database) to each plugin
    */
   #autoLoadPlugins() {
@@ -138,8 +141,8 @@ export class RestApiServer {
     this.#fastify.register(fastifyAutoLoad, {
       dir: libsPath,
       /**
-       * Filter to match only plugin files, but exclude pagination.plugin.js
-       * as it's registered explicitly before autoload
+       * Filter to match only plugin files, but exclude pagination.plugin.js as it's registered explicitly before autoload
+       *
        * @param {string} p
        */
       matchFilter: (p) => p.endsWith(".plugin.js") && !p.includes("pagination.plugin.js"),
@@ -150,8 +153,7 @@ export class RestApiServer {
   }
 
   /**
-   * Auto-loads routes from the designated directory
-   * Loads all files matching *.router.v1.js pattern from modules directory
+   * Auto-loads routes from the designated directory Loads all files matching *.router.v1.js pattern from modules directory
    * Registers routes with /v1 prefix
    */
   #autoLoadRoutes() {
@@ -159,10 +161,7 @@ export class RestApiServer {
     this.#fastify.register(fastifyAutoLoad, {
       dir: routesPath,
       ignorePattern: /d.ts/,
-      /**
-       *
-       * @param {string} p
-       */
+      /** @param {string} p */
       matchFilter: (p) => p.endsWith(".router.v1.js"),
       maxDepth: 2,
       options: {

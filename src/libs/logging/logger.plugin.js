@@ -4,12 +4,16 @@ import fp from "fastify-plugin";
 import { APP_CONFIG, LOGGER_CONFIG } from "#configs/index.js";
 import defaultLogger from "#libs/logging/logger.service.js";
 
-/** @type {import("@fastify/type-provider-typebox").FastifyPluginAsyncTypebox<import("#@types/index.jsdoc.js").PluginOptions> } */
+/**
+ * @type {import("@fastify/type-provider-typebox").FastifyPluginAsyncTypebox<
+ *   import("#@types/index.jsdoc.js").PluginOptions
+ * >}
+ */
 const requestLoggerPlugin = async (app) => {
   /**
-   * @param {import('fastify').FastifyRequest} request
-   * @param {import('fastify').FastifyReply} reply
-   * @param {import('fastify').DoneFuncWithErrOrRes} done
+   * @param {import("fastify").FastifyRequest} request
+   * @param {import("fastify").FastifyReply} reply
+   * @param {import("fastify").DoneFuncWithErrOrRes} done
    */
   const setTraceIdFastifyHook = (request, reply, done) => {
     const requestId = request.id;
@@ -22,9 +26,9 @@ const requestLoggerPlugin = async (app) => {
   };
 
   /**
-   * @param {import('fastify').FastifyRequest} request
-   * @param {import('fastify').FastifyReply} _
-   * @param {import('fastify').DoneFuncWithErrOrRes} done
+   * @param {import("fastify").FastifyRequest} request
+   * @param {import("fastify").FastifyReply} _
+   * @param {import("fastify").DoneFuncWithErrOrRes} done
    */
   const requestLogger = (request, _, done) => {
     if (LOGGER_CONFIG.enableRequestLogging) {
@@ -50,9 +54,9 @@ const requestLoggerPlugin = async (app) => {
   };
 
   /**
-   * @param {import('fastify').FastifyRequest} request
-   * @param {import('fastify').FastifyReply} reply
-   * @param {import('fastify').DoneFuncWithErrOrRes} done
+   * @param {import("fastify").FastifyRequest} request
+   * @param {import("fastify").FastifyReply} reply
+   * @param {import("fastify").DoneFuncWithErrOrRes} done
    */
   const responseLogger = (request, reply, done) => {
     if (LOGGER_CONFIG.enableRequestLogging) {

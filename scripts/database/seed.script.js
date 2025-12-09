@@ -1,9 +1,8 @@
 #!/usr/bin/env node
 
 /**
- * @file Database seeding script
- * Runs seed files to populate database with initial data
- * Uses OOP approach with class-based structure
+ * @file Database seeding script Runs seed files to populate database with initial data Uses OOP approach with class-based
+ *   structure
  */
 
 import { readdir } from "node:fs/promises";
@@ -82,19 +81,17 @@ const LOG_MESSAGES = {
 
 // ==================== Database Seeder ====================
 
-/**
- * Database seeding script class
- * Handles running database seed files with tracking mechanism
- */
+/** Database seeding script class Handles running database seed files with tracking mechanism */
 class DatabaseSeeder {
-  /** @type {import('postgres').Sql | null} */
+  /** @type {import("postgres").Sql | null} */
   #client = null;
 
-  /** @type {import('drizzle-orm/postgres-js').PostgresJsDatabase | null} */
+  /** @type {import("drizzle-orm/postgres-js").PostgresJsDatabase | null} */
   #db = null;
 
   /**
    * Closes database connection and cleans up resources
+   *
    * @returns {Promise<void>}
    */
   async close() {
@@ -107,6 +104,7 @@ class DatabaseSeeder {
 
   /**
    * Runs database seeding
+   *
    * @param {string} environment - Environment name
    * @returns {Promise<void>}
    */
@@ -122,6 +120,7 @@ class DatabaseSeeder {
 
   /**
    * Builds the full path to a seed file
+   *
    * @param {string} fileName - Name of the seed file
    * @param {string} environment - Environment name
    * @returns {string}
@@ -132,6 +131,7 @@ class DatabaseSeeder {
 
   /**
    * Builds the path to seeds directory for environment
+   *
    * @param {string} environment - Environment name
    * @returns {string}
    */
@@ -141,6 +141,7 @@ class DatabaseSeeder {
 
   /**
    * Collects all seed files for the environment
+   *
    * @param {string} environment - Environment name
    * @returns {Promise<string[]>}
    */
@@ -151,6 +152,7 @@ class DatabaseSeeder {
 
   /**
    * Ensures seed tracking table exists
+   *
    * @returns {Promise<void>}
    */
   async #ensureSeedTrackingTable() {
@@ -166,6 +168,7 @@ class DatabaseSeeder {
 
   /**
    * Executes a single seed file if not already executed
+   *
    * @param {string} filePath - Full path to the seed file
    * @param {string} fileName - Name of the seed file
    * @param {string} environment - Environment name
@@ -188,6 +191,7 @@ class DatabaseSeeder {
 
   /**
    * Executes all seed files in order
+   *
    * @param {string[]} seedFiles - Array of seed file names
    * @param {string} environment - Environment name
    * @returns {Promise<void>}
@@ -200,6 +204,7 @@ class DatabaseSeeder {
 
   /**
    * Filters files to include only seed files
+   *
    * @param {string[]} files - Array of file names
    * @returns {string[]}
    */
@@ -209,7 +214,8 @@ class DatabaseSeeder {
 
   /**
    * Gets the database connection (lazy initialization)
-   * @returns {Promise<import('drizzle-orm/postgres-js').PostgresJsDatabase>}
+   *
+   * @returns {Promise<import("drizzle-orm/postgres-js").PostgresJsDatabase>}
    */
   async #getDatabase() {
     if (this.#db) {
@@ -221,6 +227,7 @@ class DatabaseSeeder {
 
   /**
    * Gets database URL from config
+   *
    * @returns {string}
    */
   #getDatabaseUrl() {
@@ -235,6 +242,7 @@ class DatabaseSeeder {
 
   /**
    * Gets all seed files from the specified directory
+   *
    * @param {string} seedsDir - Directory containing seed files
    * @returns {Promise<string[]>}
    */
@@ -256,6 +264,7 @@ class DatabaseSeeder {
 
   /**
    * Handles missing directory error
+   *
    * @param {Error} error - Error object
    * @param {string} seedsDir - Directory path
    * @returns {string[]}
@@ -270,7 +279,8 @@ class DatabaseSeeder {
 
   /**
    * Initializes database connection
-   * @returns {import('drizzle-orm/postgres-js').PostgresJsDatabase}
+   *
+   * @returns {import("drizzle-orm/postgres-js").PostgresJsDatabase}
    */
   #initializeDatabase() {
     const databaseUrl = this.#getDatabaseUrl();
@@ -283,6 +293,7 @@ class DatabaseSeeder {
 
   /**
    * Checks if seed file has already been executed
+   *
    * @param {string} fileName - Name of the seed file
    * @param {string} environment - Environment name
    * @returns {Promise<boolean>}
@@ -300,6 +311,7 @@ class DatabaseSeeder {
 
   /**
    * Loads and validates seed function from file
+   *
    * @param {string} filePath - Full path to the seed file
    * @param {string} fileName - Name of the seed file
    * @returns {Promise<Function>}
@@ -317,6 +329,7 @@ class DatabaseSeeder {
 
   /**
    * Logs seeding complete message
+   *
    * @param {string} environment - Environment name
    */
   #logSeedingComplete(environment) {
@@ -325,6 +338,7 @@ class DatabaseSeeder {
 
   /**
    * Logs seeding start message
+   *
    * @param {string} environment - Environment name
    */
   #logSeedingStart(environment) {
@@ -333,6 +347,7 @@ class DatabaseSeeder {
 
   /**
    * Marks seed file as executed
+   *
    * @param {string} fileName - Name of the seed file
    * @param {string} environment - Environment name
    * @returns {Promise<void>}
@@ -344,6 +359,7 @@ class DatabaseSeeder {
 
   /**
    * Processes a single seed file
+   *
    * @param {string} fileName - Name of the seed file
    * @param {string} environment - Environment name
    * @returns {Promise<void>}
@@ -361,6 +377,7 @@ class DatabaseSeeder {
 
   /**
    * Runs the seed function with database and logger
+   *
    * @param {Function} seedFunction - Seed function to execute
    * @returns {Promise<void>}
    */

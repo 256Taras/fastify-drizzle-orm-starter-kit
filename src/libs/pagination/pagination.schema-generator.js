@@ -8,9 +8,7 @@ import {
   PAGINATION_STRATEGY,
 } from "./pagination.contracts.js";
 
-/**
- * Documentation for filter operators
- */
+/** Documentation for filter operators */
 const OPERATOR_DOCS = {
   $eq: { description: "Exact match", example: "active", label: "Equals" },
   $gt: { description: "Value must be greater than provided", example: "100", label: "Greater than" },
@@ -25,8 +23,9 @@ const OPERATOR_DOCS = {
 
 /**
  * Validates pagination config
+ *
  * @template T
- * @param {import('./pagination.types.jsdoc.js').PaginationConfig<T>} config - Pagination config
+ * @param {import("./pagination.types.jsdoc.js").PaginationConfig<T>} config - Pagination config
  * @throws {Error} If both excludeColumns and selectableColumns are provided
  */
 const validatePaginationConfig = (config) => {
@@ -38,11 +37,11 @@ const validatePaginationConfig = (config) => {
 };
 
 /**
- * Gets selectable columns from config
- * If selectableColumns is provided, use it
- * If excludeColumns is provided, generate selectableColumns from all columns minus excluded
+ * Gets selectable columns from config If selectableColumns is provided, use it If excludeColumns is provided, generate
+ * selectableColumns from all columns minus excluded
+ *
  * @template T
- * @param {import('./pagination.types.jsdoc.js').PaginationConfig<T>} config - Pagination config
+ * @param {import("./pagination.types.jsdoc.js").PaginationConfig<T>} config - Pagination config
  * @returns {string[]} Array of selectable column names
  */
 const getSelectableColumns = (config) => {
@@ -63,7 +62,8 @@ const getSelectableColumns = (config) => {
 
 /**
  * Build cursor description for pagination
- * @param {'after' | 'before'} type - Cursor type
+ *
+ * @param {"after" | "before"} type - Cursor type
  * @returns {string} Formatted description
  */
 const buildCursorDescription = (type) => {
@@ -97,6 +97,7 @@ const buildCursorDescription = (type) => {
 };
 /**
  * Build filter usage examples
+ *
  * @param {string} column - Column name
  * @param {string[]} operators - Available operators
  * @param {string[]} enumValues - Enum values if available
@@ -142,6 +143,7 @@ const buildFilterUsageExamples = (column, operators, enumValues) => {
     });
   } else if (operators.length > 0) {
     const firstOp = operators[0];
+    // @ts-ignore - firstOp is validated to be keyof OPERATOR_DOCS
     const doc = OPERATOR_DOCS[firstOp];
     examples.push({
       single: ["**Example:**", "```", `${column}=${firstOp}:${doc?.example || "value"}`, "```"].join("\n"),
@@ -163,6 +165,7 @@ const buildFilterUsageExamples = (column, operators, enumValues) => {
 
 /**
  * Build available operations list
+ *
  * @param {string[]} operators - Available operators
  * @returns {string} Formatted operations list
  */
@@ -175,6 +178,7 @@ const buildOperationsList = (operators) => {
 
   return operators
     .map((op) => {
+      // @ts-ignore - op is validated to be keyof OPERATOR_DOCS
       const doc = OPERATOR_DOCS[op];
       return doc ? `- \`${op}\` - ${doc.label}: ${doc.description}` : `- \`${op}\``;
     })
@@ -183,6 +187,7 @@ const buildOperationsList = (operators) => {
 
 /**
  * Build operator pattern for validation
+ *
  * @param {string[]} operators - Available operators
  * @returns {string} Regex pattern for operators
  */
@@ -194,6 +199,7 @@ const buildOperatorPattern = (operators) => {
 
 /**
  * Build enum pattern for validation
+ *
  * @param {string[]} enumValues - Enum values
  * @param {string[]} operators - Available operators
  * @returns {string | undefined} Regex pattern
@@ -220,6 +226,7 @@ const buildEnumPattern = (enumValues, operators) => {
 
 /**
  * Generate filter examples
+ *
  * @param {string[]} operators - Available operators
  * @param {string[]} enumValues - Enum values if available
  * @returns {string[]} Example values
@@ -260,7 +267,8 @@ const generateFilterExamples = (operators, enumValues) => {
 
 /**
  * Extract enum values from column property
- * @param {any} columnProperty - Column property from schema
+ *
+ * @param {import("@sinclair/typebox").TSchema} columnProperty - Column property from schema
  * @returns {string[]} Enum values
  */
 const extractEnumValues = (columnProperty) => {
@@ -290,8 +298,9 @@ const extractEnumValues = (columnProperty) => {
 
 /**
  * Generates TypeBox schema for pagination querystring based on config
+ *
  * @template T
- * @param {import('./pagination.types.jsdoc.js').PaginationConfig<T>} config - Pagination config
+ * @param {import("./pagination.types.jsdoc.js").PaginationConfig<T>} config - Pagination config
  * @returns {import("@sinclair/typebox").TObject} TypeBox querystring schema
  */
 // eslint-disable-next-line complexity -- Complex dynamic schema generation based on config
@@ -315,7 +324,7 @@ export const generatePaginationQuerySchema = (config) => {
 
   const selectableColumns = getSelectableColumns(config);
 
-  /** @type {Record<string, any>} */
+  /** @type {Record<string, import("@sinclair/typebox").TSchema>} */
   const schema = {
     limit: Type.Optional(
       Type.Integer({
@@ -567,8 +576,9 @@ export const generatePaginationQuerySchema = (config) => {
 
 /**
  * Generates TypeBox schema for single item based on Drizzle table
+ *
  * @template T
- * @param {import('./pagination.types.jsdoc.js').PaginationConfig<T>} config - Pagination config
+ * @param {import("./pagination.types.jsdoc.js").PaginationConfig<T>} config - Pagination config
  * @returns {import("@sinclair/typebox").TObject} TypeBox item schema
  */
 export const generateItemSchema = (config) => {
@@ -586,7 +596,7 @@ export const generateItemSchema = (config) => {
   }
 
   // Make all fields optional to support select parameter
-  /** @type {Record<string, any>} */
+  /** @type {Record<string, import("@sinclair/typebox").TSchema>} */
   const optionalProperties = {};
   for (const [columnName, columnSchema] of Object.entries(properties)) {
     optionalProperties[columnName] = Type.Optional(columnSchema);
@@ -605,8 +615,9 @@ export const generateItemSchema = (config) => {
 
 /**
  * Generates TypeBox schema for paginated response based on config
+ *
  * @template T
- * @param {import('./pagination.types.jsdoc.js').PaginationConfig<T>} config - Pagination config
+ * @param {import("./pagination.types.jsdoc.js").PaginationConfig<T>} config - Pagination config
  * @returns {import("@sinclair/typebox").TObject} TypeBox response schema
  */
 export const generatePaginatedResponseSchema = (config) => {
@@ -635,9 +646,10 @@ export const generatePaginatedResponseSchema = (config) => {
 
 /**
  * Generates complete Fastify route schema with pagination
+ *
  * @template T
  * @param {object} options
- * @param {import('./pagination.types.jsdoc.js').PaginationConfig<T>} options.config - Pagination config
+ * @param {import("./pagination.types.jsdoc.js").PaginationConfig<T>} options.config - Pagination config
  * @param {Record<number, import("@sinclair/typebox").TSchema>} [options.errorSchemas] - Error schemas
  * @param {import("@sinclair/typebox").TSchema} [options.bodySchema] - Request body schema
  * @param {import("@sinclair/typebox").TSchema} [options.paramsSchema] - Route params schema
@@ -657,7 +669,12 @@ export const generatePaginatedRouteSchema = ({
 }) => {
   validatePaginationConfig(config);
 
-  /** @type {Record<string, any>} */
+  /**
+   * @type {Record<
+   *   string,
+   *   import("@sinclair/typebox").TSchema | string | string[] | Record<string, import("@sinclair/typebox").TSchema>
+   * >}
+   */
   const schema = {
     querystring: generatePaginationQuerySchema(config),
     response: {
@@ -668,9 +685,10 @@ export const generatePaginatedRouteSchema = ({
 
   if (bodySchema) schema.body = bodySchema;
   if (paramsSchema) schema.params = paramsSchema;
-  if (description) schema.description = description;
-  if (summary) schema.summary = summary;
-  if (tags) schema.tags = tags;
+  // Fastify route schema allows description, summary, tags as metadata
+  if (description) /** @type {Record<string, unknown>} */ schema.description = description;
+  if (summary) /** @type {Record<string, unknown>} */ schema.summary = summary;
+  if (tags) /** @type {Record<string, unknown>} */ schema.tags = tags;
 
   return schema;
 };

@@ -3,24 +3,28 @@ import { Type } from "@sinclair/typebox";
 import { ERROR_CODE_FORMAT } from "#libs/constants/error-codes.js";
 
 /**
- * @template {Record<string, any>} T
- * @param {T} schemas
- * @param {string[]} tag
+ * @template {Record<string, import("@sinclair/typebox").TSchema | Record<string, unknown>>} T - Schema object type
+ * @param {T} schemas - Schemas object
+ * @param {string[]} tag - Tags to add
  * @returns {T}
  */
 export const mixinTagForSchema = (schemas, tag) => {
   for (const k of Object.keys(schemas)) {
     // eslint-disable-next-line security/detect-object-injection
-    schemas[k].tags = tag;
+    const schema = schemas[/** @type {keyof T} */ k];
+    if (schema && typeof schema === "object" && "tags" in schema) {
+      /** @type {Record<string, unknown>} */ schema.tags = tag;
+    }
   }
   return schemas;
 };
 
 /**
  * Creates a TypeBox Union schema from an object or array of literal values
- * @param {Record<string, string | number | boolean> | Array<string | number | boolean>} object
- * @param {Record<string, any>} [options]
- * @returns {import('@sinclair/typebox').TUnion}
+ *
+ * @param {Record<string, string | number | boolean> | (string | number | boolean)[]} object - Enum values
+ * @param {Record<string, unknown>} [options] - TypeBox options
+ * @returns {import("@sinclair/typebox").TUnion}
  */
 export const createEnumTypeUnionSchema = (object, options = {}) => {
   const values = Array.isArray(object) ? object : Object.values(object);
@@ -33,9 +37,10 @@ export const createEnumTypeUnionSchema = (object, options = {}) => {
 
 /**
  * @param {string[]} mimetypes
- * @returns {import('@sinclair/typebox').TObject}
+ * @returns {import("@sinclair/typebox").TObject}
  */
 export const createFileTypeSchema = (mimetypes) => {
+  /** @type {Record<string, import("@sinclair/typebox").TSchema>} */
   const baseSchema = {
     encoding: Type.Optional(Type.String()),
     filename: Type.Optional(Type.String()),
@@ -49,8 +54,8 @@ export const createFileTypeSchema = (mimetypes) => {
 };
 
 /**
- * @param {import('@sinclair/typebox').TSchema} dataType
- * @returns {import('@sinclair/typebox').TObject}
+ * @param {import("@sinclair/typebox").TSchema} dataType
+ * @returns {import("@sinclair/typebox").TObject}
  */
 export const paginationSchema = (dataType) =>
   Type.Object({
@@ -78,8 +83,8 @@ const ERROR_DETAIL_SCHEMA = Type.Array(
 );
 
 /**
- * @param {object} httpFastifyError
- * @returns {Record<string, import('@sinclair/typebox').TObject>}
+ * @param {{ statusCode: number; code: string; userMessage: string }} httpFastifyError
+ * @returns {Record<string, import("@sinclair/typebox").TObject>}
  */
 const mapHttpErrorToSchemaError = (httpFastifyError) => ({
   [`${httpFastifyError.statusCode}`]: Type.Object(
@@ -129,7 +134,7 @@ const sortSchemaErrorsByCodeAsc = (a, b) => {
 
 /**
  * @param {object} httpErrorCollection
- * @returns {Array<Record<string, import('@sinclair/typebox').TObject>>}
+ * @returns {Record<string, import("@sinclair/typebox").TObject>[]}
  */
 export const listHttpErrorsAsSchemaErrors = (httpErrorCollection) => {
   const list = Object.values(httpErrorCollection).map(mapHttpErrorToSchemaError);
@@ -138,7 +143,7 @@ export const listHttpErrorsAsSchemaErrors = (httpErrorCollection) => {
 
 /**
  * @param {object} httpErrorCollection
- * @returns {Record<string, import('@sinclair/typebox').TObject>}
+ * @returns {Record<string, import("@sinclair/typebox").TObject>}
  */
 export const mapHttpErrorsToSchemaErrorCollection = (httpErrorCollection) => {
   const list = listHttpErrorsAsSchemaErrors(httpErrorCollection);

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 
 /**
- * @param {object} meta
+ * @param {Record<string, unknown>} meta
  * @param {object} [options]
  * @param {number} [options.minItemCount]
  * @param {number} [options.expectedPage]
@@ -18,7 +18,7 @@ export function assertHasValidPagination(meta, options = {}) {
   assert.strictEqual(typeof meta.hasNextPage, "boolean", "hasNextPage should be a boolean");
 
   if (options.minItemCount !== undefined) {
-    assert.ok(meta.itemCount >= options.minItemCount, `itemCount should be at least ${options.minItemCount}`);
+    assert.ok(Number(meta.itemCount) >= options.minItemCount, `itemCount should be at least ${options.minItemCount}`);
   }
 
   if (options.expectedPage !== undefined) {
@@ -36,7 +36,7 @@ export function assertHasValidPagination(meta, options = {}) {
 }
 
 /**
- * @param {object} user
+ * @param {Record<string, unknown>} user
  * @param {object} [options]
  * @param {boolean} [options.includePassword]
  * @param {string[]} [options.requiredFields]
@@ -70,14 +70,14 @@ export function assertHasValidUser(user, options = {}) {
 }
 
 /**
- * @param {object} obj
- * @param {object} shape - { required: string[], optional?: string[] }
+ * @param {Record<string, unknown>} obj
+ * @param {Record<string, unknown>} shape - { required: string[], optional?: string[] }
  */
 export function assertMatchesShape(obj, shape) {
   // Extract values safely to avoid Proxy issues with fixtureFactory
   // Use hasOwnProperty check to avoid triggering Proxy errors
-  const required = (shape && "required" in shape && shape.required) || [];
-  const optional = (shape && "optional" in shape && shape.optional) || [];
+  const required = /** @type {string[]} */ (shape && "required" in shape && shape.required) || [];
+  const optional = /** @type {string[]} */ (shape && "optional" in shape && shape.optional) || [];
   const allAllowedFields = new Set([...optional, ...required]);
   const objectKeys = Object.keys(obj);
 

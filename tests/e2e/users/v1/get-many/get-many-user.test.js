@@ -6,8 +6,11 @@ import { assertHasValidPagination, assertMatchesShape, createDbHelper, createTes
 import { usersListFixtures as fixtures, getEndpoint, TESTING_METHOD } from "./get-many-user.fixtures.js";
 
 describe(`${TESTING_METHOD}-${getEndpoint()}`, () => {
+  /** @type {import("fastify").FastifyInstance} */
   let app;
+  /** @type {ReturnType<typeof createDbHelper>} */
   let db;
+  /** @type {() => Promise<void>} */
   let teardown;
 
   before(async () => {
@@ -89,6 +92,7 @@ describe(`${TESTING_METHOD}-${getEndpoint()}`, () => {
 
     assert.strictEqual(response.statusCode, 200);
     assert.ok(data.data.length > 0);
+
     assert.ok(data.data.every((user) => user.email === expected.email));
   });
 

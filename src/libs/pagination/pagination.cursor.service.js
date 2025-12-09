@@ -5,8 +5,15 @@ import { BadRequestException } from "#libs/errors/domain.errors.js";
 import { PaginationQueryBuilder } from "./pagination.query-builder.js";
 
 /**
+ * @typedef {import("./pagination.common-types.jsdoc.js").DrizzleColumn} DrizzleColumn
+ *
+ * @typedef {import("./pagination.common-types.jsdoc.js").TableColumns} TableColumns
+ */
+
+/**
  * Encode cursor to base64
- * @param {Record<string, any>} item - Item to encode
+ *
+ * @param {Record<string, string | number | boolean | null>} item - Item to encode
  * @param {string} cursorColumn - Column to use as cursor
  * @returns {string} Encoded cursor
  */
@@ -21,8 +28,9 @@ const encodeCursor = (item, cursorColumn) => {
 
 /**
  * Decode cursor from base64
+ *
  * @param {string} cursor - Encoded cursor
- * @returns {Record<string, any>} Decoded cursor object
+ * @returns {Record<string, string | number | boolean | null>} Decoded cursor object
  * @throws {BadRequestException} If cursor is invalid
  */
 const decodeCursor = (cursor) => {
@@ -39,13 +47,14 @@ const decodeCursor = (cursor) => {
 
 /**
  * Apply cursor condition to query builder
- * @template {any} TTable - Drizzle table type
- * @template {'offset' | 'cursor'} TStrategy - Pagination strategy
+ *
+ * @template TTable - Drizzle table type (PgTable or similar)
+ * @template {"offset" | "cursor"} TStrategy - Pagination strategy
  * @param {PaginationQueryBuilder<TTable, TStrategy>} builder - Query builder
- * @param {any} table - Table
+ * @param {TTable} table - Table
  * @param {string} cursorColumn - Cursor column
  * @param {string} cursor - Cursor value
- * @param {'after' | 'before'} type - Cursor type
+ * @param {"after" | "before"} type - Cursor type
  */
 const applyCursorCondition = (builder, table, cursorColumn, cursor, type) => {
   const decoded = decodeCursor(cursor);
@@ -56,8 +65,8 @@ const applyCursorCondition = (builder, table, cursorColumn, cursor, type) => {
     throw new BadRequestException(`Cursor does not contain column "${cursorColumn}"`);
   }
 
-  // eslint-disable-next-line security/detect-object-injection
-  const column = table[cursorColumn];
+  // @ts-ignore - table is generic Drizzle type
+  const column = /** @type {TableColumns} */ table[cursorColumn];
   if (!column) {
     throw new BadRequestException(`Invalid cursor column "${cursorColumn}"`);
   }
@@ -68,17 +77,18 @@ const applyCursorCondition = (builder, table, cursorColumn, cursor, type) => {
 
 /**
  * Build query builder for cursor pagination
- * @template {any} TTable - Drizzle table type
+ *
+ * @template TTable - Drizzle table type (PgTable or similar)
  * @param {object} params - Parameters
- * @param {{ db: any, logger: any }} params.deps - Dependencies (partial, only db and logger are used)
+ * @param {import("#@types/index.jsdoc.js").Dependencies} params.deps - Dependencies
  * @param {TTable} params.table - Table to paginate
- * @param {import('./pagination.types.jsdoc.js').PaginationConfig<TTable, 'cursor'>} params.config - Pagination config
- * @param {import('./pagination.types.jsdoc.js').PaginationParams<'cursor'>} params.paginationParams - Pagination parameters
- * @param {import('./pagination.types.jsdoc.js').PaginationOptions} params.options - Additional options
+ * @param {import("./pagination.types.jsdoc.js").PaginationConfig<TTable, "cursor">} params.config - Pagination config
+ * @param {import("./pagination.types.jsdoc.js").PaginationParams<"cursor">} params.paginationParams - Pagination parameters
+ * @param {import("./pagination.types.jsdoc.js").PaginationOptions} params.options - Additional options
  * @param {string} params.cursorColumn - Cursor column name
  * @param {string} [params.after] - After cursor
  * @param {string} [params.before] - Before cursor
- * @returns {import('./pagination.query-builder.js').PaginationQueryBuilder<TTable, 'cursor'>} Configured query builder
+ * @returns {import("./pagination.query-builder.js").PaginationQueryBuilder<TTable, "cursor">} Configured query builder
  */
 const buildCursorQuery = ({ deps, table, config, paginationParams, options, cursorColumn, after, before }) => {
   const { db } = deps;
@@ -104,7 +114,6 @@ const buildCursorQuery = ({ deps, table, config, paginationParams, options, curs
 
   // Apply custom query builder
   if (queryBuilder) {
-    // @ts-expect-error - queryBuilder accepts any PaginationQueryBuilder variant
     queryBuilder(builder);
   }
 
@@ -113,34 +122,44 @@ const buildCursorQuery = ({ deps, table, config, paginationParams, options, curs
 
 /**
  * Generate cursors from entities
- * @param {any[]} entities - Entities to generate cursors from
+ *
+ * @template TItem - Entity type
+ * @param {TItem[]} entities - Entities to generate cursors from
  * @param {string} cursorColumn - Cursor column name
- * @returns {{startCursor?: string, endCursor?: string}} Cursors
+ * @returns {{ startCursor?: string; endCursor?: string }} Cursors
  */
 const generateCursors = (entities, cursorColumn) => {
   if (entities.length === 0) {
     return { startCursor: undefined, endCursor: undefined };
   }
 
+  const lastEntity = entities.at(-1);
+  const firstEntity = entities[0];
+  if (!lastEntity || !firstEntity) {
+    throw new BadRequestException("Cannot generate cursors for empty entity list");
+  }
   return {
-    endCursor: encodeCursor(entities.at(-1), cursorColumn),
-    startCursor: encodeCursor(entities[0], cursorColumn),
+    endCursor: encodeCursor(/** @type {Record<string, string | number | boolean | null>} */ lastEntity, cursorColumn),
+    startCursor: encodeCursor(/** @type {Record<string, string | number | boolean | null>} */ firstEntity, cursorColumn),
   };
 };
 
 /**
  * Cursor-based pagination service
- * @template {any} TTable - Drizzle table type
- * @template {any} [TItem=any] - Item type in the response
+ *
+ * @template TTable - Drizzle table type (PgTable or similar)
+ * @template TItem - Item type in the response (inferred from table)
  * @param {import("#@types/index.jsdoc.js").Dependencies} deps - Dependencies
  * @param {TTable} table - Table to paginate
- * @param {import('./pagination.types.jsdoc.js').PaginationConfig<TTable, 'cursor'>} config - Pagination config (must have strategy 'cursor')
- * @param {import('./pagination.types.jsdoc.js').PaginationParams<'cursor'>} paginationParams - Pagination parameters (must have CursorPaginationQuery)
- * @param {import('./pagination.types.jsdoc.js').PaginationOptions} [options] - Additional options
- * @returns {Promise<import('./pagination.types.jsdoc.js').CursorPaginatedResponse<TItem>>}
+ * @param {import("./pagination.types.jsdoc.js").PaginationConfig<TTable, "cursor">} config - Pagination config (must have
+ *   strategy 'cursor')
+ * @param {import("./pagination.types.jsdoc.js").PaginationParams<"cursor">} paginationParams - Pagination parameters (must
+ *   have CursorPaginationQuery)
+ * @param {import("./pagination.types.jsdoc.js").PaginationOptions} [options] - Additional options
+ * @returns {Promise<import("./pagination.types.jsdoc.js").CursorPaginatedResponse<TItem>>}
  */
 export const paginateCursor = async ({ db, logger }, table, config, paginationParams, options = {}) => {
-  /** @type {import('./pagination.types.jsdoc.js').CursorPaginationQuery} */
+  /** @type {import("./pagination.types.jsdoc.js").CursorPaginationQuery} */
   const cursorQuery = paginationParams.query;
   const { after, before, limit: requestedLimit } = cursorQuery;
 
@@ -160,6 +179,7 @@ export const paginateCursor = async ({ db, logger }, table, config, paginationPa
     before,
     config,
     cursorColumn,
+    // @ts-ignore - partial Dependencies for pagination
     deps: { db, logger },
     options,
     paginationParams,

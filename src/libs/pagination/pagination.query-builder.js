@@ -4,8 +4,12 @@ import { createSelectSchema } from "drizzle-typebox";
 import { BadRequestException } from "#libs/errors/domain.errors.js";
 
 /**
- * Valid filter operators
+ * @typedef {import("./pagination.common-types.jsdoc.js").DrizzleColumn} DrizzleColumn
+ *
+ * @typedef {import("./pagination.common-types.jsdoc.js").TableColumns} TableColumns
  */
+
+/** Valid filter operators */
 const FILTER_OPERATORS = {
   $eq: eq,
   $gt: gt,
@@ -17,35 +21,28 @@ const FILTER_OPERATORS = {
   $notIn: notInArray,
 };
 
-/**
- * Default allowed operators for all filterable columns
- */
+/** Default allowed operators for all filterable columns */
 const DEFAULT_OPERATORS = ["$eq", "$gt", "$gte", "$lt", "$lte", "$in", "$notIn", "$ilike"];
 
-/**
- * Operators that expect array values
- */
+/** Operators that expect array values */
 const ARRAY_OPERATORS = new Set(["$in", "$notIn"]);
 
-/**
- * Legacy operator prefix for backward compatibility
- */
+/** Legacy operator prefix for backward compatibility */
 const LEGACY_OPERATOR_PREFIX = "$";
 
 /**
  * Query builder class for chainable API
- * @template {any} TTable - Drizzle table type
- * @template {'offset' | 'cursor'} [TStrategy='offset'] - Pagination strategy type
+ *
+ * @template TTable - Drizzle table type (PgTable or similar)
+ * @template {"offset" | "cursor"} [TStrategy='offset'] - Pagination strategy type. Default is `'offset'`
  */
 export class PaginationQueryBuilder {
-  /** @type {import('./pagination.types.jsdoc.js').PaginationConfig<TTable, TStrategy>} */
+  /** @type {import("./pagination.types.jsdoc.js").PaginationConfig<TTable, TStrategy>} */
   #config;
 
-  /**
-   * @typedef {import('./pagination.types.jsdoc.js').PaginationStrategy} PaginationStrategy
-   */
+  /** @typedef {import("./pagination.types.jsdoc.js").PaginationStrategy} PaginationStrategy */
 
-  /** @type {any} */
+  /** @type {import("drizzle-orm/postgres-js").PostgresJsDatabase<Record<string, never>>} */
   #db;
 
   /** @type {import("drizzle-orm").Column[]} */
@@ -54,13 +51,13 @@ export class PaginationQueryBuilder {
   /** @type {import("drizzle-orm").SQL[]} */
   #havingConditions = [];
 
-  /** @type {Array<{type: 'left' | 'inner', table: any, condition: import("drizzle-orm").SQL}>} */
+  /** @type {{ type: "left" | "inner"; table: TTable; condition: import("drizzle-orm").SQL }[]} */
   #joinClauses = [];
 
   /** @type {import("drizzle-orm").SQL[]} */
   #orderByConditions = [];
 
-  /** @type {Record<string, any> | undefined} */
+  /** @type {Record<string, import("drizzle-orm").Column> | undefined} */
   #selectColumns;
 
   /** @type {TTable} */
@@ -70,9 +67,9 @@ export class PaginationQueryBuilder {
   #whereConditions = [];
 
   /**
-   * @param {any} db - Drizzle database instance
+   * @param {import("drizzle-orm/postgres-js").PostgresJsDatabase<Record<string, never>>} db - Drizzle database instance
    * @param {TTable} table - Table to query
-   * @param {import('./pagination.types.jsdoc.js').PaginationConfig<TTable, TStrategy>} config - Pagination config
+   * @param {import("./pagination.types.jsdoc.js").PaginationConfig<TTable, TStrategy>} config - Pagination config
    */
   constructor(db, table, config) {
     this.#db = db;
@@ -83,6 +80,7 @@ export class PaginationQueryBuilder {
 
   /**
    * Apply filters from query params (protected by config)
+   *
    * @param {Record<string, string | string[]>} [filters] - Filter params (can be string or array of strings)
    * @returns {this}
    */
@@ -95,8 +93,8 @@ export class PaginationQueryBuilder {
       this.#validateFilterColumn(columnName, filterableColumnsObj);
       const allowedOperators = filterableColumnsObj[columnName];
 
-      // eslint-disable-next-line security/detect-object-injection
-      const column = this.#table[columnName];
+      // @ts-ignore - table is generic Drizzle type
+      const column = /** @type {TableColumns} */ this.#table[columnName];
       if (!column) continue;
 
       const conditions = this.#buildFilterConditions(column, columnName, filterValue, allowedOperators);
@@ -108,6 +106,7 @@ export class PaginationQueryBuilder {
 
   /**
    * Apply select from querystring (protected by config)
+   *
    * @param {string[]} [selectFields] - Fields to select from querystring
    * @returns {this}
    */
@@ -129,6 +128,7 @@ export class PaginationQueryBuilder {
 
   /**
    * Apply sorting (protected by config)
+   *
    * @param {string[]} [sortBy] - Sort params
    * @returns {this}
    */
@@ -139,8 +139,8 @@ export class PaginationQueryBuilder {
     for (const { column, direction } of sortParams) {
       this.#validateSortColumn(column, sortableColumns);
 
-      // eslint-disable-next-line security/detect-object-injection
-      const tableColumn = this.#table[column];
+      // @ts-ignore - table is generic Drizzle type
+      const tableColumn = /** @type {TableColumns} */ this.#table[column];
       if (!tableColumn) continue;
 
       this.#addOrderBy(tableColumn, direction);
@@ -151,13 +151,15 @@ export class PaginationQueryBuilder {
 
   /**
    * Execute query with pagination
+   *
    * @param {object} options
    * @param {number} options.limit - Items per page
    * @param {number} options.offset - Offset
-   * @returns {Promise<import('./pagination.types.jsdoc.js').QueryExecutionResult>}
+   * @returns {Promise<import("./pagination.types.jsdoc.js").QueryExecutionResult>}
    */
   async execute({ limit, offset }) {
     try {
+      // @ts-expect-error - Drizzle query builder types are complex and dynamic
       const dataQuery = this.#buildQuery()
         .orderBy(...this.#orderByConditions)
         .limit(limit)
@@ -176,6 +178,7 @@ export class PaginationQueryBuilder {
 
   /**
    * Add GROUP BY
+   *
    * @param {...import("drizzle-orm").Column} columns - Columns to group by
    * @returns {this}
    */
@@ -186,6 +189,7 @@ export class PaginationQueryBuilder {
 
   /**
    * Add HAVING condition
+   *
    * @param {import("drizzle-orm").SQL} condition - Having condition
    * @returns {this}
    */
@@ -198,7 +202,8 @@ export class PaginationQueryBuilder {
 
   /**
    * Add INNER JOIN
-   * @param {any} table - Table to join
+   *
+   * @param {TTable} table - Table to join
    * @param {import("drizzle-orm").SQL} condition - Join condition
    * @returns {this}
    */
@@ -209,7 +214,8 @@ export class PaginationQueryBuilder {
 
   /**
    * Add LEFT JOIN
-   * @param {any} table - Table to join
+   *
+   * @param {TTable} table - Table to join
    * @param {import("drizzle-orm").SQL} condition - Join condition
    * @returns {this}
    */
@@ -220,7 +226,8 @@ export class PaginationQueryBuilder {
 
   /**
    * Set select columns
-   * @param {Record<string, any>} columns - Columns to select
+   *
+   * @param {Record<string, import("drizzle-orm").Column>} columns - Columns to select
    * @returns {this}
    */
   select(columns) {
@@ -230,6 +237,7 @@ export class PaginationQueryBuilder {
 
   /**
    * Add WHERE condition
+   *
    * @param {import("drizzle-orm").SQL} condition - SQL condition
    * @returns {this}
    */
@@ -244,8 +252,9 @@ export class PaginationQueryBuilder {
 
   /**
    * Add ORDER BY condition
-   * @param {any} column - Column to sort
-   * @param {'ASC' | 'DESC'} direction - Sort direction
+   *
+   * @param {import("drizzle-orm").Column} column - Column to sort
+   * @param {"ASC" | "DESC"} direction - Sort direction
    */
   #addOrderBy(column, direction) {
     this.#orderByConditions.push(direction === "DESC" ? desc(column) : asc(column));
@@ -253,6 +262,7 @@ export class PaginationQueryBuilder {
 
   /**
    * Apply filter conditions (OR for multiple, single for one)
+   *
    * @param {import("drizzle-orm").SQL[]} conditions - Filter conditions
    */
   #applyFilterConditions(conditions) {
@@ -264,11 +274,14 @@ export class PaginationQueryBuilder {
 
   /**
    * Apply all JOIN clauses to query
-   * @param {any} query - Query builder
-   * @returns {any} Query with joins applied
+   *
+   * @template TQuery - Query builder type
+   * @param {TQuery} query - Query builder
+   * @returns {TQuery} Query with joins applied
    */
   #applyJoins(query) {
     for (const { condition, table, type } of this.#joinClauses) {
+      // @ts-expect-error - Drizzle join methods have complex types that TypeScript can't infer correctly
       query = type === "left" ? query.leftJoin(table, condition) : query.innerJoin(table, condition);
     }
     return query;
@@ -276,18 +289,21 @@ export class PaginationQueryBuilder {
 
   /**
    * Build count query with proper GROUP BY support
-   * @returns {any} Count query builder
+   *
+   * @returns {unknown} Count query builder (Drizzle has complex types)
    */
   #buildCountQuery() {
     if (this.#groupByColumns.length > 0) {
       return this.#buildGroupedCountQuery();
     }
 
+    // @ts-expect-error - Drizzle table types are dynamic and complex
     let query = this.#db.select({ itemCount: count() }).from(this.#table);
     query = this.#applyJoins(query);
 
     const whereCondition = this.#combineConditions(this.#whereConditions);
     if (whereCondition) {
+      // @ts-expect-error - Drizzle query builder types are complex
       query = query.where(whereCondition);
     }
 
@@ -296,6 +312,7 @@ export class PaginationQueryBuilder {
 
   /**
    * Build filter conditions for a column
+   *
    * @param {any} column - Drizzle column
    * @param {string} columnName - Column name
    * @param {string | string[]} filterValue - Filter value(s)
@@ -314,7 +331,8 @@ export class PaginationQueryBuilder {
 
   /**
    * Build grouped count query using subquery
-   * @returns {any} Grouped count query
+   *
+   * @returns {unknown} Grouped count query (Drizzle has complex types)
    */
   #buildGroupedCountQuery() {
     // @ts-expect-error - table structure is dynamic, id column may not exist in type but exists at runtime
@@ -323,38 +341,46 @@ export class PaginationQueryBuilder {
     subquery = this.#applyJoins(subquery);
 
     if (this.#whereConditions.length > 0) {
+      // @ts-expect-error - Drizzle query builder types are complex
       subquery = subquery.where(and(...this.#whereConditions));
     }
 
+    // @ts-expect-error - Drizzle groupBy accepts dynamic column types
     subquery = subquery.groupBy(...this.#groupByColumns);
 
     if (this.#havingConditions.length > 0) {
+      // @ts-expect-error - Drizzle query builder types are complex
       subquery = subquery.having(and(...this.#havingConditions));
     }
 
-    return this.#db.select({ itemCount: count() }).from(subquery.as("grouped"));
+    return /** @type {unknown} */ this.#db.select({ itemCount: count() }).from(subquery.as("grouped"));
   }
 
   /**
    * Build final query with all conditions
-   * @returns {any} Query builder
+   *
+   * @returns {unknown} Query builder (Drizzle has complex types)
    */
   #buildQuery() {
+    // @ts-expect-error - Drizzle select accepts undefined for select all, but TypeScript doesn't understand this
     let query = this.#db.select(this.#selectColumns || undefined).from(this.#table);
 
     query = this.#applyJoins(query);
 
     const whereCondition = this.#combineConditions(this.#whereConditions);
     if (whereCondition) {
+      // @ts-expect-error - Drizzle query builder types are complex
       query = query.where(whereCondition);
     }
 
     if (this.#groupByColumns.length > 0) {
+      // @ts-expect-error - Drizzle groupBy accepts dynamic column types
       query = query.groupBy(...this.#groupByColumns);
     }
 
     const havingCondition = this.#combineConditions(this.#havingConditions);
     if (havingCondition) {
+      // @ts-expect-error - Drizzle query builder types are complex
       query = query.having(havingCondition);
     }
 
@@ -363,22 +389,28 @@ export class PaginationQueryBuilder {
 
   /**
    * Build select object from field names
+   *
    * @param {string[]} selectFields - Field names to select
-   * @returns {Record<string, any>} Select object
+   * @returns {TableColumns} Select object
    */
   #buildSelectObject(selectFields) {
-    return selectFields.reduce((acc, field) => {
-      // eslint-disable-next-line security/detect-object-injection
-      const column = this.#table[field];
-      if (column) {
-        acc[field] = column;
-      }
-      return acc;
-    }, {});
+    return selectFields.reduce(
+      (acc, field) => {
+        // @ts-ignore - table is generic Drizzle type
+        const column = /** @type {TableColumns} */ this.#table[field];
+        if (column) {
+          // @ts-ignore - accumulator type
+          acc[field] = column;
+        }
+        return acc;
+      },
+      /** @type {TableColumns} */ {},
+    );
   }
 
   /**
    * Combine multiple conditions with AND
+   *
    * @param {import("drizzle-orm").SQL[]} conditions - Conditions to combine
    * @returns {import("drizzle-orm").SQL | undefined} Combined condition
    */
@@ -389,9 +421,10 @@ export class PaginationQueryBuilder {
 
   /**
    * Create filter condition based on operator
-   * @param {any} column - Drizzle column
-   * @param {import('./pagination.types.jsdoc.js').FilterOperator} operator - Filter operator
-   * @param {any} value - Filter value
+   *
+   * @param {import("drizzle-orm").Column} column - Drizzle column
+   * @param {import("./pagination.types.jsdoc.js").FilterOperator} operator - Filter operator
+   * @param {string | number | boolean | string[]} value - Filter value
    * @returns {import("drizzle-orm").SQL} SQL condition
    */
   #createFilterCondition(column, operator, value) {
@@ -410,6 +443,7 @@ export class PaginationQueryBuilder {
 
   /**
    * Extract enum values from schema for better error messages
+   *
    * @returns {string[]} Enum values or empty array
    */
   #extractEnumValues() {
@@ -446,6 +480,7 @@ export class PaginationQueryBuilder {
 
   /**
    * Get allowed columns for select
+   *
    * @returns {string[]} Allowed column names
    */
   #getAllowedSelectColumns() {
@@ -466,12 +501,13 @@ export class PaginationQueryBuilder {
 
   /**
    * Handle database errors and convert to user-friendly exceptions
-   * @param {any} error - Database error
+   *
+   * @param {unknown} error - Database error
    * @throws {BadRequestException} User-friendly error
    */
   #handleDatabaseError(error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    const cause = /** @type {any} */ error?.cause || error;
+    const cause = (error && typeof error === "object" && "cause" in error ? error.cause : error) || error;
     const causeMessage = cause instanceof Error ? cause.message : String(cause);
     const fullMessage = `${errorMessage} ${causeMessage}`;
 
@@ -496,6 +532,7 @@ export class PaginationQueryBuilder {
 
   /**
    * Normalize filterableColumns config to object format
+   *
    * @returns {Record<string, string[]>} Normalized filterable columns
    */
   #normalizeFilterableColumns() {
@@ -508,8 +545,9 @@ export class PaginationQueryBuilder {
 
   /**
    * Parse filter value into operator and value
+   *
    * @param {string} value - Filter value string
-   * @returns {import('./pagination.types.jsdoc.js').ParsedFilterValue} Parsed filter
+   * @returns {import("./pagination.types.jsdoc.js").ParsedFilterValue} Parsed filter
    */
   #parseFilterValue(value) {
     if (!value) return { operator: "$eq", value };
@@ -520,23 +558,23 @@ export class PaginationQueryBuilder {
       const [, operator, val] = operatorMatch;
 
       // Validate operator exists in FILTER_OPERATORS
-      const validOperators = /** @type {Array<import('./pagination.types.jsdoc.js').FilterOperator>} */ (
-        Object.keys(FILTER_OPERATORS)
-      );
-      if (!validOperators.includes(/** @type {import('./pagination.types.jsdoc.js').FilterOperator} */ (operator))) {
-        throw new BadRequestException(
-          `Unknown filter operator: ${operator}. Valid operators: ${validOperators.join(", ")}`,
-        );
+      const validOperators =
+        /** @type {import("./pagination.types.jsdoc.js").FilterOperator[]} */ Object.keys(FILTER_OPERATORS);
+      if (!validOperators.includes(/** @type {import("./pagination.types.jsdoc.js").FilterOperator} */ operator)) {
+        throw new BadRequestException(`Unknown filter operator: ${operator}. Valid operators: ${validOperators.join(", ")}`);
       }
 
       // Type assertion is safe because we validated operator exists in FILTER_OPERATORS
-      const op = /** @type {import('./pagination.types.jsdoc.js').FilterOperator} */ (operator);
+      // @ts-ignore - operator is validated against FILTER_OPERATORS
+      const op = operator;
 
       // Parse array values for $in and $notIn
       if (ARRAY_OPERATORS.has(op)) {
+        // @ts-ignore - operator type is checked
         return { operator: op, value: val.split(",") };
       }
 
+      // @ts-ignore - operator type is checked
       return { operator: op, value: val };
     }
 
@@ -551,22 +589,24 @@ export class PaginationQueryBuilder {
 
   /**
    * Parse sort parameter string
+   *
    * @param {string} sortParam - Sort parameter (e.g., "name:DESC")
-   * @returns {import('./pagination.types.jsdoc.js').SortParam} Parsed sort param
+   * @returns {import("./pagination.types.jsdoc.js").SortParam} Parsed sort param
    */
   #parseSortParam(sortParam) {
     const [column, direction = "ASC"] = sortParam.split(":");
     const upperDir = direction.toUpperCase();
-    /** @type {'ASC' | 'DESC'} */
+    /** @type {"ASC" | "DESC"} */
     const dir = upperDir === "ASC" || upperDir === "DESC" ? upperDir : "ASC";
     return { column, direction: dir };
   }
 
   /**
    * Resolve sort parameters from query or defaults
+   *
    * @param {string[]} [sortBy] - Sort params from query
-   * @param {Array<[string, 'ASC' | 'DESC']>} [defaultSortBy] - Default sort config
-   * @returns {import('./pagination.types.jsdoc.js').SortParam[]} Resolved sort params
+   * @param {[string, "ASC" | "DESC"][]} [defaultSortBy] - Default sort config
+   * @returns {import("./pagination.types.jsdoc.js").SortParam[]} Resolved sort params
    */
   #resolveSortParams(sortBy, defaultSortBy) {
     if (sortBy && sortBy.length > 0) {
@@ -582,6 +622,7 @@ export class PaginationQueryBuilder {
 
   /**
    * Validate filter column is allowed
+   *
    * @param {string} columnName - Column name
    * @param {Record<string, string[]>} filterableColumns - Allowed filterable columns
    * @throws {BadRequestException} If column is not filterable
@@ -599,6 +640,7 @@ export class PaginationQueryBuilder {
 
   /**
    * Validate operator is allowed for column
+   *
    * @param {string} operator - Operator to validate
    * @param {string} columnName - Column name
    * @param {string[]} allowedOperators - Allowed operators
@@ -614,6 +656,7 @@ export class PaginationQueryBuilder {
 
   /**
    * Validate select fields are allowed
+   *
    * @param {string[]} selectFields - Fields to validate
    * @param {string[]} allowedColumns - Allowed columns
    * @throws {BadRequestException} If field is not selectable
@@ -628,6 +671,7 @@ export class PaginationQueryBuilder {
 
   /**
    * Validate sort column is allowed
+   *
    * @param {string} column - Column name
    * @param {string[]} sortableColumns - Allowed sortable columns
    * @throws {BadRequestException} If column is not sortable

@@ -4,6 +4,7 @@ import { users } from "./users.model.js";
 
 /**
  * Pagination configuration for users module
+ *
  * @type {import("#libs/pagination/pagination.types.jsdoc.js").PaginationConfig<typeof users>}
  */
 export const USERS_PAGINATION_CONFIG = {

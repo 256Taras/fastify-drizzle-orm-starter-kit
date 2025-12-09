@@ -1,5 +1,5 @@
 /**
- * @template T extends Record<string, any>
+ * @template T Extends Record<string, unknown>
  * @param {T} fixture
  * @returns {T}
  */
@@ -7,8 +7,8 @@ export function fixtureFactory(fixture) {
   const proxyCache = new WeakMap();
 
   /**
-   * @param {any} target
-   * @returns {any}
+   * @param {unknown} target - Target object to create proxy for
+   * @returns {unknown} Proxy object
    */
   function createProxy(target) {
     if (target == null || typeof target !== "object") {
@@ -21,11 +21,12 @@ export function fixtureFactory(fixture) {
 
     const proxy = new Proxy(target, {
       /**
-       * @param {object} t
+       * @param {Record<string, unknown>} t
        * @param {string | symbol} p
        */
       get(t, p) {
         if (typeof p === "symbol" || !(p in t)) {
+          // @ts-expect-error - Proxy indexing with symbol or dynamic string
           return t[p];
         }
 
@@ -47,5 +48,6 @@ export function fixtureFactory(fixture) {
     return proxy;
   }
 
+  // @ts-expect-error - Return type is generic and inferred from fixture parameter
   return createProxy(fixture);
 }

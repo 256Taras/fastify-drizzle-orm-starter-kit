@@ -23,9 +23,7 @@ const findAll = async ({ paginationService }, paginationParams) => {
   return paginationService.paginate(USERS_PAGINATION_CONFIG, paginationParams);
 };
 
-/**
- * @param {Dependencies} deps
- */
+/** @param {Dependencies} deps */
 export default function usersService(deps) {
   return {
     findAll: partial(findAll, [deps]),
@@ -37,11 +35,16 @@ export default function usersService(deps) {
 
 /**
  * @typedef {import("./users.contracts.js").User} User
+ *
  * @typedef {import("./users.contracts.js").GetUsersListInputContract} GetUsersListInputContract
+ *
  * @typedef {import("./users.contracts.js").GetUsersListOutputContract} GetUsersListOutputContract
- * @typedef {import("#libs/pagination/pagination.types.jsdoc.js").PaginationParams} PaginationParams
- * @typedef {import("#libs/pagination/pagination.types.jsdoc.js").OffsetPaginatedResponse<any>} PaginatedResponse
+ *
+ * @typedef {import("#libs/pagination/pagination.types.jsdoc.js").PaginationParams<"offset">} PaginationParams
+ *
+ * @typedef {import("#libs/pagination/pagination.types.jsdoc.js").OffsetPaginatedResponse<User>} PaginatedResponse
  *
  * @typedef {function(Dependencies, string):Promise<User>} FindOneById
+ *
  * @typedef {function(Dependencies, PaginationParams):Promise<PaginatedResponse>} FindAll
  */

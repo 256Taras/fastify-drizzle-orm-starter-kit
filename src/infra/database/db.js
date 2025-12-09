@@ -4,17 +4,18 @@ import postgres from "postgres";
 import { databaseLogger, logger } from "#libs/logging/logger.service.js";
 
 export class DatabaseManager {
-  /** @type {import('drizzle-orm/postgres-js').PostgresJsDatabase} */
+  /** @type {import("drizzle-orm/postgres-js").PostgresJsDatabase} */
   drizzle;
 
   isInitialized = false;
 
-  /** @type {import('postgres').Sql} */
+  /** @type {import("postgres").Sql} */
   postgres;
 
   /**
    * Initializes a new instance of the DatabaseManager.
-   * @param {{configs: import("#@types/index.jsdoc.js").Configs}} configs - The configuration object.
+   *
+   * @param {{ configs: import("#@types/index.jsdoc.js").Configs }} configs - The configuration object.
    */
   constructor({ configs }) {
     const { APP_CONFIG, DB_CONFIG } = configs;
@@ -31,9 +32,7 @@ export class DatabaseManager {
     });
   }
 
-  /**
-   * Disconnects the database connection if initialized.
-   */
+  /** Disconnects the database connection if initialized. */
   async disconnect() {
     if (this.isInitialized) {
       await this.postgres.end();
@@ -42,6 +41,7 @@ export class DatabaseManager {
 
   /**
    * Handles unexpected connection closures by logging and throwing an error.
+   *
    * @param {number} connId - The connection ID that was unexpectedly closed.
    */
   handleClose(connId) {
@@ -50,7 +50,8 @@ export class DatabaseManager {
 
   /**
    * Handles PostgreSQL notices by logging them and optionally throwing an error for severe notices.
-   * @param {object} notice - The notice object from PostgreSQL.
+   *
+   * @param {{ severity?: string; message?: string }} notice - The notice object from PostgreSQL.
    */
   handleNotice(notice) {
     if (notice.severity === "ERROR" || notice.severity === "FATAL") {
@@ -63,6 +64,7 @@ export class DatabaseManager {
 
   /**
    * Initializes database connection asynchronously with retry logic
+   *
    * @param {object} [options] - Retry options
    * @param {number} [options.maxRetries] - Maximum number of retry attempts
    * @param {number} [options.initialDelay] - Initial delay in milliseconds
@@ -101,9 +103,7 @@ export class DatabaseManager {
     throw new Error("Database initialization failed: unexpected error");
   }
 
-  /**
-   * Performs a simple database query to test the connection.
-   */
+  /** Performs a simple database query to test the connection. */
   async testConnection() {
     try {
       await this.postgres`SELECT 1`;

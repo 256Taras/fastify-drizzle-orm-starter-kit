@@ -18,8 +18,12 @@ export const USER_INPUT_LIST = COMMON_CONTRACTS_V1.paginationQuery;
 
 /**
  * Type definitions for users module
+ *
  * @typedef {import("@sinclair/typebox").Static<typeof USER_ENTITY_CONTRACT>} UserWithPassword
+ *
  * @typedef {import("@sinclair/typebox").Static<typeof USER_OUTPUT_CONTRACT>} User
+ *
  * @typedef {import("@sinclair/typebox").Static<typeof USER_INPUT_LIST>} GetUsersListInputContract
+ *
  * @typedef {import("@sinclair/typebox").Static<typeof USER_OUTPUT_LIST>} GetUsersListOutputContract
  */

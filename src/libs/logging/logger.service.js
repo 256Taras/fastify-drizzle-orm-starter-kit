@@ -26,7 +26,7 @@ export const TerminalOptions = {
   transport: LOGGER_CONFIG.enablePrettyPrint ? PinoPrettyTransport : undefined,
 };
 
-/**@typedef {'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal'} LOG_LEVEL */
+/** @typedef {"trace" | "debug" | "info" | "warn" | "error" | "fatal"} LOG_LEVEL */
 // @ts-ignore - pino is callable but TypeScript doesn't recognize it
 const loggerService = pino(TerminalOptions);
 
@@ -37,6 +37,7 @@ export const databaseLogger = new DefaultLogger({
   writer: {
     /**
      * Writes a database log message to the logger
+     *
      * @param {string} message - The log message to write
      */
     write(message) {

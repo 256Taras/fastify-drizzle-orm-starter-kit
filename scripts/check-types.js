@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
- * JSDoc Type Checking Script
- * Validates type coverage, declarations, and imports across the codebase
+ * JSDoc Type Checking Script Validates type coverage, declarations, and imports across the codebase
+ *
  * @file Automated type validation for JSDoc-based TypeScript project
  */
 /* eslint-disable no-console */
@@ -45,6 +45,7 @@ const colors = {
 
 /**
  * Logs a colored message
+ *
  * @param {string} icon - Emoji icon
  * @param {string} message - Message to log
  * @param {keyof typeof colors} [color] - Color name
@@ -56,12 +57,14 @@ const log = (icon, message, color = "reset") => {
 
 /**
  * Prints a separator line
+ *
  * @param {number} [length] - Length of separator
  */
 const separator = (length = 50) => console.log("=".repeat(length));
 
 /**
  * Checks if file should be excluded from coverage check
+ *
  * @param {string} filePath - Path to check
  * @returns {boolean}
  */
@@ -71,6 +74,7 @@ const shouldExcludeFromCoverage = (filePath) => {
 
 /**
  * Extracts type imports from file content
+ *
  * @param {string} content - File content
  * @returns {string[]}
  */
@@ -88,6 +92,7 @@ const extractTypeImports = (content) => {
 
 /**
  * Checks if file has JSDoc annotations
+ *
  * @param {string} filePath - Path to check
  * @returns {boolean}
  */
@@ -107,6 +112,7 @@ const hasJSDocTypes = (filePath) => {
 
 /**
  * Checks type coverage across JavaScript files
+ *
  * @returns {boolean} Whether coverage meets minimum requirement
  */
 function checkTypeCoverage() {
@@ -162,6 +168,7 @@ function checkTypeCoverage() {
 
 /**
  * Validates type declaration quality
+ *
  * @returns {boolean} Whether all declarations are valid
  */
 function checkTypeDeclarations() {
@@ -238,6 +245,7 @@ function checkTypeDeclarations() {
 
 /**
  * Validates type import paths
+ *
  * @returns {boolean} Whether all imports are valid
  */
 function checkTypeImports() {
@@ -285,6 +293,7 @@ function checkTypeImports() {
 
 /**
  * Runs TypeScript compiler check
+ *
  * @returns {boolean} Whether TypeScript compilation succeeds
  */
 function checkTypeScript() {
@@ -315,9 +324,7 @@ function checkTypeScript() {
 // Main
 // ============================================================================
 
-/**
- * Main execution function
- */
+/** Main execution function */
 function main() {
   console.log();
   log("🚀", "JSDoc Type Checking", "cyan");
@@ -346,7 +353,7 @@ function main() {
   };
 
   for (const [key, passed] of Object.entries(results)) {
-    // eslint-disable-next-line security/detect-object-injection
+    // @ts-expect-error - Dynamic key from Object.entries
     const label = resultLabels[key];
     const icon = passed ? "✅" : "❌";
     const color = passed ? "green" : "red";

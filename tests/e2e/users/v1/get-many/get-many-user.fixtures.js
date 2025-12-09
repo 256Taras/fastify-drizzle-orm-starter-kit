@@ -1,13 +1,11 @@
 import { ROLES_NAMES } from "#libs/constants/common.constants.js";
 import encrypterService from "#libs/encryption/encrypter.service.js";
-
-import { TABLE_NAMES } from "../../../../helpers/db-utils.js";
-import { fixtureFactory } from "../../../../helpers/index.js";
+// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+import { users } from "#modules/users/users.model.js";
+import { TABLE_NAMES } from "#tests/helpers/db-utils.js";
+import { fixtureFactory } from "#tests/helpers/index.js";
 
 const TESTING_METHOD = "GET";
-/**
- *
- */
 const getEndpoint = () => "/v1/users/";
 
 const hashedPassword = await encrypterService().getHash("test_password");
@@ -73,9 +71,9 @@ export const usersListFixtures = fixtureFactory({
       ],
     },
     /**
-     *
-     * @param {number} [count]
-     * @param  {object} overrides
+     * @param {number} [count] - Number of users to generate
+     * @param {Record<string, unknown>} [overrides] - User properties to override
+     * @returns {{ table: string; data: Record<string, unknown>[] }}
      */
     MANY_USERS: (count = 10, overrides = {}) => ({
       table: TABLE_NAMES.users,

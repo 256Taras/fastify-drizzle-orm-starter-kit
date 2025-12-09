@@ -8,23 +8,17 @@ const CONTROLLER_KEY = "CONTROLLER_KEY";
 const SIGNAL_KEY = "SIGNAL_KEY";
 
 /**
- * Plugin to handle request timeouts in Fastify. It sets up timeouts based on route-specific
- * configurations or global defaults and ensures proper cleanup of resources upon request completion
- * or failure. This plugin leverages Fastify's hooks for onRequest, onSend, and onError.
- * // Usage at the route level:
- * fastify.get('/some-route', {
- *   config: {
- *     timeout: 2000 // 2 seconds
- *   }
- * }, async (request, reply) => {
- *   // Your handler logic here.
- * });
- * @type {(app: import("#@types/index.jsdoc.js").FastifyInstance, options: { configs: { SERVER_CONFIG: { requestTimeout: number } } }) => Promise<void>}
+ * Plugin to handle request timeouts in Fastify. It sets up timeouts based on route-specific configurations or global
+ * defaults and ensures proper cleanup of resources upon request completion or failure. This plugin leverages Fastify's hooks
+ * for onRequest, onSend, and onError. // Usage at the route level: fastify.get('/some-route', { config: { timeout: 2000 // 2
+ * seconds } }, async (request, reply) => { // Your handler logic here. });
+ *
+ * @type {(
+ *   app: import("#@types/index.jsdoc.js").FastifyInstance,
+ *   options: { configs: { SERVER_CONFIG: { requestTimeout: number } } },
+ * ) => Promise<void>}
  */
 async function requestTimeoutPlugin(app, options) {
-  /**
-   *
-   */
   const performCleanup = () => {
     // @ts-ignore
     const timeoutId = requestContext.get(TIMEOUT_KEY);
@@ -40,9 +34,9 @@ async function requestTimeoutPlugin(app, options) {
   };
 
   /**
-   * @param {import('fastify').FastifyRequest} request
-   * @param {import('fastify').FastifyReply} reply
-   * @param {import('fastify').HookHandlerDoneFunction} done
+   * @param {import("fastify").FastifyRequest} request
+   * @param {import("fastify").FastifyReply} reply
+   * @param {import("fastify").HookHandlerDoneFunction} done
    */
   const setupRequestTimeout = (request, reply, done) => {
     try {
@@ -71,10 +65,10 @@ async function requestTimeoutPlugin(app, options) {
   };
 
   /**
-   * @param {import('fastify').FastifyRequest} request
-   * @param {import('fastify').FastifyReply} reply
-   * @param {any} payload
-   * @param {(err: Error | null, newPayload?: any) => void} done
+   * @param {import("fastify").FastifyRequest} request
+   * @param {import("fastify").FastifyReply} reply
+   * @param {unknown} payload
+   * @param {(err: Error | null, newPayload?: unknown) => void} done
    */
   const cleanupResources = (request, reply, payload, done) => {
     performCleanup();
@@ -82,8 +76,8 @@ async function requestTimeoutPlugin(app, options) {
   };
 
   /**
-   * @param {import('fastify').FastifyRequest} request
-   * @param {import('fastify').FastifyReply} reply
+   * @param {import("fastify").FastifyRequest} request
+   * @param {import("fastify").FastifyReply} reply
    * @param {Error} error
    * @param {(err?: Error) => void} done
    */

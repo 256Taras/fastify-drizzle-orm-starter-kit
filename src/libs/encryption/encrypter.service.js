@@ -4,6 +4,7 @@ import { ENCRYPTION_CONFIG } from "#configs/index.js";
 
 /**
  * Ensures encryption key is properly formatted (32 bytes for AES-256)
+ *
  * @returns {Buffer} The encryption key as a Buffer
  * @throws {Error} If the encryption key is missing or too short
  */
@@ -29,6 +30,7 @@ const cryptoConfig = {
 
 /**
  * Generates random bytes.
+ *
  * @param {number} [length] - The length of the random bytes.
  * @param {BufferEncoding} [encoding] - The encoding of the output.
  * @returns {string} The generated random bytes in the specified encoding.
@@ -37,6 +39,7 @@ const generateRandomBytes = (length = 16, encoding = "hex") => randomBytes(lengt
 
 /**
  * Generates a UUID.
+ *
  * @param {boolean} [clean] - Whether to remove hyphens.
  * @returns {string} The generated UUID, optionally without hyphens.
  */
@@ -47,6 +50,7 @@ const generateUUID = (clean = false) => {
 
 /**
  * Generates a hash from a password.
+ *
  * @param {string} password - The password to hash.
  * @returns {Promise<string>} A Promise that resolves to the salt and hash, concatenated by a colon.
  */
@@ -62,6 +66,7 @@ const getHash = async (password) => {
 
 /**
  * Compares a password with a hash to see if they match.
+ *
  * @param {string} password - The plaintext password.
  * @param {string} hash - The hash to compare against.
  * @returns {Promise<boolean>} A Promise that resolves to a boolean indicating the match result.
@@ -78,6 +83,7 @@ const compareHash = async (password, hash) => {
 
 /**
  * Encrypts data.
+ *
  * @param {string} rawData - The data to encrypt.
  * @returns {string} The encrypted data, including the IV.
  */
@@ -104,6 +110,7 @@ const decryptData = (encryptedData) => {
 
 /**
  * Encodes data to base64 format.
+ *
  * @param {string} data - The data to encode.
  * @returns {string} The base64-encoded data.
  */
@@ -111,15 +118,13 @@ const base64Encode = (data) => Buffer.from(data).toString("base64");
 
 /**
  * Decodes data from base64 format.
+ *
  * @param {string} data - The base64-encoded data.
  * @returns {string} The decoded data.
  */
 const base64Decode = (data) => Buffer.from(data, "base64").toString();
 
-/**
- * Creates a service providing cryptographic utilities.
- * @returns {object} An object containing cryptographic utility functions.
- */
+/** Creates a service providing cryptographic utilities. */
 const createEncrypterService = () => ({
   base64Decode,
   base64Encode,

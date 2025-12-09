@@ -15,14 +15,10 @@ const DRIZZLE_TABLES = {
   [TABLE_NAMES.users]: users,
 };
 
-/**
- * @param {import('drizzle-orm/postgres-js').PostgresJsDatabase} drizzleDb
- */
+/** @param {import("drizzle-orm/postgres-js").PostgresJsDatabase} drizzleDb */
 export function createDbHelper(drizzleDb) {
   return {
-    /**
-     * @returns {Promise<void>}
-     */
+    /** @returns {Promise<void>} */
     async cleanUp() {
       await validateTestDatabase(drizzleDb);
 
@@ -41,7 +37,7 @@ export function createDbHelper(drizzleDb) {
     },
 
     /**
-     * @param {object} seedConfig - { table: string|object, tablesMap?: Map<string, any>, data: any[] }
+     * @param {{ table: string; data: Record<string, unknown>[] }} seedConfig - Seed configuration
      * @returns {Promise<void>}
      */
     async seed(seedConfig) {
@@ -53,17 +49,19 @@ export function createDbHelper(drizzleDb) {
       if (data.length === 0) return;
 
       // If table is a string, resolve it from tablesMap
+      // eslint-disable-next-line security/detect-object-injection
       const ormTable = DRIZZLE_TABLES[table];
 
       if (!ormTable) {
         throw new Error(`Table "${table}" not found in tables map`);
       }
 
+      // @ts-expect-error - Generic data array is cast to specific table schema at runtime
       await drizzleDb.insert(ormTable).values(data);
     },
 
     /**
-     * @param {object[]} seedConfigs - масив { table, data }
+     * @param {{ table: string; data: Record<string, unknown>[] }[]} seedConfigs - Масив { table, data }
      * @returns {Promise<void>}
      */
     async seedMany(seedConfigs) {
@@ -73,7 +71,7 @@ export function createDbHelper(drizzleDb) {
     },
 
     /**
-     * @param {import('drizzle-orm').Table} table
+     * @param {import("drizzle-orm").Table} table
      * @returns {Promise<number>}
      */
     async count(table) {
@@ -82,8 +80,9 @@ export function createDbHelper(drizzleDb) {
     },
 
     /**
-     * @param {Function} testFn
-     * @returns {Promise<any>}
+     * @template T - Return type of test function
+     * @param {(db: import("drizzle-orm/postgres-js").PostgresJsDatabase) => Promise<T>} testFn - Test function
+     * @returns {Promise<T>}
      */
     async withTransaction(testFn) {
       await validateTestDatabase(drizzleDb);
@@ -107,9 +106,7 @@ export function createDbHelper(drizzleDb) {
   };
 }
 
-/**
- * @param {import('drizzle-orm/postgres-js').PostgresJsDatabase} db
- */
+/** @param {import("drizzle-orm/postgres-js").PostgresJsDatabase} db */
 async function validateTestDatabase(db) {
   if (ENV_CONFIG.ENV_NAME !== "test") {
     throw new Error(`Cleanup only allowed in test environment. Current: ${ENV_CONFIG.ENV_NAME}`);

@@ -1,8 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-/**
- * @type {import('fastify').FastifyHttpOptions<*>}
- */
+/** @type {import("fastify").FastifyHttpOptions<any>} */
 export const FASTIFY_CONFIG = {
   ajv: {
     customOptions: {

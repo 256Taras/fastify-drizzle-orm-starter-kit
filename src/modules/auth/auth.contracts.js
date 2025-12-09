@@ -20,15 +20,16 @@ export const SIGN_IN_UP_OUTPUT_CONTRACT = Type.Intersect([
   ),
 ]);
 
-// Sign up input - pick only required fields from insert schema (omit id, timestamps)
 export const SIGN_UP_INPUT_CONTRACT = Type.Pick(USER_INSERT_CONTRACT, ["email", "password", "firstName", "lastName"]);
 
-// Sign in input - pick only email and password
 export const SIGN_IN_INPUT_CONTRACT = Type.Pick(SIGN_UP_INPUT_CONTRACT, ["email", "password"]);
 
 /**
  * Type definitions for auth module
+ *
  * @typedef {import("@sinclair/typebox").Static<typeof SIGN_IN_UP_OUTPUT_CONTRACT>} Credentials
+ *
  * @typedef {import("@sinclair/typebox").Static<typeof SIGN_IN_INPUT_CONTRACT>} SignInInput
+ *
  * @typedef {import("@sinclair/typebox").Static<typeof SIGN_UP_INPUT_CONTRACT>} SignUpInput
  */

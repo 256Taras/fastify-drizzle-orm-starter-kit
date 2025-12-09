@@ -7,7 +7,7 @@ import { logger } from "#libs/logging/logger.service.js";
  * @param {object} [options]
  * @param {import("#@types/index.jsdoc.js").Configs} [options.configs]
  * @param {DatabaseManager} [options.database]
- * @returns {Promise<{app: import('fastify').FastifyInstance, database: DatabaseManager, teardown: () => Promise<void>}>}
+ * @returns {Promise<{ app: import("fastify").FastifyInstance; database: DatabaseManager; teardown: () => Promise<void> }>}
  */
 export async function createTestingApp(options = {}) {
   const testConfigs = options.configs || configs;
@@ -39,9 +39,6 @@ export async function createTestingApp(options = {}) {
   return {
     app,
     database: testDatabase,
-    /**
-     *
-     */
     teardown: async () => {
       try {
         await server.stop();

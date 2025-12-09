@@ -6,7 +6,7 @@ import { ConflictException, ResourceNotFoundException, UnauthorizedException } f
 import { authTokens } from "#modules/auth/auth-token.model.js";
 import { NON_PASSWORD_COLUMNS, users } from "#modules/users/users.model.js";
 
-/** @type {SignUpUser} **/
+/** @type {SignUpUser} * */
 const signUpUser = async ({ authTokenService, db, encrypterService, logger }, { email, firstName, lastName, password }) => {
   logger.debug(`Try sign up user with email: ${email}`);
 
@@ -21,10 +21,10 @@ const signUpUser = async ({ authTokenService, db, encrypterService, logger }, { 
     .values({ email, firstName, lastName, password: hashedPassword })
     .returning(NON_PASSWORD_COLUMNS);
 
-  return authTokenService.generateTokens({ id: savedUser.id, roles: savedUser.role });
+  return authTokenService.generateTokens(savedUser);
 };
 
-/** @type {SignInUser} **/
+/** @type {SignInUser} * */
 const signInUser = async ({ authTokenService, db, encrypterService }, { email, password }) => {
   const [maybeUser] = await db.select().from(users).where(eq(users.email, email));
 
@@ -34,10 +34,12 @@ const signInUser = async ({ authTokenService, db, encrypterService }, { email, p
 
   if (!isPasswordValid) throw new UnauthorizedException("Invalid password");
 
-  return authTokenService.generateTokens({ id: maybeUser.id, roles: maybeUser.role });
+  const [userWithoutPassword] = await db.select(NON_PASSWORD_COLUMNS).from(users).where(eq(users.id, maybeUser.id));
+
+  return authTokenService.generateTokens(userWithoutPassword);
 };
 
-/** @type {LogOutUser} **/
+/** @type {LogOutUser} * */
 const logOutUser = async ({ db, logger, sessionStorageService }) => {
   const { ppid, userId } = sessionStorageService.getUserCredentials();
 
@@ -53,11 +55,11 @@ const logOutUser = async ({ db, logger, sessionStorageService }) => {
   return STATUS_SUCCESS;
 };
 
-/** @type {RefreshTokens} **/
+/** @type {RefreshTokens} * */
 const refreshTokens = async ({ authTokenService, db, sessionStorageService }) => {
   const { ppid, userId } = sessionStorageService.getUserCredentials();
 
-  const [maybeUser] = await db.select().from(users).where(eq(users.id, userId));
+  const [maybeUser] = await db.select(NON_PASSWORD_COLUMNS).from(users).where(eq(users.id, userId));
 
   if (!maybeUser) throw new ResourceNotFoundException("User not found");
 
@@ -68,38 +70,33 @@ const refreshTokens = async ({ authTokenService, db, sessionStorageService }) =>
 
   if (!result) return UnauthorizedException.of("Failed refresh token");
 
-  const { accessToken, refreshToken, user } = await authTokenService.generateTokens(maybeUser);
-
-  return { accessToken, refreshToken, user };
+  return authTokenService.generateTokens(maybeUser);
 };
 
 /** @param {Dependencies} deps */
 export default function authService(deps) {
   return {
-    /**
-     *
-     */
     refreshAccessToken: () => refreshTokens(deps),
     signInUser: partial(signInUser, [deps]),
-    /**
-     *
-     */
     signOut: () => logOutUser(deps),
     signUpUser: partial(signUpUser, [deps]),
   };
 }
 
-/**
- * @typedef {import("#@types/index.jsdoc.js").Dependencies} Dependencies
- */
+/** @typedef {import("#@types/index.jsdoc.js").Dependencies} Dependencies */
 
 /**
  * @typedef {import("./auth.contracts.js").Credentials} Credentials
+ *
  * @typedef {import("./auth.contracts.js").SignInInput} SignInInput
+ *
  * @typedef {import("./auth.contracts.js").SignUpInput} SignUpInput
  *
  * @typedef {function(Dependencies, SignUpInput):Promise<Credentials>} SignUpUser
+ *
  * @typedef {function(Dependencies, SignInInput):Promise<Credentials>} SignInUser
+ *
  * @typedef {function(Dependencies):Promise<STATUS_SUCCESS>} LogOutUser
+ *
  * @typedef {function(Dependencies):Promise<Credentials>} RefreshTokens
  */
