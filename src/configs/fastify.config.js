@@ -1,7 +1,5 @@
 import { randomUUID } from "node:crypto";
 
-import { ajvFilePlugin } from "@fastify/multipart";
-
 /**
  * @type {import('fastify').FastifyHttpOptions<*>}
  */
@@ -24,7 +22,6 @@ export const FASTIFY_CONFIG = {
       validateFormats: true, // Enforce format validation strictly. Ensures data conforms to specified formats.
       verbose: true, // Provide detailed error messages. Makes debugging and fixing data issues easier.
     },
-    plugins: [ajvFilePlugin],
   },
   disableRequestLogging: true, // we do it on our own
   genReqId: () => randomUUID(),

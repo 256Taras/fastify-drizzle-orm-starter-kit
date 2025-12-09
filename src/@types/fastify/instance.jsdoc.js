@@ -22,7 +22,6 @@
  * @description
  * This type extends the base FastifyInstance with:
  * - Application configs (configs)
- * - File upload methods (upload, uploadToStorage, parseMultipartFields)
  * - Authentication methods (verifyJwt, verifyJwtRefreshToken, verifyApiKey)
  * - JWT token management (jwt.accessToken, jwt.refreshToken)
  * - Dependency injection container (diContainer.cradle)
@@ -35,7 +34,6 @@
  *
  * // Now all custom methods are available
  * app.configs.APP_CONFIG;
- * app.upload(file);
  * app.verifyJwt(request);
  * app.diContainer.cradle.authService;
  * const pagination = app.transformers.getPaginationQuery(req); // Returns pagination params

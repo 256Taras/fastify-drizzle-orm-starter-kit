@@ -6,10 +6,8 @@ import fastifyAutoLoad from "@fastify/autoload";
 import fastifyCors from "@fastify/cors";
 import fastifyFormBody from "@fastify/formbody";
 import fastifyHelmet from "@fastify/helmet";
-import fastifyMultipart from "@fastify/multipart";
 import fastifyRateLimit from "@fastify/rate-limit";
 import fastifyRequestContextPlugin from "@fastify/request-context";
-import fastifyStatic from "@fastify/static";
 import fastifySwaggerPlugin from "@fastify/swagger";
 import fastifySwaggerUiPlugin from "@fastify/swagger-ui";
 import Fastify from "fastify";
@@ -70,10 +68,6 @@ export class RestApiServer {
     this.#fastify.register(fastifyRateLimit, this.#configs.FASTIFY_RATE_LIMIT_CONFIG);
     // Helmet plugin for securing the app with important HTTP headers.
     this.#fastify.register(fastifyHelmet, this.#configs.FASTIFY_HELMET_CONFIG);
-    // Static plugin for serving static files.
-    this.#fastify.register(fastifyStatic, this.#configs.FASTIFY_STATIC_CONFIG);
-    // Multipart plugin for handling multipart form data (e.g., file uploads).
-    this.#fastify.register(fastifyMultipart, this.#configs.FASTIFY_MULTIPART_CONFIG);
     // FormBody plugin for parsing form bodies into JS objects.
     this.#fastify.register(fastifyFormBody);
 
