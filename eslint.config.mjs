@@ -4,7 +4,6 @@ import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
 import globals from 'globals';
 import pluginSecurity from 'eslint-plugin-security';
 import noSecrets from 'eslint-plugin-no-secrets';
-import jsdoc from 'eslint-plugin-jsdoc';
 import eslintPluginUnicorn from 'eslint-plugin-unicorn';
 import importPlugin from 'eslint-plugin-import';
 import perfectionist from 'eslint-plugin-perfectionist';
@@ -51,9 +50,6 @@ export default tseslint.config(
 
   // Security plugin recommended configuration
   pluginSecurity.configs.recommended,
-
-  // JSDoc flat configuration
-  jsdoc.configs['flat/recommended'],
 
   // Import plugin flat configuration
   importPlugin.flatConfigs.recommended,
@@ -190,23 +186,6 @@ export default tseslint.config(
       'security/detect-possible-timing-attacks': 'warn',
       'security/detect-pseudoRandomBytes': 'error',
 
-      // JSDoc rules
-      'jsdoc/require-returns': 'off',
-      'jsdoc/require-param-description': 'off',
-      'jsdoc/require-returns-description': 'off',
-      'jsdoc/tag-lines': 'off',
-      'jsdoc/require-jsdoc': ['error', {
-        require: {
-          FunctionDeclaration: true,
-          FunctionExpression: true,
-          ArrowFunctionExpression: true,
-          MethodDefinition: true,
-        },
-      }], // Вимагаємо JSDoc для функцій
-      'jsdoc/require-param-type': 'error', // Вимагаємо типи для параметрів
-      'jsdoc/require-param': 'error', // Вимагаємо документування параметрів
-      'jsdoc/require-returns-type': 'off', // Не обов'язково для виходу
-
       // Perfectionist rules
       'perfectionist/sort-imports': 'off',
       'perfectionist/sort-decorator': 'off',
@@ -226,12 +205,6 @@ export default tseslint.config(
       '@typescript-eslint/no-require-imports': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
 
-      // JSDoc rules
-      'jsdoc/no-undefined-types': 'off',
-      'jsdoc/reject-any-type': 'off',
-      'jsdoc/reject-function-type': 'off',
-
-
       // Other rules
       'no-constant-binary-expression': 'off',
     },
@@ -247,9 +220,6 @@ export default tseslint.config(
       '@typescript-eslint/ban-ts-comment': 'off',
       '@typescript-eslint/no-require-imports': 'off',
       'unicorn/import-style': 'off',
-      'jsdoc/require-jsdoc': 'off',
-      'jsdoc/require-param': 'off',
-      'jsdoc/require-param-type': 'off',
     },
   },
 
@@ -284,9 +254,6 @@ export default tseslint.config(
     rules: {
       'unicorn/no-anonymous-default-export': 'off',
       'unicorn/no-abusive-eslint-disable': 'off',
-      'jsdoc/require-jsdoc': 'off',
-      'jsdoc/require-param': 'off',
-      'jsdoc/require-param-type': 'off',
     },
   },
 
@@ -298,10 +265,6 @@ export default tseslint.config(
       'no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': 'off',
       'unicorn/require-module-specifiers': 'off', // Allow export {} for type-only files
-      'jsdoc/require-jsdoc': 'off', // Type definition files don't need JSDoc
-      'jsdoc/require-param': 'off',
-      'jsdoc/require-param-type': 'off',
-      'jsdoc/require-property-description': 'off', // Properties in typedef don't need descriptions
     },
   },
 
@@ -318,10 +281,6 @@ export default tseslint.config(
           partitionByNewLine: true,
         },
       ],
-      // Handler functions in routes have automatic type inference from TypeBox
-      'jsdoc/require-jsdoc': 'off', // Handlers have automatic type inference
-      'jsdoc/require-param': 'off', // Handlers have automatic type inference
-      'jsdoc/require-param-type': 'off', // Handlers have automatic type inference
     },
   },
 
