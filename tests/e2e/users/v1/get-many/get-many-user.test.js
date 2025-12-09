@@ -1,12 +1,7 @@
 import assert from "node:assert/strict";
 import { after, before, beforeEach, describe, it } from "node:test";
 
-import {
-  assertHasValidPagination,
-  assertMatchesShape,
-  createDbHelper,
-  createTestingApp,
-} from "#tests/helpers/index.js";
+import { assertHasValidPagination, assertMatchesShape, createDbHelper, createTestingApp } from "#tests/helpers/index.js";
 
 import { usersListFixtures as fixtures, getEndpoint, TESTING_METHOD } from "./get-many-user.fixtures.js";
 
@@ -145,7 +140,7 @@ describe(`${TESTING_METHOD}-${getEndpoint()}`, () => {
     assert.ok(data.data.length > 0);
   });
 
-  it.only("[200] should return only selected multiple fields", async () => {
+  it("[200] should return only selected multiple fields", async () => {
     await db.seed(fixtures.seeds.SINGLE_USER);
 
     const response = await app.inject({
@@ -154,11 +149,7 @@ describe(`${TESTING_METHOD}-${getEndpoint()}`, () => {
       query: fixtures.positive.SELECT_MULTIPLE.in.query,
     });
 
-    console.log(response.err)
-
     const data = response.json();
-
-    console.log(JSON.stringify({sss: data}, null, 6));
     const expected = fixtures.positive.SELECT_MULTIPLE.out.shape;
 
     assert.strictEqual(response.statusCode, 200);

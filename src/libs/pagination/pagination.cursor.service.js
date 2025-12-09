@@ -69,17 +69,18 @@ const applyCursorCondition = (builder, table, cursorColumn, cursor, type) => {
 /**
  * Build query builder for cursor pagination
  * @template {any} TTable - Drizzle table type
- * @param {import("#@types/index.jsdoc.js").Dependencies} deps - Dependencies
- * @param {TTable} table - Table to paginate
- * @param {import('./pagination.types.jsdoc.js').PaginationConfig<TTable, 'cursor'>} config - Pagination config
- * @param {import('./pagination.types.jsdoc.js').PaginationParams<'cursor'>} paginationParams - Pagination parameters
- * @param {import('./pagination.types.jsdoc.js').PaginationOptions} options - Additional options
- * @param {string} cursorColumn - Cursor column name
- * @param {string} [after] - After cursor
- * @param {string} [before] - Before cursor
+ * @param {object} params - Parameters
+ * @param {{ db: any, logger: any }} params.deps - Dependencies (partial, only db and logger are used)
+ * @param {TTable} params.table - Table to paginate
+ * @param {import('./pagination.types.jsdoc.js').PaginationConfig<TTable, 'cursor'>} params.config - Pagination config
+ * @param {import('./pagination.types.jsdoc.js').PaginationParams<'cursor'>} params.paginationParams - Pagination parameters
+ * @param {import('./pagination.types.jsdoc.js').PaginationOptions} params.options - Additional options
+ * @param {string} params.cursorColumn - Cursor column name
+ * @param {string} [params.after] - After cursor
+ * @param {string} [params.before] - Before cursor
  * @returns {import('./pagination.query-builder.js').PaginationQueryBuilder<TTable, 'cursor'>} Configured query builder
  */
-const buildCursorQuery = (deps, table, config, paginationParams, options, cursorColumn, after, before) => {
+const buildCursorQuery = ({ deps, table, config, paginationParams, options, cursorColumn, after, before }) => {
   const { db } = deps;
   const { filters, select: selectFields, sortBy } = paginationParams;
   const { queryBuilder, select: optionsSelect } = options;
@@ -154,7 +155,16 @@ export const paginateCursor = async ({ db, logger }, table, config, paginationPa
     limit,
   });
 
-  const builder = buildCursorQuery({ db, logger }, table, config, paginationParams, options, cursorColumn, after, before);
+  const builder = buildCursorQuery({
+    after,
+    before,
+    config,
+    cursorColumn,
+    deps: { db, logger },
+    options,
+    paginationParams,
+    table,
+  });
 
   // Fetch one extra item to determine hasNextPage
   const fetchLimit = limit + 1;

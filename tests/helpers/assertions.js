@@ -74,7 +74,10 @@ export function assertHasValidUser(user, options = {}) {
  * @param {object} shape - { required: string[], optional?: string[] }
  */
 export function assertMatchesShape(obj, shape) {
-  const { required = [], optional = [] } = shape;
+  // Extract values safely to avoid Proxy issues with fixtureFactory
+  // Use hasOwnProperty check to avoid triggering Proxy errors
+  const required = (shape && "required" in shape && shape.required) || [];
+  const optional = (shape && "optional" in shape && shape.optional) || [];
   const allAllowedFields = new Set([...optional, ...required]);
   const objectKeys = Object.keys(obj);
 
@@ -86,4 +89,3 @@ export function assertMatchesShape(obj, shape) {
     assert.ok(allAllowedFields.has(key), `Unexpected field: ${key}`);
   }
 }
-

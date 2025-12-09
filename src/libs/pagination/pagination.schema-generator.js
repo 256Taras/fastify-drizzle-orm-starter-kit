@@ -60,6 +60,7 @@ const getSelectableColumns = (config) => {
 
   return [];
 };
+
 /**
  * Build cursor description for pagination
  * @param {'after' | 'before'} type - Cursor type
@@ -324,7 +325,6 @@ export const generatePaginationQuerySchema = (config) => {
     ),
   };
 
-  // Add pagination strategy specific fields
   if (strategy === PAGINATION_STRATEGY.offset) {
     schema.page = Type.Optional(
       Type.Integer({
@@ -412,7 +412,6 @@ export const generatePaginationQuerySchema = (config) => {
     );
   }
 
-  // Add filtering
   if (filterableColumnsObj && Object.keys(filterableColumnsObj).length > 0) {
     // @ts-expect-error - table is generic type, but createSelectSchema works at runtime
     const baseSchema = createSelectSchema(config.table);
@@ -423,7 +422,6 @@ export const generatePaginationQuerySchema = (config) => {
       const enumValues = extractEnumValues(baseProperties[column]);
       const examples = generateFilterExamples(operators, enumValues);
 
-      // Build description
       const descriptionParts = [
         `Filter results by \`${column}\` field.`,
         "",
@@ -478,10 +476,10 @@ export const generatePaginationQuerySchema = (config) => {
     }
   }
 
-  // Add select
   if (selectableColumns.length > 0) {
     const selectExamples = selectableColumns.slice(0, 3);
     const availableColumnsList = selectableColumns.map((col) => `- \`${col}\``).join("\n");
+    const selectPattern = selectableColumns.join("|");
 
     schema.select = Type.Optional(
       Type.Union(
@@ -489,12 +487,14 @@ export const generatePaginationQuerySchema = (config) => {
           Type.String({
             description: "Single column to select or comma-separated list",
             examples: [selectExamples[0], `${selectExamples[0]},${selectExamples[1]}`],
+            pattern: `^(${selectPattern})(,(${selectPattern}))*$`,
             title: "Select Column",
           }),
           Type.Array(
             Type.String({
               description: "Column name to select",
               examples: selectExamples,
+              pattern: `^(${selectPattern})$`,
               title: "Select Column",
             }),
             {
@@ -561,11 +561,10 @@ export const generatePaginationQuerySchema = (config) => {
 export const generateItemSchema = (config) => {
   validatePaginationConfig(config);
 
-  const { excludeColumns = [], optionalColumns = {}, table } = config;
+  const { excludeColumns = [], table } = config;
 
   // @ts-expect-error - table is generic type, but createSelectSchema works at runtime
   const baseSchema = createSelectSchema(table);
-
   const properties = { ...baseSchema.properties };
 
   // Remove excluded columns
@@ -574,18 +573,18 @@ export const generateItemSchema = (config) => {
   }
 
   // Make all fields optional to support select parameter
-  const optionalProperties = Object.entries(properties).reduce((acc, [column, property]) => {
-    acc[column] = optionalColumns[column] ? property : Type.Optional(property);
-    return acc;
-  }, {});
+  /** @type {Record<string, any>} */
+  const optionalProperties = {};
+  for (const [columnName, columnSchema] of Object.entries(properties)) {
+    optionalProperties[columnName] = Type.Optional(columnSchema);
+  }
 
-  // Ensure we have properties
   if (Object.keys(optionalProperties).length === 0) {
     throw new Error("Cannot create item schema: no properties available after filtering");
   }
 
   return Type.Object(optionalProperties, {
-    additionalProperties: true, // Allow additional properties to support select parameter
+    additionalProperties: true,
     description: "Single item from the paginated result. All fields are optional to support the `select` parameter.",
     title: "Item",
   });

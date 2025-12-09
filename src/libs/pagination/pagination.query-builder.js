@@ -521,7 +521,9 @@ export class PaginationQueryBuilder {
 
       // Validate operator exists in FILTER_OPERATORS
       if (!Object.keys(FILTER_OPERATORS).includes(operator)) {
-        throw new BadRequestException(`Unknown filter operator: ${operator}. Valid operators: ${Object.keys(FILTER_OPERATORS).join(", ")}`);
+        throw new BadRequestException(
+          `Unknown filter operator: ${operator}. Valid operators: ${Object.keys(FILTER_OPERATORS).join(", ")}`,
+        );
       }
 
       // Type assertion is safe because we validated operator exists in FILTER_OPERATORS

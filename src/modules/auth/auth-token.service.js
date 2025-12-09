@@ -7,7 +7,6 @@ import { authTokens } from "#modules/auth/auth-token.model.js";
  * @param {Dependencies} deps
  * @param {object} user
  * @returns {Promise<{ refreshToken: string, accessToken: string, user: object }>}
- * @param user
  */
 const generateTokens = async ({ db, encrypterService, jwtService }, user) => {
   const refreshHash = encrypterService.randomBytes(32);
