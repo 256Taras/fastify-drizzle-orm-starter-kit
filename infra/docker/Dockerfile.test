@@ -18,6 +18,9 @@ ENV NODE_ENV=test
 # Expose port (if needed for tests)
 EXPOSE 8001
 
+# Note: Migrations are run in docker-compose.test.yml, not during build
+# This ensures the database container is ready before migrations
+
 # Default command (can be overridden in docker-compose)
 CMD ["npm", "test"]
 

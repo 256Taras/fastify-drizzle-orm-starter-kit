@@ -24,8 +24,7 @@ const setUser = (data) => {
  */
 const getUserCredentials = () => {
   // @ts-ignore - requestContext.get has generic type issues
-  const credentials = requestContext.get(TOKENS.userCredentials);
-  return credentials;
+  return requestContext.get(TOKENS.userCredentials);
 };
 
 /**

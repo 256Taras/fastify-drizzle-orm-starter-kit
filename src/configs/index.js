@@ -11,6 +11,5 @@ export * from "./fastify-static.config.js";
 export * from "./fastify.config.js";
 export * from "./logger.config.js";
 export * from "./openapi.config.js";
-export * from "./permissions.config.js";
 export * from "./server.config.js";
 export * from "./storage.config.js";

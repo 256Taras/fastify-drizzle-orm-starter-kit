@@ -457,7 +457,8 @@ export class PaginationQueryBuilder {
 
     if (excludeColumns.length > 0) {
       // @ts-expect-error - table is an object at runtime, Object.keys works
-      return Object.keys(this.#table).filter((col) => !excludeColumns.includes(col));
+      const tableKeys = Object.keys(this.#table);
+      return tableKeys.filter((col) => !excludeColumns.includes(col));
     }
 
     return [];
@@ -518,19 +519,20 @@ export class PaginationQueryBuilder {
     if (operatorMatch) {
       const [, operator, val] = operatorMatch;
 
-      // Validate operator exists
+      // Validate operator exists in FILTER_OPERATORS
       if (!Object.keys(FILTER_OPERATORS).includes(operator)) {
-        return { operator: "$eq", value };
+        throw new BadRequestException(`Unknown filter operator: ${operator}. Valid operators: ${Object.keys(FILTER_OPERATORS).join(", ")}`);
       }
 
-      const op = /** @type {import('./pagination.types.jsdoc.js').FilterOperator} */ operator;
+      // Type assertion is safe because we validated operator exists in FILTER_OPERATORS
+      const op = /** @type {import('./pagination.types.jsdoc.js').FilterOperator} */ (operator);
 
       // Parse array values for $in and $notIn
       if (ARRAY_OPERATORS.has(op)) {
-        return { operator: /** @type {import('./pagination.types.jsdoc.js').FilterOperator} */ op, value: val.split(",") };
+        return { operator: op, value: val.split(",") };
       }
 
-      return { operator: /** @type {import('./pagination.types.jsdoc.js').FilterOperator} */ op, value: val };
+      return { operator: op, value: val };
     }
 
     // Legacy support: $value → $ilike:value

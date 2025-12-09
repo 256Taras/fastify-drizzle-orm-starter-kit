@@ -1,7 +1,4 @@
-/**
- * @file Test helpers index
- */
-
-export { dbUtils } from "./db-utils.js";
-export { fixtureFactory, fixtures } from "./fixtures.js";
+export { assertHasValidPagination, assertHasValidUser, assertMatchesShape } from "./assertions.js";
+export { createDbHelper } from "./db-utils.js";
+export { fixtureFactory } from "./fixtures.js";
 export { createTestingApp } from "./testing-app.js";

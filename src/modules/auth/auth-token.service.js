@@ -4,10 +4,10 @@ import { FASTIFY_JWT_CONFIG } from "#configs/index.js";
 import { authTokens } from "#modules/auth/auth-token.model.js";
 
 /**
- * Generates access and refresh tokens for a user.
- * @param {Dependencies} deps - The dependencies required for token generation.
- * @param {object} user - The user for whom the tokens are generated.
- * @returns {Promise<{ refreshToken: string, accessToken: string, user: object }>} An object containing the refresh token, access token, and user object.
+ * @param {Dependencies} deps
+ * @param {object} user
+ * @returns {Promise<{ refreshToken: string, accessToken: string, user: object }>}
+ * @param user
  */
 const generateTokens = async ({ db, encrypterService, jwtService }, user) => {
   const refreshHash = encrypterService.randomBytes(32);
@@ -28,9 +28,7 @@ const generateTokens = async ({ db, encrypterService, jwtService }, user) => {
   return { accessToken, refreshToken, user };
 };
 
-/**
- * @param {Dependencies}deps
- */
+/** @param {Dependencies} deps */
 export default function authTokenService(deps) {
   return {
     generateTokens: partial(generateTokens, [deps]),

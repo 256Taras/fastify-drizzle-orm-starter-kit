@@ -34,7 +34,13 @@ services:
       - test-network
     profiles:
       - ci
-    command: npm test
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        echo "📦 Running database migrations..."
+        npm run database:push:test || true
+        echo "🧪 Running tests..."
+        npm test
 
 networks:
   test-network:

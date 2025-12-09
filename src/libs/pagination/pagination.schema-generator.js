@@ -487,15 +487,13 @@ export const generatePaginationQuerySchema = (config) => {
       Type.Union(
         [
           Type.String({
-            description: "Single column to select",
-            enum: selectableColumns,
-            examples: selectExamples.slice(0, 1),
+            description: "Single column to select or comma-separated list",
+            examples: [selectExamples[0], `${selectExamples[0]},${selectExamples[1]}`],
             title: "Select Column",
           }),
           Type.Array(
             Type.String({
               description: "Column name to select",
-              enum: selectableColumns,
               examples: selectExamples,
               title: "Select Column",
             }),
@@ -587,7 +585,7 @@ export const generateItemSchema = (config) => {
   }
 
   return Type.Object(optionalProperties, {
-    additionalProperties: false,
+    additionalProperties: true, // Allow additional properties to support select parameter
     description: "Single item from the paginated result. All fields are optional to support the `select` parameter.",
     title: "Item",
   });

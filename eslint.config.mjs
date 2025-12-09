@@ -114,10 +114,11 @@ export default tseslint.config(
         'eslint-import-resolver-custom-alias': {
           alias: {
             '@types': './src/@types',
+            '#configs': './src/configs',
             '#infra': './src/infra',
             '#libs': './src/libs',
             '#modules': './src/modules',
-            '#configs': './src/configs',
+            '#tests': './tests',
           },
           extensions: ['.js', '.cjs', '.mjs', '.ts', '.d.ts'],
         },
@@ -157,6 +158,11 @@ export default tseslint.config(
           pathGroups: [
             {
               pattern: '#*',
+              group: 'internal',
+              position: 'after',
+            },
+            {
+              pattern: '#tests/*',
               group: 'internal',
               position: 'after',
             },

@@ -23,7 +23,7 @@ const SIGNAL_KEY = "SIGNAL_KEY";
  */
 async function requestTimeoutPlugin(app, options) {
   /**
-   * Helper function to clear timeout and controller references stored in the request context.
+   *
    */
   const performCleanup = () => {
     // @ts-ignore
@@ -40,11 +40,9 @@ async function requestTimeoutPlugin(app, options) {
   };
 
   /**
-   * Sets up a timeout for handling requests which can be aborted if not completed
-   * within a specified timeframe, triggering a 408 error.
-   * @param {import('fastify').FastifyRequest} request The request object.
-   * @param {import('fastify').FastifyReply} reply The reply object.
-   * @param {import('fastify').HookHandlerDoneFunction} done Callback to signal completion or error.
+   * @param {import('fastify').FastifyRequest} request
+   * @param {import('fastify').FastifyReply} reply
+   * @param {import('fastify').HookHandlerDoneFunction} done
    */
   const setupRequestTimeout = (request, reply, done) => {
     try {
@@ -73,8 +71,6 @@ async function requestTimeoutPlugin(app, options) {
   };
 
   /**
-   * Cleans up resources after sending a response or when an error occurs.
-   * This function clears any timeouts and removes references from the request context.
    * @param {import('fastify').FastifyRequest} request
    * @param {import('fastify').FastifyReply} reply
    * @param {any} payload
@@ -86,8 +82,6 @@ async function requestTimeoutPlugin(app, options) {
   };
 
   /**
-   * Handles errors and cleans up resources.
-   * Must call done() to allow error handler to process the error.
    * @param {import('fastify').FastifyRequest} request
    * @param {import('fastify').FastifyReply} reply
    * @param {Error} error

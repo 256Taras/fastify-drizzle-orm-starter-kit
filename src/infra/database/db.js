@@ -62,25 +62,43 @@ export class DatabaseManager {
   }
 
   /**
-   * Initializes database connection asynchronously
+   * Initializes database connection asynchronously with retry logic
+   * @param {object} [options] - Retry options
+   * @param {number} [options.maxRetries] - Maximum number of retry attempts
+   * @param {number} [options.initialDelay] - Initial delay in milliseconds
    * @returns {Promise<DatabaseManager>}
    */
-  async initialize() {
+  async initialize(options = {}) {
     if (this.isInitialized) {
       return this;
     }
 
-    try {
-      await this.testConnection();
-      logger.info("Database connection established successfully.");
-      this.isInitialized = true;
-      Object.freeze(this);
-      return this;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error(`Database initialization failed: ${errorMessage}`);
-      throw error;
+    const maxRetries = options.maxRetries ?? 5;
+    const initialDelay = options.initialDelay ?? 1000;
+
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        await this.testConnection();
+        logger.info("Database connection established successfully.");
+        this.isInitialized = true;
+        Object.freeze(this);
+        return this;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const isLastAttempt = attempt === maxRetries - 1;
+
+        if (isLastAttempt) {
+          logger.error(`Database initialization failed after ${maxRetries} attempts: ${errorMessage}`);
+          throw error;
+        }
+
+        const delay = initialDelay * Math.pow(2, attempt);
+        logger.warn(`Database connection attempt ${attempt + 1}/${maxRetries} failed. Retrying in ${delay}ms...`);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
     }
+
+    throw new Error("Database initialization failed: unexpected error");
   }
 
   /**

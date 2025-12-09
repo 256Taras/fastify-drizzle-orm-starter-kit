@@ -33,8 +33,10 @@ export const paginateOffset = async ({ db, logger }, table, config, paginationPa
   const builder = new PaginationQueryBuilder(db, table, config);
 
   if (optionsSelect) {
+    logger.debug("Using optionsSelect", { optionsSelect });
     builder.select(optionsSelect);
   } else {
+    logger.debug("Applying select from query params", { selectFields });
     builder.applySelect(selectFields);
   }
 

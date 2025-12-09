@@ -12,8 +12,7 @@ const ACCESS_DENIED_MESSAGE = "Access denied";
  */
 async function authPlugin(app, options) {
   /**
-   * Default JWT verification function for access tokens
-   * @param {import('fastify').FastifyRequest} request - The Fastify request
+   * @param {import('fastify').FastifyRequest} request
    * @throws {UNAUTHORIZED_ACCESS_401} If access token is missing or invalid
    */
   const defaultVerifyJwt = (request) => {
@@ -29,8 +28,7 @@ async function authPlugin(app, options) {
   };
 
   /**
-   * Default JWT verification function for refresh tokens
-   * @param {import('fastify').FastifyRequest} request - The Fastify request
+   * @param {import('fastify').FastifyRequest} request
    * @throws {UNAUTHORIZED_ACCESS_401} If refresh token is missing or invalid
    */
   const defaultVerifyJwtRefreshToken = (request) => {

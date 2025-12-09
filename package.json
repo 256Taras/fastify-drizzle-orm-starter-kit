@@ -15,6 +15,7 @@
     "docker:infra:down": "docker compose -f ./infra/docker/docker-compose.yml down",
     "database:generate": "drizzle-kit generate --config=infra/database/drizzle.config.js",
     "database:push": "drizzle-kit push --config=infra/database/drizzle.config.js",
+    "database:push:test": "drizzle-kit push --config=infra/database/drizzle.config.js --force",
     "database:migrate": "drizzle-kit migrate --config=infra/database/drizzle.config.js",
     "database:seed": "node scripts/database/seed.script.js",
     "database:seed:dev": "node scripts/database/seed.script.js development",
@@ -66,7 +67,8 @@
     ]
   },
   "imports": {
-    "#*": "./src/*"
+    "#*": "./src/*",
+    "#tests/*": "./tests/*"
   },
   "dependencies": {
     "@fastify/auth": "^5.0.4",

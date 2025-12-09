@@ -7,11 +7,6 @@ export const TOKENS = {
   userJwtData: "userJwtData",
 };
 
-export const TABLES = {
-  authToken: "auth_token",
-  user: "user",
-};
-
 export const ROLES_NAMES = {
   admin: "ADMIN",
   user: "USER",

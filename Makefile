@@ -5,6 +5,8 @@ test-local:
 	@echo "🐳 Starting test dependencies..."
 	docker compose -f infra/docker/docker-compose.test.yml up -d db-test --remove-orphans
 	@sleep 3
+	@echo "📦 Running database migrations..."
+	@ENV_NAME=test npm run database:push:test || true
 	@echo "🧪 Running tests locally..."
 	ENV_NAME=test node --test
 	@echo "✅ Done!"
