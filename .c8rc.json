@@ -1,0 +1,23 @@
+{
+  "check-coverage": true,
+  "lines": 80,
+  "functions": 80,
+  "branches": 80,
+  "statements": 80,
+  "exclude": [
+    "tests/**",
+    "**/*.test.js",
+    "**/*.spec.js",
+    "coverage/**",
+    "node_modules/**",
+    "scripts/**",
+    "tools/**",
+    "infra/**"
+  ],
+  "reporter": [
+    "text",
+    "html",
+    "json"
+  ]
+}
+

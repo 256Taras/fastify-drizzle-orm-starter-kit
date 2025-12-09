@@ -36,13 +36,17 @@ export const CONFIG_SCHEMA = Type.Object(
     RATE_LIMIT_TIME_WINDOW: Type.Integer(),
     REQUEST_TIMEOUT: Type.Integer(),
     SHUTDOWN_TIMEOUT: Type.Integer(),
-    VERSION: Type.String(),
+    VERSION: Type.Optional(Type.String()),
   },
   { additionalProperties: false },
 );
 
 const getEnvFilePath = () => {
   const env = process.env.ENV_NAME || "development";
+  // For development, use .env, for other environments use .env.{env}
+  if (env === "development") {
+    return "configs/.env";
+  }
   return `configs/.env.${env}`;
 };
 
