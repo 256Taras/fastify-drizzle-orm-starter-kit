@@ -1,6 +1,7 @@
 import { Type } from "@sinclair/typebox";
 import { pick } from "rambda";
 
+import { SWAGGER_TAGS } from "#libs/constants/swagger-tags.constants.js";
 import { COMMON_CONTRACTS_V1 } from "#libs/contracts/v1/index.js";
 import { defaultHttpErrorCollection } from "#libs/errors/default-http-error-collection.js";
 import {
@@ -9,7 +10,6 @@ import {
   ResourceNotFoundException,
   UnauthorizedException,
 } from "#libs/errors/domain.errors.js";
-import { SWAGGER_TAGS } from "#libs/constants/swagger-tags.constants.js";
 import { mapHttpErrorsToSchemaErrorCollection } from "#libs/utils/schemas.js";
 import { SIGN_IN_UP_OUTPUT_CONTRACT, SIGN_UP_INPUT_CONTRACT } from "#modules/auth/auth.contracts.js";
 

@@ -1,7 +1,5 @@
 import { pick } from "rambda";
 
-import { USERS_PAGINATION_CONFIG } from "./users.pagination.config.js";
-
 import { SWAGGER_TAGS } from "#libs/constants/swagger-tags.constants.js";
 import { COMMON_CONTRACTS_V1 } from "#libs/contracts/v1/index.js";
 import { defaultHttpErrorCollection } from "#libs/errors/default-http-error-collection.js";
@@ -13,6 +11,8 @@ import {
   USER_OUTPUT_CONTRACT,
   USER_UPDATE_INPUT_CONTRACT,
 } from "#modules/users/users.contracts.js";
+
+import { USERS_PAGINATION_CONFIG } from "./users.pagination.config.js";
 
 const usersSchemas = {
   getList: generatePaginatedRouteSchema({
