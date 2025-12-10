@@ -9,11 +9,13 @@ import {
   ResourceNotFoundException,
   UnauthorizedException,
 } from "#libs/errors/domain.errors.js";
-import { mapHttpErrorsToSchemaErrorCollection, mixinTagForSchema } from "#libs/utils/schemas.js";
+import { SWAGGER_TAGS } from "#libs/constants/swagger-tags.constants.js";
+import { mapHttpErrorsToSchemaErrorCollection } from "#libs/utils/schemas.js";
 import { SIGN_IN_UP_OUTPUT_CONTRACT, SIGN_UP_INPUT_CONTRACT } from "#modules/auth/auth.contracts.js";
 
 const authSchemas = {
   logOut: {
+    tags: SWAGGER_TAGS.AUTH,
     response: {
       200: COMMON_CONTRACTS_V1.status,
       ...mapHttpErrorsToSchemaErrorCollection(pick([UnauthorizedException.name], defaultHttpErrorCollection)),
@@ -23,6 +25,7 @@ const authSchemas = {
   },
 
   refreshTokens: {
+    tags: SWAGGER_TAGS.AUTH,
     response: {
       200: SIGN_IN_UP_OUTPUT_CONTRACT,
       ...mapHttpErrorsToSchemaErrorCollection(pick([ResourceNotFoundException.name], defaultHttpErrorCollection)),
@@ -32,6 +35,7 @@ const authSchemas = {
   },
 
   signIn: {
+    tags: SWAGGER_TAGS.AUTH,
     body: Type.Pick(SIGN_UP_INPUT_CONTRACT, ["email", "password"]),
     response: {
       200: SIGN_IN_UP_OUTPUT_CONTRACT,
@@ -43,6 +47,7 @@ const authSchemas = {
   },
 
   signUp: {
+    tags: SWAGGER_TAGS.AUTH,
     body: SIGN_UP_INPUT_CONTRACT,
     response: {
       201: SIGN_IN_UP_OUTPUT_CONTRACT,
@@ -54,4 +59,4 @@ const authSchemas = {
   },
 };
 
-export default mixinTagForSchema(authSchemas, ["auth"]);
+export default authSchemas;

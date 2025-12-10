@@ -1,8 +1,8 @@
 import { partial } from "rambda";
 
-import { ConflictException, ResourceNotFoundException } from "#libs/errors/domain.errors.js";
-
 import { USER_EVENTS } from "./users.events.js";
+
+import { ConflictException, ResourceNotFoundException } from "#libs/errors/domain.errors.js";
 
 /** @type {(deps: Dependencies, input: UserCreateInput) => Promise<User>} */
 const createUser = async ({ usersRepository, encrypterService, eventBus, logger }, input) => {

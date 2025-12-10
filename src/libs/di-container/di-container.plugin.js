@@ -5,16 +5,17 @@ import { diContainer, fastifyAwilixPlugin } from "@fastify/awilix";
 import * as awilix from "awilix";
 import fp from "fastify-plugin";
 
+import eventBusService from "#libs/events/event-bus.service.js";
 import { logger } from "#libs/logging/logger.service.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const basePath = path.resolve(__dirname, "../../");
 
 const patterns = {
-  // Auto-load: repository, queries, mutations for domain modules
-  modules: "modules/**/*.{repository,queries,mutations}.js",
-  // Libs services (including events)
-  services: "libs/{encryption,session-storage,pagination,events}/**/*.service.js",
+  // Auto-load: repository, queries, mutations, services for domain modules
+  modules: "modules/**/*.{repository,queries,mutations,service}.js",
+  // Libs services
+  services: "libs/{encryption,session-storage,pagination}/**/*.service.js",
 };
 
 /**
@@ -36,6 +37,7 @@ const diContainerPlugin = async (app, opts) => {
     app: awilix.asValue(app),
     configs: awilix.asValue(opts.configs),
     db: awilix.asValue(opts.database.drizzle),
+    eventBus: awilix.asFunction(eventBusService),
     jwtService: awilix.asValue(app.jwt),
     logger: awilix.asValue(logger),
   });

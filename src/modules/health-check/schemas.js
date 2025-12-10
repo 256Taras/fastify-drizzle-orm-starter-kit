@@ -1,5 +1,7 @@
 import { Type } from "@sinclair/typebox";
 
+import { SWAGGER_TAGS } from "#libs/constants/swagger-tags.constants.js";
+
 export const SIMPLE_SYSTEM_HEALTH_SCHEMA = Type.Object(
   {
     memoryUsage: Type.Object({
@@ -75,12 +77,12 @@ export default {
       // are returning it in your route handler.
       200: SIMPLE_SYSTEM_HEALTH_SCHEMA,
     },
-    tags: ["dev"],
+    tags: SWAGGER_TAGS.DEV,
   },
   extended: {
     response: {
       200: SYSTEM_HEALTH_SCHEMA,
     },
-    tags: ["dev"],
+    tags: SWAGGER_TAGS.DEV,
   },
 };

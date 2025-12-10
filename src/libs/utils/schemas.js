@@ -3,23 +3,6 @@ import { Type } from "@sinclair/typebox";
 import { ERROR_CODE_FORMAT } from "#libs/constants/error-codes.js";
 
 /**
- * @template {Record<string, import("@sinclair/typebox").TSchema | Record<string, unknown>>} T - Schema object type
- * @param {T} schemas - Schemas object
- * @param {string[]} tag - Tags to add
- * @returns {T}
- */
-export const mixinTagForSchema = (schemas, tag) => {
-  for (const k of Object.keys(schemas)) {
-    // eslint-disable-next-line security/detect-object-injection
-    const schema = schemas[/** @type {keyof T} */ k];
-    if (schema && typeof schema === "object" && "tags" in schema) {
-      /** @type {Record<string, unknown>} */ schema.tags = tag;
-    }
-  }
-  return schemas;
-};
-
-/**
  * Creates a TypeBox Union schema from an object or array of literal values
  *
  * @param {Record<string, string | number | boolean> | (string | number | boolean)[]} object - Enum values
