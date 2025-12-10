@@ -100,7 +100,7 @@
     "@semantic-release/git": "^10.0.1",
     "@types/lodash-es": "^4.17.12",
     "@types/node": "^24.0.0",
-    "@types/pg": "^8.10.9",
+    "@types/pg": "^8.16.0",
     "dependency-cruiser": "^17.3.2",
     "dotenv-safe": "^8.2.0",
     "drizzle-kit": "^0.31.8",
@@ -120,7 +120,7 @@
     "prettier": "^3.0.0",
     "semantic-release": "^25.0.2",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.48.1",
+    "typescript-eslint": "^8.49.0",
     "yeoman-generator": "6.0.1"
   }
 }
