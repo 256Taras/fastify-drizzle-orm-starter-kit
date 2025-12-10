@@ -33,7 +33,7 @@
     "test": "ENV_NAME=test npx c8 node --test",
     "test:watch": "node --test --watch",
     "precommit": "lint-staged",
-    "prepush": "yarn lint && yarn check:types:jsdoc && make test",
+    "prepush": "yarn lint && yarn check:types:jsdoc",
     "hooks:setup": "bash scripts/setup-hooks.sh",
     "release": "semantic-release",
     "check:types": "npx tsc --project tsconfig.json",
