@@ -19,6 +19,15 @@
  */
 
 /**
+ * Fastify request with typed params
+ *
+ * @template {import("@sinclair/typebox").TSchema} TParams
+ * @typedef {import("fastify").FastifyRequest<{
+ *   Params: import("@sinclair/typebox").Static<TParams>;
+ * }>} FastifyRequestWithParams
+ */
+
+/**
  * Fastify request with typed querystring and body
  *
  * @template {import("@sinclair/typebox").TSchema} TQuery

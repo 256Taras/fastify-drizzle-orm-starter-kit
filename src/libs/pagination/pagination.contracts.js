@@ -12,7 +12,7 @@ export const FILTER_OPERATORS = {
   $notIn: "$notIn",
 };
 
-/** Pagination strategies */
+/** @type {{cursor: "cursor", offset: "offset"}} */
 export const PAGINATION_STRATEGY = {
   cursor: "cursor",
   offset: "offset",

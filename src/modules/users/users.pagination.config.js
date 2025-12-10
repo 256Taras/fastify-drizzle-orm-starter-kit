@@ -2,11 +2,7 @@ import { PAGINATION_STRATEGY } from "#libs/pagination/pagination.contracts.js";
 
 import { users } from "./users.model.js";
 
-/**
- * Pagination configuration for users module
- *
- * @type {import("#libs/pagination/pagination.types.jsdoc.js").PaginationConfig<typeof users>}
- */
+/** @type {import("#libs/pagination/pagination.types.jsdoc.js").PaginationConfig<typeof users>} **/
 export const USERS_PAGINATION_CONFIG = {
   table: users,
   defaultLimit: 10,
@@ -24,6 +20,5 @@ export const USERS_PAGINATION_CONFIG = {
     deletedAt: true,
   },
   sortableColumns: ["email", "firstName", "lastName", "createdAt", "updatedAt", "id"],
-  // @ts-expect-error - PAGINATION_STRATEGY.offset is a string literal, but TypeScript sees it as string
   strategy: PAGINATION_STRATEGY.offset,
 };

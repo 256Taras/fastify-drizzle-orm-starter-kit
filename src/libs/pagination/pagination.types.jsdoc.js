@@ -18,7 +18,7 @@
  * @property {number} [defaultLimit=10] - Default items per page. Default is `10`
  * @property {number} [maxLimit=100] - Maximum items per page. Default is `100`
  * @property {[string, "ASC" | "DESC"][]} [defaultSortBy] - Default sorting
- * @property {TStrategy} [strategy='offset'] - Pagination strategy. Default is `'offset'`
+ * @property {'offset' | 'cursor'} [strategy='offset'] - Pagination strategy. Default is `'offset'`
  * @property {string} [cursorColumn='id'] - Column to use for cursor (cursor strategy only). Default is `'id'`
  */
 

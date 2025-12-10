@@ -1,11 +1,14 @@
 /** @file Dependency injection container types */
 
 import encrypterService from "#libs/encryption/encrypter.service.js";
+import eventBusService from "#libs/events/event-bus.service.js";
 import paginationService from "#libs/pagination/pagination.service.js";
 import sessionStorageService from "#libs/session-storage/session-storage.service.js";
 import authTokenService from "#modules/auth/auth-token.service.js";
 import authService from "#modules/auth/auth.service.js";
-import usersService from "#modules/users/users.service.js";
+import usersMutations from "#modules/users/users.mutations.js";
+import usersQueries from "#modules/users/users.queries.js";
+import usersRepository from "#modules/users/users.repository.js";
 
 /**
  * JWT Service interface
@@ -52,11 +55,14 @@ import usersService from "#modules/users/users.service.js";
  * @property {ReturnType<typeof authTokenService>} authTokenService
  * @property {import("drizzle-orm/postgres-js").PostgresJsDatabase} db
  * @property {EncrypterService} encrypterService
+ * @property {ReturnType<typeof eventBusService>} eventBus
  * @property {JwtService} jwtService
  * @property {import("pino").Logger} logger
  * @property {ReturnType<typeof paginationService>} paginationService
  * @property {SessionStorageService} sessionStorageService
- * @property {ReturnType<typeof usersService>} usersService
+ * @property {ReturnType<typeof usersMutations>} usersMutations
+ * @property {ReturnType<typeof usersQueries>} usersQueries
+ * @property {ReturnType<typeof usersRepository>} usersRepository
  */
 
 export {};

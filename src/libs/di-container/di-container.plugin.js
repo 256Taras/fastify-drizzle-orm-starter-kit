@@ -11,8 +11,10 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const basePath = path.resolve(__dirname, "../../");
 
 const patterns = {
-  modules: "modules/**/*.{service,repository,use-case}.{js,ts}",
-  services: "libs/{encryption,session-storage,pagination}/**/*.{service,service.js}",
+  // Auto-load: repository, queries, mutations for domain modules
+  modules: "modules/**/*.{repository,queries,mutations}.js",
+  // Libs services (including events)
+  services: "libs/{encryption,session-storage,pagination,events}/**/*.service.js",
 };
 
 /**

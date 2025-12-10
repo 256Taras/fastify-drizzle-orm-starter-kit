@@ -2,28 +2,52 @@ import usersSchemas from "./users.schemas.js";
 
 /** @type {import("#@types/index.jsdoc.js").FastifyPluginTypebox} */
 export default async function usersRouterV1(app) {
-  const { sessionStorageService, usersService } = app.diContainer.cradle;
+  const { sessionStorageService, usersMutations, usersQueries } = app.diContainer.cradle;
 
   app.get("/profile", {
-    preHandler: app.auth([app.verifyJwt]),
-    schema: usersSchemas.getProfile,
-
     async handler() {
       const { id } = sessionStorageService.get();
-
-      return usersService.findOneById(id);
+      return usersQueries.findUserById(id);
     },
+    preHandler: app.auth([app.verifyJwt]),
+    schema: usersSchemas.getProfile,
   });
 
   app.get("/", {
-    // preHandler: app.auth([app.verifyJwt]),
-    schema: usersSchemas.getList,
-
     async handler(req) {
       const pagination = app.transformers.getPaginationQuery(req);
-
-      const result = await usersService.findAll(pagination);
-      return result;
+      return usersQueries.listUsers(pagination);
     },
+    schema: usersSchemas.getList,
+  });
+
+  app.get("/:id", {
+    async handler(req) {
+      return usersQueries.findUserById(req.params.id);
+    },
+    schema: usersSchemas.getById,
+  });
+
+  app.post("/", {
+    async handler(req, rep) {
+      const user = await usersMutations.createUser(req.body);
+      rep.status(201);
+      return user;
+    },
+    schema: usersSchemas.create,
+  });
+
+  app.put("/:id", {
+    async handler(req) {
+      return usersMutations.updateUser(req.params.id, req.body);
+    },
+    schema: usersSchemas.update,
+  });
+
+  app.delete("/:id", {
+    async handler(req) {
+      return usersMutations.deleteUser(req.params.id);
+    },
+    schema: usersSchemas.delete,
   });
 }

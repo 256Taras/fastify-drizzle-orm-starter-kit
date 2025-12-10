@@ -1,12 +1,17 @@
 import { pick } from "rambda";
 
+import { USERS_PAGINATION_CONFIG } from "./users.pagination.config.js";
+
+import { COMMON_CONTRACTS_V1 } from "#libs/contracts/v1/index.js";
 import { defaultHttpErrorCollection } from "#libs/errors/default-http-error-collection.js";
-import { BadRequestException } from "#libs/errors/domain.errors.js";
+import { BadRequestException, ConflictException, ResourceNotFoundException } from "#libs/errors/domain.errors.js";
 import { generatePaginatedRouteSchema } from "#libs/pagination/index.js";
 import { mapHttpErrorsToSchemaErrorCollection, mixinTagForSchema } from "#libs/utils/schemas.js";
-import { USER_OUTPUT_CONTRACT } from "#modules/users/users.contracts.js";
-
-import { USERS_PAGINATION_CONFIG } from "./users.pagination.config.js";
+import {
+  USER_CREATE_INPUT_CONTRACT,
+  USER_OUTPUT_CONTRACT,
+  USER_UPDATE_INPUT_CONTRACT,
+} from "#modules/users/users.contracts.js";
 
 const usersSchemas = {
   getList: generatePaginatedRouteSchema({
@@ -23,6 +28,55 @@ const usersSchemas = {
       ...mapHttpErrorsToSchemaErrorCollection(defaultHttpErrorCollection),
     },
     summary: "Get User info.",
+  },
+
+  getById: {
+    description: "Get user by ID",
+    params: COMMON_CONTRACTS_V1.id,
+    response: {
+      200: USER_OUTPUT_CONTRACT,
+      ...mapHttpErrorsToSchemaErrorCollection(
+        pick([BadRequestException.name, ResourceNotFoundException.name], defaultHttpErrorCollection),
+      ),
+    },
+    summary: "Get user by ID",
+  },
+
+  create: {
+    body: USER_CREATE_INPUT_CONTRACT,
+    description: "Create a new user",
+    response: {
+      201: USER_OUTPUT_CONTRACT,
+      ...mapHttpErrorsToSchemaErrorCollection(
+        pick([BadRequestException.name, ConflictException.name], defaultHttpErrorCollection),
+      ),
+    },
+    summary: "Create user",
+  },
+
+  update: {
+    body: USER_UPDATE_INPUT_CONTRACT,
+    description: "Update user by ID",
+    params: COMMON_CONTRACTS_V1.id,
+    response: {
+      200: USER_OUTPUT_CONTRACT,
+      ...mapHttpErrorsToSchemaErrorCollection(
+        pick([BadRequestException.name, ConflictException.name, ResourceNotFoundException.name], defaultHttpErrorCollection),
+      ),
+    },
+    summary: "Update user",
+  },
+
+  delete: {
+    description: "Delete user by ID (soft delete)",
+    params: COMMON_CONTRACTS_V1.id,
+    response: {
+      200: USER_OUTPUT_CONTRACT,
+      ...mapHttpErrorsToSchemaErrorCollection(
+        pick([BadRequestException.name, ResourceNotFoundException.name], defaultHttpErrorCollection),
+      ),
+    },
+    summary: "Delete user",
   },
 };
 
