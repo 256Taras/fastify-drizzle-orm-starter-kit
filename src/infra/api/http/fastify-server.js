@@ -2,7 +2,9 @@
 import path from "node:path";
 
 // Import necessary Fastify core and plugins.
+import fastifyAuth from "@fastify/auth";
 import fastifyAutoLoad from "@fastify/autoload";
+import fastifyCompress from "@fastify/compress";
 import fastifyCors from "@fastify/cors";
 import fastifyFormBody from "@fastify/formbody";
 import fastifyHelmet from "@fastify/helmet";
@@ -11,8 +13,6 @@ import fastifyRequestContextPlugin from "@fastify/request-context";
 import fastifySwaggerPlugin from "@fastify/swagger";
 import fastifySwaggerUiPlugin from "@fastify/swagger-ui";
 import Fastify from "fastify";
-// eslint-disable-next-line import/order
-import fastifyAuth from "@fastify/auth";
 
 // Import custom modules and configurations.
 
@@ -69,6 +69,8 @@ export class RestApiServer {
     this.#fastify.register(fastifyRateLimit, this.#configs.FASTIFY_RATE_LIMIT_CONFIG);
     // Helmet plugin for securing the app with important HTTP headers.
     this.#fastify.register(fastifyHelmet, this.#configs.FASTIFY_HELMET_CONFIG);
+    // Compress plugin for response compression (gzip, brotli).
+    this.#fastify.register(fastifyCompress);
     // FormBody plugin for parsing form bodies into JS objects.
     this.#fastify.register(fastifyFormBody);
 

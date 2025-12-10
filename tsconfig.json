@@ -31,7 +31,10 @@
     },
     "typeRoots": ["./node_modules/@types"],
     "incremental": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "exactOptionalPropertyTypes": false
   },
   "include": [
     "tests/utils/**/*.js",

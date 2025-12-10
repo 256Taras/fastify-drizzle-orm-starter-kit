@@ -8,6 +8,13 @@
       "when": 1765061221212,
       "tag": "0000_initial_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1765399832500,
+      "tag": "0001_bouncy_luminals",
+      "breakpoints": true
     }
   ]
 }

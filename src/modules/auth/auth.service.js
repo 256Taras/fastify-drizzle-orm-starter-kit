@@ -50,7 +50,7 @@ const logOutUser = async ({ db, logger, sessionStorageService }) => {
     .where(and(eq(authTokens.ppid, ppid), eq(authTokens.userId, userId)))
     .returning();
 
-  if (!result) return UnauthorizedException.of("Failed to log out");
+  if (result.length === 0) throw new UnauthorizedException("Failed to log out");
 
   return STATUS_SUCCESS;
 };
@@ -68,7 +68,7 @@ const refreshTokens = async ({ authTokenService, db, sessionStorageService }) =>
     .where(and(eq(authTokens.ppid, ppid), eq(authTokens.userId, userId)))
     .returning();
 
-  if (!result) return UnauthorizedException.of("Failed refresh token");
+  if (result.length === 0) throw new UnauthorizedException("Failed refresh token");
 
   return authTokenService.generateTokens(maybeUser);
 };

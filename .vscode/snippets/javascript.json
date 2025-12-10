@@ -1,0 +1,83 @@
+{
+  "Fastify Route Handler": {
+    "prefix": "froute",
+    "body": [
+      "app.${1|get,post,put,delete,patch|}('${2:/path}', {",
+      "  schema: ${3:schemas}.${4:method},",
+      "  async handler(req, rep) {",
+      "    ${5:// handler logic}",
+      "  },",
+      "});"
+    ],
+    "description": "Fastify route handler with schema"
+  },
+  "Fastify Plugin": {
+    "prefix": "fplugin",
+    "body": [
+      "/** @type {import(\"#@types/index.jsdoc.js\").FastifyPluginTypebox} */",
+      "export default async function ${1:pluginName}(app) {",
+      "  const { ${2:dependencies} } = app.diContainer.cradle;",
+      "  ${3:// plugin logic}",
+      "}"
+    ],
+    "description": "Fastify plugin with DI"
+  },
+  "Drizzle Repository": {
+    "prefix": "drepo",
+    "body": [
+      "/** @type {${1:RepositoryFunction}} */",
+      "const ${2:functionName} = async ({ db }, ${3:params}) => {",
+      "  return db.select().from(${4:table}).where(${5:condition});",
+      "};",
+      "",
+      "/** @param {Dependencies} deps */",
+      "export default function ${6:repositoryName}(deps) {",
+      "  return {",
+      "    ${2:functionName}: partial(${2:functionName}, [deps]),",
+      "  };",
+      "}",
+      "",
+      "/** @typedef {import(\"#@types/index.jsdoc.js\").Dependencies} Dependencies */"
+    ],
+    "description": "Drizzle repository pattern"
+  },
+  "TypeBox Schema": {
+    "prefix": "tschema",
+    "body": [
+      "export const ${1:SCHEMA_NAME} = Type.Object({",
+      "  ${2:field}: Type.${3|String,Number,Boolean,Array,Object|}(),",
+      "});",
+      "",
+      "/** @typedef {import(\"@sinclair/typebox\").Static<typeof ${1:SCHEMA_NAME}>} ${4:TypeName} */"
+    ],
+    "description": "TypeBox schema with typedef"
+  },
+  "JSDoc Function": {
+    "prefix": "jsdocfn",
+    "body": [
+      "/**",
+      " * ${1:Description}",
+      " *",
+      " * @type {(${2:params}) => ${3:ReturnType}}",
+      " */",
+      "const ${4:functionName} = async (${2:params}) => {",
+      "  ${5:// implementation}",
+      "};"
+    ],
+    "description": "JSDoc typed function"
+  },
+  "Error Throw": {
+    "prefix": "ethrow",
+    "body": [
+      "throw new ${1|ConflictException,ResourceNotFoundException,UnauthorizedException,BadRequestException|}(${2:\"Error message\"});"
+    ],
+    "description": "Throw domain exception"
+  },
+  "Event Emit": {
+    "prefix": "eemit",
+    "body": [
+      "await eventBus.emit(${1:EVENT_NAME}, ${2:payload});"
+    ],
+    "description": "Emit event"
+  }
+}

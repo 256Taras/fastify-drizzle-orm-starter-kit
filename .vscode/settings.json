@@ -1,22 +1,55 @@
 {
-  "cSpell.words": [
-    "adminer",
-    "encrypter",
-    "fastify",
-    "IEFT",
-    "imageproxy",
-    "Millis",
-    "openapi",
-    "pino",
-    "prettierrc",
-    "ratelimit",
-    "Serializers",
-    "unmocked"
-  ],
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "js/ts.implicitProjectConfig.checkJs": true,
   "editor.formatOnSave": true,
   "editor.formatOnPaste": false,
   "editor.tabSize": 2,
-  "prettier.useEditorConfig": false
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "javascript.preferences.quoteStyle": "double",
+  "typescript.preferences.quoteStyle": "double",
+  "files.eol": "\n",
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "prettier.useEditorConfig": false,
+  "cSpell.words": [
+    "awilix",
+    "fastify",
+    "drizzle",
+    "typebox",
+    "pino",
+    "rambda",
+    "swagger",
+    "openapi",
+    "jsdoc"
+  ],
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact"
+  ],
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/coverage": true,
+    "**/.git": true,
+    "**/package-lock.json": true,
+    "**/yarn.lock": true
+  },
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "javascript.suggest.autoImports": true,
+  "typescript.suggest.autoImports": true,
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "files.associations": {
+    "*.js": "javascript"
+  },
+  "editor.suggestSelection": "first",
+  "editor.snippetSuggestions": "top",
+  "editor.quickSuggestions": {
+    "strings": true
+  },
+  "editor.inlineSuggest.enabled": true,
+  "editor.bracketPairColorization.enabled": true,
+  "editor.guides.bracketPairs": "active"
 }
