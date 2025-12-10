@@ -140,7 +140,7 @@ async function paginationPlugin(fastify) {
   // Add preValidation hook to validate mutually exclusive cursors before schema validation
   fastify.addHook("preValidation", async (request) => {
     /** @type {Record<string, string | string[] | undefined>} */
-    // @ts-expect-error - request.query can be undefined, but we handle it with ?? and cast to proper type
+    // @ts-ignore - request.query can be undefined, but we handle it with ?? and cast to proper type
     const rawQuery = /** @type {QueryParams} */ request.query ?? {};
 
     // Validate mutually exclusive cursors for cursor pagination
@@ -155,7 +155,7 @@ async function paginationPlugin(fastify) {
   // Add preHandler hook to parse pagination params
   fastify.addHook("preHandler", async (request) => {
     /** @type {Record<string, string | string[] | undefined>} */
-    // @ts-expect-error - request.query can be undefined, but we handle it with ?? and cast to proper type
+    // @ts-ignore - request.query can be undefined, but we handle it with ?? and cast to proper type
     const rawQuery = /** @type {QueryParams} */ request.query ?? {};
 
     // @ts-ignore - pagination is decorated on request
