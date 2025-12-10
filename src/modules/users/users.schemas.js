@@ -1,17 +1,17 @@
 import { pick } from "rambda";
 
-import { USERS_PAGINATION_CONFIG } from "./users.pagination.config.js";
-
 import { COMMON_CONTRACTS_V1 } from "#libs/contracts/v1/index.js";
 import { defaultHttpErrorCollection } from "#libs/errors/default-http-error-collection.js";
 import { BadRequestException, ConflictException, ResourceNotFoundException } from "#libs/errors/domain.errors.js";
 import { generatePaginatedRouteSchema } from "#libs/pagination/index.js";
-import { mapHttpErrorsToSchemaErrorCollection, mixinTagForSchema } from "#libs/utils/schemas.js";
+import { mapHttpErrorsToSchemaErrorCollection } from "#libs/utils/schemas.js";
 import {
   USER_CREATE_INPUT_CONTRACT,
   USER_OUTPUT_CONTRACT,
   USER_UPDATE_INPUT_CONTRACT,
 } from "#modules/users/users.contracts.js";
+
+import { USERS_PAGINATION_CONFIG } from "./users.pagination.config.js";
 
 const usersSchemas = {
   getList: generatePaginatedRouteSchema({
@@ -19,9 +19,11 @@ const usersSchemas = {
     description: "Get paginated list of users with filtering, sorting, and search",
     errorSchemas: mapHttpErrorsToSchemaErrorCollection(pick([BadRequestException.name], defaultHttpErrorCollection)),
     summary: "Get users list",
+    tags: ["users"],
   }),
 
   getProfile: {
+    tags: ["users"],
     description: "Get all information of an authorized user.",
     response: {
       200: USER_OUTPUT_CONTRACT,
@@ -31,6 +33,7 @@ const usersSchemas = {
   },
 
   getById: {
+    tags: ["users"],
     description: "Get user by ID",
     params: COMMON_CONTRACTS_V1.id,
     response: {
@@ -43,6 +46,7 @@ const usersSchemas = {
   },
 
   create: {
+    tags: ["users"],
     body: USER_CREATE_INPUT_CONTRACT,
     description: "Create a new user",
     response: {
@@ -55,6 +59,7 @@ const usersSchemas = {
   },
 
   update: {
+    tags: ["users"],
     body: USER_UPDATE_INPUT_CONTRACT,
     description: "Update user by ID",
     params: COMMON_CONTRACTS_V1.id,
@@ -68,6 +73,7 @@ const usersSchemas = {
   },
 
   delete: {
+    tags: ["users"],
     description: "Delete user by ID (soft delete)",
     params: COMMON_CONTRACTS_V1.id,
     response: {
@@ -81,4 +87,4 @@ const usersSchemas = {
 };
 
 // @ts-ignore - Fastify schema types are complex, auto-inference works correctly at runtime
-export default mixinTagForSchema(usersSchemas, ["users"]);
+export default usersSchemas;

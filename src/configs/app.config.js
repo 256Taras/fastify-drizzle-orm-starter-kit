@@ -12,6 +12,4 @@ export const APP_CONFIG = {
   isDev: isDev(),
   isProd: isProd(),
   isTest: isTest(),
-  RATE_LIMIT_MAX: ENV_CONFIG.RATE_LIMIT_MAX,
-  RATE_LIMIT_TIME_WINDOW: ENV_CONFIG.RATE_LIMIT_TIME_WINDOW,
 };

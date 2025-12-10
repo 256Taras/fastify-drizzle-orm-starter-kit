@@ -1,16 +1,16 @@
 import { partial } from "rambda";
 
-import { USER_EVENTS } from "./users.events.js";
-
 import { ConflictException, ResourceNotFoundException } from "#libs/errors/domain.errors.js";
 
-/** @type {(deps: Dependencies, input: UserInsert) => Promise<User | ConflictException>} */
+import { USER_EVENTS } from "./users.events.js";
+
+/** @type {(deps: Dependencies, input: UserCreateInput) => Promise<User>} */
 const createUser = async ({ usersRepository, encrypterService, eventBus, logger }, input) => {
   logger.debug(`[UsersMutations] Creating user: ${input.email}`);
 
   const existingUser = await usersRepository.findByEmail(input.email);
   if (existingUser) {
-    return ConflictException.of(`User with email: ${input.email} already exists`);
+    throw new ConflictException(`User with email: ${input.email} already exists`);
   }
 
   const hashedPassword = await encrypterService.getHash(input.password);
@@ -26,23 +26,24 @@ const createUser = async ({ usersRepository, encrypterService, eventBus, logger 
   });
 
   logger.info(`[UsersMutations] User created: ${newUser.id}`);
+
   return newUser;
 };
 
-/** @type {(deps: Dependencies, userId: string, input: Partial<UserInsert>) => Promise<User | ConflictException | ResourceNotFoundException>} */
+/** @type {(deps: Dependencies, userId: string, input: UserUpdateInput) => Promise<User>} */
 const updateUser = async ({ usersRepository, eventBus, logger }, userId, input) => {
   logger.debug(`[UsersMutations] Updating user: ${userId}`);
 
   if (input.email) {
     const existingUser = await usersRepository.findByEmail(input.email);
     if (existingUser && existingUser.id !== userId) {
-      return ConflictException.of(`User with email: ${input.email} already exists`);
+      throw new ConflictException(`User with email: ${input.email} already exists`);
     }
   }
 
   const updatedUser = await usersRepository.update(userId, input);
   if (!updatedUser) {
-    return ResourceNotFoundException.of(`User with id: ${userId} not found`);
+    throw new ResourceNotFoundException(`User with id: ${userId} not found`);
   }
 
   await eventBus.emit(USER_EVENTS.UPDATED, {
@@ -53,13 +54,13 @@ const updateUser = async ({ usersRepository, eventBus, logger }, userId, input) 
   return updatedUser;
 };
 
-/** @type {(deps: Dependencies, userId: string) => Promise<User | ResourceNotFoundException>} */
+/** @type {(deps: Dependencies, userId: string) => Promise<User>} */
 const deleteUser = async ({ usersRepository, eventBus, logger }, userId) => {
   logger.debug(`[UsersMutations] Deleting user: ${userId}`);
 
   const deletedUser = await usersRepository.softDelete(userId);
   if (!deletedUser) {
-    return ResourceNotFoundException.of(`User with id: ${userId} not found`);
+    throw new ResourceNotFoundException(`User with id: ${userId} not found`);
   }
 
   await eventBus.emit(USER_EVENTS.DELETED, {
@@ -70,7 +71,7 @@ const deleteUser = async ({ usersRepository, eventBus, logger }, userId) => {
   return deletedUser;
 };
 
-/** @type {(deps: Dependencies) => UsersMutations} */
+/** @param {Dependencies} deps */
 export default function usersMutations(deps) {
   return {
     createUser: partial(createUser, [deps]),
@@ -81,5 +82,5 @@ export default function usersMutations(deps) {
 
 /** @typedef {import("#@types/index.jsdoc.js").Dependencies} Dependencies */
 /** @typedef {import("./users.contracts.js").User} User */
-/** @typedef {import("./users.contracts.js").UserInsert} UserInsert */
-/** @typedef {{ createUser: (input: UserInsert) => Promise<User | import("#libs/errors/domain.errors.js").ConflictException>, updateUser: (userId: string, input: Partial<UserInsert>) => Promise<User | import("#libs/errors/domain.errors.js").ConflictException | import("#libs/errors/domain.errors.js").ResourceNotFoundException>, deleteUser: (userId: string) => Promise<User | import("#libs/errors/domain.errors.js").ResourceNotFoundException> }} UsersMutations */
+/** @typedef {import("./users.contracts.js").UserCreateInput} UserCreateInput */
+/** @typedef {import("./users.contracts.js").UserUpdateInput} UserUpdateInput */

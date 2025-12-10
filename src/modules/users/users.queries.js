@@ -6,25 +6,25 @@ import { users } from "#modules/users/users.model.js";
 
 import { USERS_PAGINATION_CONFIG } from "./users.pagination.config.js";
 
-/**@type {(deps: Dependencies, userId: string) => Promise<User | ResourceNotFoundException>} */
+/**@type {(deps: Dependencies, userId: string) => Promise<User>} */
 const findUserById = async ({ usersRepository, logger }, userId) => {
   logger.debug(`[UsersQueries] Getting user: ${userId}`);
 
   const user = await usersRepository.findById(userId);
   if (!user) {
-    return ResourceNotFoundException.of(`User with id: ${userId} not found`);
+    throw new ResourceNotFoundException(`User with id: ${userId} not found`);
   }
 
   return user;
 };
 
-/** @type {(deps: Dependencies, email: string) => Promise<User | ResourceNotFoundException>} */
+/** @type {(deps: Dependencies, email: string) => Promise<User>} */
 const findUserByEmail = async ({ usersRepository, logger }, email) => {
   logger.debug(`[UsersQueries] Getting user by email: ${email}`);
 
   const user = await usersRepository.findByEmail(email);
   if (!user) {
-    return ResourceNotFoundException.of(`User with email: ${email} not found`);
+    throw new ResourceNotFoundException(`User with email: ${email} not found`);
   }
 
   return user;
@@ -52,4 +52,3 @@ export default function usersQueries(deps) {
 /** @typedef {import("./users.contracts.js").User} User */
 /** @typedef {import("./users.contracts.js").GetUsersListInputContract} GetUsersListInputContract */
 /** @typedef {import("./users.contracts.js").GetUsersListOutputContract} GetUsersListOutputContract */
-/** @typedef {{ findUserById: (userId: string) => Promise<User | import("#libs/errors/domain.errors.js").ResourceNotFoundException>, findUserByEmail: (email: string) => Promise<User | import("#libs/errors/domain.errors.js").ResourceNotFoundException>, listUsers: (paginationParams: GetUsersListInputContract) => Promise<GetUsersListOutputContract> }} UsersQueries */

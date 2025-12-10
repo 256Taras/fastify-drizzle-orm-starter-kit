@@ -1,4 +1,4 @@
-import { APP_CONFIG } from "./app.config.js";
+import { ENV_CONFIG } from "#configs/env.config.js";
 
 export const FASTIFY_RATE_LIMIT_CONFIG = {
   addHeaders: {
@@ -20,10 +20,10 @@ export const FASTIFY_RATE_LIMIT_CONFIG = {
   continueExceeding: true, // default false
   enableDraftSpec: false, // default false. Uses IEFT draft header standard
   global: true,
-  max: APP_CONFIG.RATE_LIMIT_MAX, // default 1000
+  max: ENV_CONFIG.RATE_LIMIT_MAX, // default 1000
   redis: null,
   skipOnError: true, // default false
-  timeWindow: APP_CONFIG.RATE_LIMIT_TIME_WINDOW, // default 1000 * 60
+  timeWindow: ENV_CONFIG.RATE_LIMIT_TIME_WINDOW, // default 1000 * 60
   // example: redis: new Redis({ host: "127.0.0.1" }), // default null
   // keyGenerator: function (req) {
   //   /* ... */
