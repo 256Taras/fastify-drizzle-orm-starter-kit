@@ -24,6 +24,7 @@
     "strictPropertyInitialization": false,
     "skipLibCheck": true,
     "maxNodeModuleJsDepth": 1,
+    "suppressImplicitAnyIndexErrors": false,
     "baseUrl": ".",
     "paths": {
       "#*": ["./src/*"],
@@ -50,5 +51,8 @@
     "scripts/**/*.js",
     "scripts/**/*.cjs"
   ],
-  "exclude": ["node_modules", "tools", "infra/docker/pgadmin"]
+  "exclude": ["node_modules", "tools", "infra/docker/pgadmin"],
+  "ts-node": {
+    "skipLibCheck": true
+  }
 }

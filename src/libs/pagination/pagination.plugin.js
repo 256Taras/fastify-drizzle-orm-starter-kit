@@ -139,6 +139,7 @@ async function paginationPlugin(fastify) {
 
   // Add preValidation hook to validate mutually exclusive cursors before schema validation
   fastify.addHook("preValidation", async (request) => {
+    /** @type {Record<string, string | string[] | undefined>} */
     const rawQuery = /** @type {QueryParams} */ request.query ?? {};
 
     // Validate mutually exclusive cursors for cursor pagination
@@ -152,14 +153,15 @@ async function paginationPlugin(fastify) {
 
   // Add preHandler hook to parse pagination params
   fastify.addHook("preHandler", async (request) => {
+    /** @type {Record<string, string | string[] | undefined>} */
     const rawQuery = /** @type {QueryParams} */ request.query ?? {};
 
     // @ts-ignore - pagination is decorated on request
     request.pagination = {
       query: parsePaginationQuery(rawQuery),
       filters: parseFilterParameters(rawQuery),
-      sortBy: parseSortParameter(rawQuery.sortBy),
-      select: parseSelectParameter(rawQuery.select),
+      sortBy: parseSortParameter(/** @type {string | undefined} */ rawQuery.sortBy),
+      select: parseSelectParameter(/** @type {string | undefined} */ rawQuery.select),
     };
   });
 }

@@ -93,7 +93,11 @@ describe(`${TESTING_METHOD}-${getEndpoint()}`, () => {
     assert.strictEqual(response.statusCode, 200);
     assert.ok(data.data.length > 0);
 
-    assert.ok(data.data.every((user) => user.email === expected.email));
+    assert.ok(
+      data.data.every(
+        (/** @type {import("#modules/users/users.contracts.js").User} */ user) => user.email === expected.email,
+      ),
+    );
   });
 
   it("[200] should filter by email with $in operator", async () => {
@@ -109,7 +113,11 @@ describe(`${TESTING_METHOD}-${getEndpoint()}`, () => {
     const allowedEmails = fixtures.positive.FILTER_EMAIL_IN.out.matchSome;
 
     assert.strictEqual(response.statusCode, 200);
-    assert.ok(data.data.every((user) => allowedEmails.includes(user.email)));
+    assert.ok(
+      data.data.every((/** @type {import("#modules/users/users.contracts.js").User} */ user) =>
+        allowedEmails.includes(user.email),
+      ),
+    );
   });
 
   it("[200] should handle multiple filters", async () => {
@@ -125,8 +133,16 @@ describe(`${TESTING_METHOD}-${getEndpoint()}`, () => {
     const expected = fixtures.positive.MULTIPLE_FILTERS.out;
 
     assert.strictEqual(response.statusCode, 200);
-    assert.ok(data.data.every((user) => user.role === expected.matchEvery.role));
-    assert.ok(data.data.every((user) => user.email.toLowerCase().includes(expected.emailContains)));
+    assert.ok(
+      data.data.every(
+        (/** @type {import("#modules/users/users.contracts.js").User} */ user) => user.role === expected.matchEvery.role,
+      ),
+    );
+    assert.ok(
+      data.data.every((/** @type {import("#modules/users/users.contracts.js").User} */ user) =>
+        user.email.toLowerCase().includes(expected.emailContains),
+      ),
+    );
   });
 
   it("[200] should sort by multiple fields", async () => {
