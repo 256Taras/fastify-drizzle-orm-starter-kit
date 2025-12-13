@@ -91,7 +91,7 @@
     "fastify-plugin": "^5.1.0",
     "pino": "^8.15.0",
     "postgres": "^3.4.4",
-    "rambda": "^9.1.1"
+    "rambda": "^10.3.4"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.0.0",
