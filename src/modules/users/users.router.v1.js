@@ -7,7 +7,7 @@ export default async function usersRouterV1(app) {
   app.get("/profile", {
     async handler() {
       const { id } = sessionStorageService.get();
-      return usersQueries.findUserById(id);
+      return usersQueries.findOneById(id);
     },
     preHandler: app.auth([app.verifyJwt]),
     schema: usersSchemas.getProfile,
@@ -16,14 +16,14 @@ export default async function usersRouterV1(app) {
   app.get("/", {
     async handler(req) {
       const pagination = app.transformers.getPaginationQuery(req);
-      return usersQueries.listUsers(pagination);
+      return usersQueries.findMany(pagination);
     },
     schema: usersSchemas.getList,
   });
 
   app.get("/:id", {
     async handler(req) {
-      return usersQueries.findUserById(req.params.id);
+      return usersQueries.findOneById(req.params.id);
     },
     schema: usersSchemas.getById,
   });

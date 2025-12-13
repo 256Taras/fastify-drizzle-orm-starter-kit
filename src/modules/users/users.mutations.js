@@ -8,22 +8,18 @@ import { USER_EVENTS } from "./users.events.js";
 const createUser = async ({ usersRepository, encrypterService, eventBus, logger }, input) => {
   logger.debug(`[UsersMutations] Creating user: ${input.email}`);
 
-  const existingUser = await usersRepository.findByEmail(input.email);
+  const existingUser = await usersRepository.findOneByEmail(input.email);
   if (existingUser) {
     throw new ConflictException(`User with email: ${input.email} already exists`);
   }
 
   const hashedPassword = await encrypterService.getHash(input.password);
-  const newUser = await usersRepository.create({
+  const newUser = await usersRepository.createOne({
     ...input,
     password: hashedPassword,
   });
 
-  await eventBus.emit(USER_EVENTS.CREATED, {
-    userId: newUser.id,
-    email: newUser.email,
-    firstName: newUser.firstName,
-  });
+  await eventBus.emit(USER_EVENTS.CREATED, newUser);
 
   logger.info(`[UsersMutations] User created: ${newUser.id}`);
 
@@ -35,13 +31,13 @@ const updateUser = async ({ usersRepository, eventBus, logger }, userId, input) 
   logger.debug(`[UsersMutations] Updating user: ${userId}`);
 
   if (input.email) {
-    const existingUser = await usersRepository.findByEmail(input.email);
+    const existingUser = await usersRepository.findOneByEmail(input.email);
     if (existingUser && existingUser.id !== userId) {
       throw new ConflictException(`User with email: ${input.email} already exists`);
     }
   }
 
-  const updatedUser = await usersRepository.update(userId, input);
+  const updatedUser = await usersRepository.updateOneById(userId, input);
   if (!updatedUser) {
     throw new ResourceNotFoundException(`User with id: ${userId} not found`);
   }
@@ -58,7 +54,7 @@ const updateUser = async ({ usersRepository, eventBus, logger }, userId, input) 
 const deleteUser = async ({ usersRepository, eventBus, logger }, userId) => {
   logger.debug(`[UsersMutations] Deleting user: ${userId}`);
 
-  const deletedUser = await usersRepository.softDelete(userId);
+  const deletedUser = await usersRepository.softDeleteOneById(userId);
   if (!deletedUser) {
     throw new ResourceNotFoundException(`User with id: ${userId} not found`);
   }

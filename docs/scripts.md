@@ -51,4 +51,4 @@ Here's a breakdown of all the npm scripts available in this project, each design
 
 - **`generate:module`**: Scaffolds a new module using configured templates.
 
-Feel free to run these scripts directly with `npm run <script-name>` or `yarn <script-name>` to streamline your development workflows and ensure high standards of code hygiene and deployment readiness! 🌟
+Feel free to run these scripts directly with `pnpm <script-name>` or `pnpm <script-name>` to streamline your development workflows and ensure high standards of code hygiene and deployment readiness! 🌟

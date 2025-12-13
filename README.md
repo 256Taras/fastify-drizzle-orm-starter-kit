@@ -64,7 +64,7 @@ git clone https://github.com/256Taras/fastify-drizzle-orm-starter-kit
 2. This project needs some dependencies. Let's go install it.
 
   ```bash
-yarn install
+pnpm install
   ```
 
 
@@ -83,7 +83,7 @@ cp .environment.example .environment
 4. Run migrations
 
   ```bash
-yarn typeorm:migration:run
+pnpm typeorm:migration:run
   ```
 
 ## 🏃 Run Project
@@ -91,13 +91,13 @@ yarn typeorm:migration:run
 1. Run infrastructure in docker (db, etc.):
 
  ```bash
-   yarn docker:infra:up
+   pnpm docker:infra:up
  ```
 
 2. Run server on local machine without docker:
 
  ```bash
-   yarn start
+   pnpm start
  ```
 
 Finally, Cheers 🍻🍻 !!! you passed all steps.
@@ -112,7 +112,7 @@ You can check The ApiSpec after running this project. [here](http://localhost:80
 1. Run infrastructure in docker (db, etc.):
 
   ```bash
-yarn docker:infra:up
+pnpm docker:infra:up
   ```
 
 

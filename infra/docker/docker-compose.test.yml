@@ -5,15 +5,15 @@ services:
     image: postgres:14.1-alpine
     restart: always
     environment:
-      POSTGRES_USER: test_user
-      POSTGRES_DB: test_db
-      POSTGRES_PASSWORD: test_password
+      POSTGRES_USER: ${POSTGRES_USER:-test_user}
+      POSTGRES_DB: ${POSTGRES_DB:-test_db}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-test_password}
     ports:
       - 5434:5432
     networks:
       - test-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U test_user -d test_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-test_user} -d ${POSTGRES_DB:-test_db}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -26,7 +26,7 @@ services:
     container_name: node-test
     environment:
       ENV_NAME: test
-      DATABASE_URL: postgresql://test_user:test_password@db-test:5432/test_db
+      DATABASE_URL: ${DATABASE_URL:-postgresql://test_user:test_password@db-test:5432/test_db}
     depends_on:
       db-test:
         condition: service_healthy

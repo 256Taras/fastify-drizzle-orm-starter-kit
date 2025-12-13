@@ -2,11 +2,14 @@ FROM node:24-alpine
 
 WORKDIR /app
 
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
 # Copy package files
-COPY package.json yarn.lock* ./
+COPY package.json pnpm-lock.yaml* .npmrc* ./
 
 # Install dependencies (including dev dependencies for tests)
-RUN yarn install --frozen-lockfile
+RUN pnpm install --frozen-lockfile
 
 # Copy source code
 COPY . .

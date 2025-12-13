@@ -1,5 +1,5 @@
 export const SWAGGER_TAGS = {
-  AUTH: ["auth"],
-  USERS: ["users"],
-  DEV: ["dev"],
+  AUTH: ["Authentication and Authorization"],
+  USERS: ["Users"],
+  DEV: ["System"],
 };

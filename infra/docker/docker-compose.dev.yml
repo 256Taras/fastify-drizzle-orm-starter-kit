@@ -10,7 +10,7 @@ services:
       # Path to the Dockerfile
       dockerfile: ./infra/docker/Dockerfile
     # Command to run inside the container
-    command: yarn start
+    command: pnpm start
     # Port mapping for the container
     ports:
       - '8000:8000'

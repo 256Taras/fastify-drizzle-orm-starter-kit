@@ -3,9 +3,10 @@
   "version": "0.1.0",
   "description": "Template for Node.js projects with pre-built fastify setup.",
   "main": "./src/index.js",
+  "types": "./types/index.d.ts",
   "type": "module",
   "scripts": {
-    "audit": "yarn audit",
+    "audit": "pnpm audit",
     "start": "node src/index.js",
     "start:dev": "node src/index.js | pino-pretty --ignore serviceContext",
     "start:dev:watch": "node --watch src/index.js | pino-pretty --ignore serviceContext",
@@ -33,17 +34,18 @@
     "test": "ENV_NAME=test npx c8 node --test",
     "test:watch": "node --test --watch",
     "precommit": "lint-staged",
-    "prepush": "yarn lint && yarn check:types:jsdoc",
+    "prepush": "pnpm lint && pnpm check:types:jsdoc",
     "hooks:setup": "bash scripts/setup-hooks.sh",
     "release": "semantic-release",
     "check:types": "npx tsc --project tsconfig.json",
     "check:types:jsdoc": "node scripts/check-types.js",
     "check:types:watch": "npx tsc --project tsconfig.json --watch",
+    "generate:types": "rm -rf types && npx tsc --project tsconfig.declarations.json || true",
     "check:env": "node -r ./scripts/env/load-and-validate-env.cjs",
     "check:dep": "npx depcheck",
     "deps:validate": "npx depcruise src --config .dependency-cruiser.cjs",
     "check": "npm run check:types && npm run lint",
-    "ci": "yarn prettier:fix & yarn lint:fix && yarn lint && make test && yarn check",
+    "ci": "pnpm prettier:fix & pnpm lint:fix && pnpm lint && make test && pnpm check",
     "generate:module": "npx yo tools/generators/scaffold.js"
   },
   "author": {
@@ -53,12 +55,12 @@
   "license": "MIT",
   "engines": {
     "node": ">=24.0.0",
-    "npm": ">=10"
+    "pnpm": ">=9"
   },
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx}": [
-      "yarn run prettier:fix",
-      "yarn run lint:fix"
+      "pnpm run prettier:fix",
+      "pnpm run lint:fix"
     ]
   },
   "imports": {
@@ -82,7 +84,6 @@
     "@sinclair/typebox": "^0.34.41",
     "ajv": "^8.12.0",
     "awilix": "^10.0.2",
-    "dayjs": "^1.11.10",
     "drizzle-orm": "^0.45.0",
     "drizzle-typebox": "^0.3.3",
     "env-schema": "^5.2.1",
@@ -98,7 +99,6 @@
     "@eslint/js": "^9.39.1",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
-    "@types/lodash-es": "^4.17.12",
     "@types/node": "^24.0.0",
     "@types/pg": "^8.10.9",
     "dependency-cruiser": "^17.3.2",

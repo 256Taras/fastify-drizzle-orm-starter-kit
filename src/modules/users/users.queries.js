@@ -7,10 +7,10 @@ import { users } from "#modules/users/users.model.js";
 import { USERS_PAGINATION_CONFIG } from "./users.pagination.config.js";
 
 /**@type {(deps: Dependencies, userId: string) => Promise<User>} */
-const findUserById = async ({ usersRepository, logger }, userId) => {
+const findOneById = async ({ usersRepository, logger }, userId) => {
   logger.debug(`[UsersQueries] Getting user: ${userId}`);
 
-  const user = await usersRepository.findById(userId);
+  const user = await usersRepository.findOneById(userId);
   if (!user) {
     throw new ResourceNotFoundException(`User with id: ${userId} not found`);
   }
@@ -19,10 +19,10 @@ const findUserById = async ({ usersRepository, logger }, userId) => {
 };
 
 /** @type {(deps: Dependencies, email: string) => Promise<User>} */
-const findUserByEmail = async ({ usersRepository, logger }, email) => {
+const findOneByEmail = async ({ usersRepository, logger }, email) => {
   logger.debug(`[UsersQueries] Getting user by email: ${email}`);
 
-  const user = await usersRepository.findByEmail(email);
+  const user = await usersRepository.findOneByEmail(email);
   if (!user) {
     throw new ResourceNotFoundException(`User with email: ${email} not found`);
   }
@@ -31,7 +31,7 @@ const findUserByEmail = async ({ usersRepository, logger }, email) => {
 };
 
 /** @type {(deps: Dependencies, paginationParams: import("#libs/pagination/pagination.types.jsdoc.js").PaginationParams<"offset">) => Promise<GetUsersListOutputContract>} */
-const listUsers = async ({ paginationService, logger }, paginationParams) => {
+const findMany = async ({ paginationService, logger }, paginationParams) => {
   logger.debug(`[UsersQueries] Getting users list`);
 
   return paginationService.paginate(USERS_PAGINATION_CONFIG, paginationParams, {
@@ -42,9 +42,9 @@ const listUsers = async ({ paginationService, logger }, paginationParams) => {
 /** @param {Dependencies} deps */
 export default function usersQueries(deps) {
   return {
-    findUserByEmail: partial(findUserByEmail, [deps]),
-    findUserById: partial(findUserById, [deps]),
-    listUsers: partial(listUsers, [deps]),
+    findOneByEmail: partial(findOneByEmail, [deps]),
+    findOneById: partial(findOneById, [deps]),
+    findMany: partial(findMany, [deps]),
   };
 }
 

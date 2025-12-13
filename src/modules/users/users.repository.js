@@ -1,69 +1,84 @@
 import { and, eq, isNull } from "drizzle-orm";
 import { partial } from "rambda";
 
+import { createBaseRepository } from "#libs/repositories/base-repository.js";
 import { NON_PASSWORD_COLUMNS, users } from "#modules/users/users.model.js";
 
-/** @type {(deps: Dependencies, id: string) => Promise<User | undefined>} */
-const findById = async ({ db }, id) => {
-  const [maybeUser] = await db
-    .select(NON_PASSWORD_COLUMNS)
-    .from(users)
-    .where(and(eq(users.id, id), isNull(users.deletedAt)));
-
-  return maybeUser;
-};
-
 /** @type {(deps: Dependencies, email: string) => Promise<User | undefined>} */
-const findByEmail = async ({ db }, email) => {
+const findOneByEmail = async ({ db }, email) => {
   const [maybeUser] = await db
     .select(NON_PASSWORD_COLUMNS)
     .from(users)
     .where(and(eq(users.email, email), isNull(users.deletedAt)));
 
-  return maybeUser;
+  return /** @type {User | undefined} */ maybeUser;
 };
 
-/** @type {(deps: Dependencies, data: UserInsert) => Promise<User>} */
-const create = async ({ db }, data) => {
-  const [newUser] = await db.insert(users).values(data).returning(NON_PASSWORD_COLUMNS);
+/** @type {(deps: Dependencies, email: string) => Promise<UserWithPassword | undefined>} */
+const findOneByEmailWithPassword = async ({ db }, email) => {
+  const [maybeUser] = await db
+    .select()
+    .from(users)
+    .where(and(eq(users.email, email), isNull(users.deletedAt)));
 
-  return newUser;
+  return /** @type {UserWithPassword | undefined} */ maybeUser;
+};
+
+/** @type {(deps: Dependencies, id: string) => Promise<UserWithPassword | undefined>} */
+const findOneByIdWithPassword = async ({ db }, id) => {
+  const [maybeUser] = await db
+    .select()
+    .from(users)
+    .where(and(eq(users.id, id), isNull(users.deletedAt)));
+
+  return /** @type {UserWithPassword | undefined} */ maybeUser;
+};
+
+/** @type {(deps: Dependencies, id: string, password: string) => Promise<User | undefined>} */
+const updateOnePasswordById = async ({ db }, id, password) => {
+  const [updatedUser] = await db
+    .update(users)
+    .set({ password, updatedAt: new Date().toISOString() })
+    .where(and(eq(users.id, id), isNull(users.deletedAt)))
+    .returning(NON_PASSWORD_COLUMNS);
+
+  return /** @type {User | undefined} */ updatedUser;
 };
 
 /** @type {(deps: Dependencies, id: string, data: Partial<UserInsert>) => Promise<User | undefined>} */
-const update = async ({ db }, id, data) => {
+const updateOneById = async ({ db }, id, data) => {
   const [updatedUser] = await db
     .update(users)
     .set({ ...data, updatedAt: new Date().toISOString() })
     .where(and(eq(users.id, id), isNull(users.deletedAt)))
     .returning(NON_PASSWORD_COLUMNS);
 
-  return updatedUser;
+  return /** @type {User | undefined} */ updatedUser;
 };
 
-/** @type {(deps: Dependencies, id: string) => Promise<User | undefined>} */
-const softDelete = async ({ db }, id) => {
-  const [deletedUser] = await db
-    .update(users)
-    .set({ deletedAt: new Date().toISOString() })
-    .where(and(eq(users.id, id), isNull(users.deletedAt)))
-    .returning(NON_PASSWORD_COLUMNS);
-
-  return deletedUser;
-};
-
-/** @type {(deps: Dependencies) => UsersRepository} */
+/** @param {Dependencies} deps */
 export default function usersRepository(deps) {
+  const baseRepo = createBaseRepository({
+    table: users,
+    logger: deps.logger,
+    db: deps.db,
+    defaultSelectColumns: NON_PASSWORD_COLUMNS,
+    softDeleteColumn: "deletedAt",
+  });
+
   return {
-    create: partial(create, [deps]),
-    findByEmail: partial(findByEmail, [deps]),
-    findById: partial(findById, [deps]),
-    softDelete: partial(softDelete, [deps]),
-    update: partial(update, [deps]),
+    createOne: baseRepo.createOne,
+    findOneById: baseRepo.findOneById,
+    softDeleteOneById: baseRepo.softDeleteOneById,
+    findOneByEmail: partial(findOneByEmail, [deps]),
+    findOneByEmailWithPassword: partial(findOneByEmailWithPassword, [deps]),
+    findOneByIdWithPassword: partial(findOneByIdWithPassword, [deps]),
+    updateOneById: partial(updateOneById, [deps]),
+    updateOnePasswordById: partial(updateOnePasswordById, [deps]),
   };
 }
 
 /** @typedef {import("#@types/index.jsdoc.js").Dependencies} Dependencies */
 /** @typedef {import("./users.contracts.js").User} User */
 /** @typedef {import("./users.contracts.js").UserInsert} UserInsert */
-/** @typedef {{ findById: (id: string) => Promise<User | undefined>, findByEmail: (email: string) => Promise<User | undefined>, create: (data: UserInsert) => Promise<User>, update: (id: string, data: Partial<UserInsert>) => Promise<User | undefined>, softDelete: (id: string) => Promise<User | undefined> }} UsersRepository */
+/** @typedef {import("drizzle-orm").InferSelectModel<typeof users>} UserWithPassword */

@@ -74,16 +74,6 @@
  */
 
 // ============================================================================
-// Database types
-// ============================================================================
-
-/**
- * Kysely database instance Types are automatically inferred from Drizzle schema using Kyselify
- *
- * @typedef {import("./database/kysely.jsdoc.js").KyselyDatabase} Database
- */
-
-// ============================================================================
 // Config types
 // ============================================================================
 

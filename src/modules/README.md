@@ -25,7 +25,7 @@ Module Generator is a script that automatically generates code for a new module 
 Run the generator using the following command:
 
 ```shell
-yarn generate:module ModuleName 'field1:type1(10), field2:type2, field3?:type3'
+pnpm generate:module ModuleName 'field1:type1(10), field2:type2, field3?:type3'
 ```
 Replace ModuleName with the desired name for your new module, and field1:type1, field2:type2 with your desired field names and their respective types.
 

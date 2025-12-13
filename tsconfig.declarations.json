@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true,
+    "outDir": "./types",
+    "removeComments": false,
+    "skipLibCheck": true,
+    "noEmitOnError": false
+  },
+  "include": [
+    "src/**/*.js",
+    "src/**/*.ts",
+    "src/**/*.cjs",
+    "tests/**/*.js",
+    "tests/**/*.ts",
+    "tests/**/*.cjs"
+  ],
+  "exclude": ["node_modules", "tools", "infra/docker/pgadmin", "types"]
+}

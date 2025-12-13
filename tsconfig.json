@@ -23,11 +23,11 @@
     "declaration": true,
     "strictPropertyInitialization": false,
     "skipLibCheck": true,
-    "maxNodeModuleJsDepth": 1,
+    "maxNodeModuleJsDepth": 0,
     "suppressImplicitAnyIndexErrors": false,
     "baseUrl": ".",
     "paths": {
-      "#*": ["./src/*"],
+      "#*": ["./src/*", "./types/*"],
       "#tests/*": ["./tests/*"]
     },
     "typeRoots": ["./node_modules/@types"],
@@ -51,7 +51,7 @@
     "scripts/**/*.js",
     "scripts/**/*.cjs"
   ],
-  "exclude": ["node_modules", "tools", "infra/docker/pgadmin"],
+  "exclude": ["node_modules", "tools", "infra/docker/pgadmin", "**/node_modules/**"],
   "ts-node": {
     "skipLibCheck": true
   }

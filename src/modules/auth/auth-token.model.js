@@ -1,7 +1,9 @@
 import { index, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
+import { TABLE_NAMES } from "#infra/database/table-names.js";
+
 export const authTokens = pgTable(
-  "auth_tokens",
+  TABLE_NAMES.authTokens,
   {
     createdAt: timestamp("created_at").defaultNow().notNull(),
     id: uuid("id").primaryKey().notNull().defaultRandom(),

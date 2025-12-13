@@ -1,11 +1,13 @@
 /** @file Dependency injection container types */
 
+import emailService from "#libs/email/email.service.js";
 import encrypterService from "#libs/encryption/encrypter.service.js";
 import eventBusService from "#libs/events/event-bus.service.js";
 import paginationService from "#libs/pagination/pagination.service.js";
 import sessionStorageService from "#libs/session-storage/session-storage.service.js";
 import authTokenService from "#modules/auth/auth-token.service.js";
-import authService from "#modules/auth/auth.service.js";
+import authMutations from "#modules/auth/auth.mutations.js";
+import authRepository from "#modules/auth/auth.repository.js";
 import usersMutations from "#modules/users/users.mutations.js";
 import usersQueries from "#modules/users/users.queries.js";
 import usersRepository from "#modules/users/users.repository.js";
@@ -51,9 +53,12 @@ import usersRepository from "#modules/users/users.repository.js";
  * Dependencies interface for dependency injection
  *
  * @typedef {object} Dependencies
- * @property {ReturnType<typeof authService>} authService
+ * @property {ReturnType<typeof authMutations>} authMutations
+ * @property {ReturnType<typeof authRepository>} authRepository
  * @property {ReturnType<typeof authTokenService>} authTokenService
+ * @property {import("#@types/index.jsdoc.js").Configs} configs
  * @property {import("drizzle-orm/postgres-js").PostgresJsDatabase} db
+ * @property {ReturnType<typeof emailService>} emailService
  * @property {EncrypterService} encrypterService
  * @property {ReturnType<typeof eventBusService>} eventBus
  * @property {JwtService} jwtService

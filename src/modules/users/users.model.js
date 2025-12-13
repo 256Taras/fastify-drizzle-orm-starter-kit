@@ -2,12 +2,13 @@ import { getTableColumns } from "drizzle-orm";
 import { index, pgEnum, pgTable, text, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
 import { omit } from "rambda";
 
+import { TABLE_NAMES } from "#infra/database/table-names.js";
 import { ROLES_NAMES } from "#libs/constants/common.constants.js";
 
 export const roleEnum = pgEnum("roles", [ROLES_NAMES.user, ROLES_NAMES.admin]);
 
 export const users = pgTable(
-  "users",
+  TABLE_NAMES.users,
   {
     createdAt: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
     deletedAt: timestamp("deleted_at", { mode: "string" }),
