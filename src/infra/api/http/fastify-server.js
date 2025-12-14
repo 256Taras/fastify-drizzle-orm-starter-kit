@@ -13,15 +13,14 @@ import fastifyRequestContextPlugin from "@fastify/request-context";
 import fastifySwaggerPlugin from "@fastify/swagger";
 import fastifySwaggerUiPlugin from "@fastify/swagger-ui";
 import Fastify from "fastify";
+import fastifyMetrics from "fastify-metrics";
 
-// Import custom modules and configurations.
-
-import { FASTIFY_CORS_CONFIG } from "#configs/index.js";
+import { FASTIFY_CORS_CONFIG, FASTIFY_METRICS_CONFIG } from "#configs/index.js";
 import { globalHttpFastify404ErrorHandler, globalHttpFastifyErrorHandler } from "#infra/api/http/fastify-error-handler.js";
+import healthCheckRouter from "#infra/api/http/routes/health-check.router.js";
 import defaultLogger, { logger } from "#libs/logging/logger.service.js";
 import { paginationPlugin } from "#libs/pagination/index.js";
 import { getDirName } from "#libs/utils/files.js";
-import sharedHealthCheckRouter from "#modules/health-check/router.js";
 
 export class RestApiServer {
   /** @type {import("#@types/index.jsdoc.js").Configs} */
@@ -63,6 +62,10 @@ export class RestApiServer {
     this.#fastify.register(fastifyRequestContextPlugin, { defaultStoreValues: { logger: defaultLogger } });
     // Register pagination plugin explicitly before autoload to ensure it's available for all routes
     this.#fastify.register(paginationPlugin);
+    // Register metrics plugin for Prometheus metrics collection
+    // Swagger schema is included in the endpoint RouteOptions
+    // @ts-ignore - fastify-metrics type definitions issue
+    await this.#fastify.register(fastifyMetrics, FASTIFY_METRICS_CONFIG);
     // Autoload plugin to load custom plugins from a directory.
     this.#autoLoadPlugins();
     // RateLimit plugin for limiting request rates.
@@ -82,8 +85,8 @@ export class RestApiServer {
     //   we wrote to solve this specific problems. It loads all the content from the specified
     // folder, even the subfolders. Take at look at its documentation, as it's doing a lot more!
     //   First of all, we require all the plugins that we'll need in our application
-    // Registering routers.
-    this.#fastify.register(sharedHealthCheckRouter, { prefix: "/api" });
+    // Registering system routers (health check, etc.)
+    this.#fastify.register(healthCheckRouter, { prefix: "/api" });
 
     this.#autoLoadRoutes();
   }
@@ -143,11 +146,13 @@ export class RestApiServer {
     this.#fastify.register(fastifyAutoLoad, {
       dir: libsPath,
       /**
-       * Filter to match only plugin files, but exclude pagination.plugin.js as it's registered explicitly before autoload
+       * Filter to match only plugin files, but exclude pagination.plugin.js and metrics.plugin.js
+       * as they are registered explicitly before autoload
        *
        * @param {string} p
        */
-      matchFilter: (p) => p.endsWith(".plugin.js") && !p.includes("pagination.plugin.js"),
+      matchFilter: (p) =>
+        p.endsWith(".plugin.js") && !p.includes("pagination.plugin.js") && !p.includes("metrics.plugin.js"),
       options: {
         ...this.#options,
       },

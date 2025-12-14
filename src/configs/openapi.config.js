@@ -19,7 +19,7 @@ export const OPENAPI_CONFIG = {
           type: "apiKey",
         },
         bearerTokenAuth: {
-          bearerFormat: "JWT", // optional, arbitrary value for documentation purposes
+          bearerFormat: "JWT",
           in: "header",
           name: "Bearer Token",
           scheme: "bearer",
@@ -40,7 +40,6 @@ export const OPENAPI_CONFIG = {
     },
     produces: ["application/json"],
     schemes: ["http", "https"],
-    tags: [{ description: "Dev related end-points", name: "dev" }],
   },
   routePrefix: "/docs",
 };

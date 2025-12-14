@@ -1,28 +1,31 @@
-FROM node:18.11-alpine AS BUILDER
+FROM node:24-alpine AS BUILDER
 
-WORKDIR /user/src/app
+WORKDIR /app
 
 # Install pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
 COPY package.json pnpm-lock.yaml* .npmrc* ./
 
-RUN pnpm install --prod --frozen-lockfile
+RUN pnpm install --frozen-lockfile
 
 COPY . .
 
-FROM node:18.11-alpine
+FROM node:24-alpine
 
-WORKDIR /user/src/app
+WORKDIR /app
 
 # Install pnpm in final image
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-COPY --from=BUILDER /user/src/app .
-
-ENV DB_HOST=db
+COPY --from=BUILDER /app/node_modules ./node_modules
+COPY --from=BUILDER /app/package.json ./package.json
+COPY --from=BUILDER /app/pnpm-lock.yaml ./pnpm-lock.yaml
+COPY --from=BUILDER /app/.npmrc* ./
+COPY . .
 
 ENV PORT=8000
-EXPOSE 8000
+
+EXPOSE 8000 9229
 
 CMD [ "pnpm", "start"]

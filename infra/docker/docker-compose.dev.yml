@@ -1,28 +1,43 @@
-version: '3.8'
-
 services:
   # Backend container
   backend:
+    container_name: backend
     # Build configuration for the container
     build:
       # Context for the Dockerfile
       context: ../../
       # Path to the Dockerfile
       dockerfile: ./infra/docker/Dockerfile
-    # Command to run inside the container
-    command: pnpm start
+    # Command to run inside the container (with hot reload)
+    command: pnpm start:dev:watch
     # Port mapping for the container
     ports:
       - '8000:8000'
       - '9229:9229'
     # Environment file to load environment variables from
     env_file: [ '../../configs/.env' ]
+    # Environment variables (override DATABASE_URL for Docker)
+    environment:
+      - DATABASE_URL=${DATABASE_URL:-postgresql://oonhvxbq:WNDWxbMlQEQLCqkQQybNREkQyOJMZ5eD@db:5432/oonhvxbq}
     # List of services to depend on before starting this container
-    depends_on: [ 'db' ]
-    # Mount source code directory into container
-    volumes: [ './:/app' ]
+    depends_on:
+      db:
+        condition: service_healthy
+    # Mount source code directory into container for hot reload
+    volumes:
+      - '../../src:/app/src'
+      - '../../configs:/app/configs'
+      - '../../infra:/app/infra'
+      - '../../scripts:/app/scripts'
+      - '../../package.json:/app/package.json'
+      - '../../tsconfig.json:/app/tsconfig.json'
     networks:
       - starter-network
+    # Add labels for Promtail to identify logs
+    labels:
+      - "logging=promtail"
+      - "logging_jobname=nodejs-app"
+    restart: unless-stopped
 
 networks:
   starter-network:

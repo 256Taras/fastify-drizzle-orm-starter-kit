@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # PostgreSQL database container
   db:
@@ -22,33 +20,17 @@ services:
     env_file: [ '../../configs/.env' ]
     networks:
       - starter-network
-
-  # Database management tool container
-  pgadmin:
-    # Define a container name for the pgadmin service
-    container_name: pgadmin
-    # Use the dpage/pgadmin4:5.7 image for the service
-    image: dpage/pgadmin4:5.7
-    # Always restart the container if it stops
-    restart: always
-    # Set environment variables for the service
-    environment:
-      PGADMIN_DEFAULT_EMAIL: test@test.com
-      PGADMIN_DEFAULT_PASSWORD: oonhvxbf
-    # Expose port 80 in the container and map it to port 8080 on the host
-    ports:
-      - 8888:80
-    # Mount a local directory to the container to store pgadmin data
-    volumes:
-      - ./pgadmin:/var/lib/pgadmin
-    # Specify that the service depends on the db service
-    depends_on:
-      - db
-    networks:
-      - starter-network
+    # Health check for depends_on
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U oonhvxbq -d oonhvxbq"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 networks:
   starter-network:
+    name: starter-network
+    driver: bridge
 
 
 

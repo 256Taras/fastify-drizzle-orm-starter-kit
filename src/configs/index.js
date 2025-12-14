@@ -5,6 +5,7 @@ export * from "./encryption.config.js";
 export * from "./fastify-cors.config.js";
 export * from "./fastify-helmet.config.js";
 export * from "./fastify-jwt.config.js";
+export * from "./fastify-metrics.config.js";
 export * from "./fastify-rate-limit.config.js";
 export * from "./fastify.config.js";
 export * from "./logger.config.js";

@@ -29,4 +29,3 @@ docker.env
 **/obj
 **/secrets.dev.yaml
 **/values.dev.yaml
-pgadmin
