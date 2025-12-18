@@ -5,6 +5,7 @@ import type { FastifyInstanceWithJWT } from "#libs/auth/jwt.types.d.ts";
 import type emailService from "#libs/email/email.service.ts";
 import type eventBusService from "#libs/events/event-bus.service.ts";
 import type paginationService from "#libs/pagination/pagination.service.ts";
+import type unitOfWorkService from "#libs/persistence/unit-of-work.service.ts";
 import type authTokenService from "#modules/auth/auth-token.service.ts";
 import type authMutations from "#modules/auth/auth.mutations.ts";
 import type authRepository from "#modules/auth/auth.repository.ts";
@@ -31,6 +32,7 @@ export interface Dependencies {
   logger: import("pino").Logger;
   paginationService: ReturnType<typeof paginationService>;
   sessionStorageService: SessionStorageService;
+  unitOfWork: ReturnType<typeof unitOfWorkService>;
   usersMutations: ReturnType<typeof usersMutations>;
   usersQueries: ReturnType<typeof usersQueries>;
   usersRepository: ReturnType<typeof usersRepository>;

@@ -115,23 +115,13 @@ export class RestApiServer {
   async start({ ip, port }: { ip: string; port: number }): Promise<void> {
     await this.buildServerApp();
 
+    await this.#fastify.register(fastifyMetrics, FASTIFY_METRICS_CONFIG as never);
+
     await this.#fastify.listen({ host: ip, port });
 
-    // Register metrics plugin after server start for better startup performance
-    // This doesn't block the server from accepting requests
-    this.#fastify.ready(async () => {
-      try {
-        await this.#fastify.register(fastifyMetrics, FASTIFY_METRICS_CONFIG as never);
-        logger.debug("Metrics plugin registered");
-      } catch (error) {
-        logger.warn("Failed to register metrics plugin:", error);
-      }
-
-      // Print the route tree for debugging purposes
-      if (this.#configs.APP_CONFIG.isDebug) {
-        logger.debug(this.#fastify.printRoutes());
-      }
-    });
+    if (this.#configs.APP_CONFIG.isDebug) {
+      logger.debug(this.#fastify.printRoutes());
+    }
   }
 
   /**

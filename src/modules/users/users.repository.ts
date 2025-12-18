@@ -3,7 +3,7 @@ import { and, eq, isNull } from "drizzle-orm";
 import type { InferSelectModel } from "drizzle-orm";
 import { partial } from "rambda";
 
-import { createBaseRepository } from "#libs/repositories/base-repository.ts";
+import { createBaseRepository } from "#libs/persistence/base-repository.ts";
 import { NON_PASSWORD_COLUMNS, users } from "#modules/users/users.model.ts";
 
 import type { User, UserInsert } from "./users.contracts.ts";

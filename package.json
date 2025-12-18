@@ -56,9 +56,9 @@
   },
   "license": "MIT",
   "engines": {
-    "node": ">=25.0.0",
-    "pnpm": ">=9"
+    "node": ">=25.0.0"
   },
+  "packageManager": "pnpm@9.15.0",
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx}": [
       "pnpm run prettier:fix",

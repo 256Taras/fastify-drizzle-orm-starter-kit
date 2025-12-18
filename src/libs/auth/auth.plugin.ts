@@ -1,4 +1,4 @@
-import { FastifyAuthFunction } from "@fastify/auth";
+import type { FastifyAuthFunction } from "@fastify/auth";
 import fastifyJwt from "@fastify/jwt";
 import type { FastifyInstance, FastifyRequest } from "fastify";
 import fp from "fastify-plugin";
@@ -17,6 +17,13 @@ type AuthPluginOptions = {
     };
   };
 };
+
+declare module "fastify" {
+  interface FastifyInstance {
+    verifyJwt: FastifyAuthFunction;
+    verifyJwtRefreshToken: FastifyAuthFunction;
+  }
+}
 
 /**
  * A Fastify plugin to handle JWT authentication and authorization.

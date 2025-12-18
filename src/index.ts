@@ -1,3 +1,5 @@
+import * as console from "node:console";
+
 import * as configs from "#configs/index.ts";
 import { APP_CONFIG, SERVER_CONFIG } from "#configs/index.ts";
 import { RestApiServer } from "#infra/api/http/fastify-server.ts";
@@ -65,7 +67,7 @@ class Application {
 
     process.once("exit", (code) => {
       const color = code === 0 ? "\u001B[32m" : "\u001B[31m";
-      // eslint-disable-next-line no-console
+
       console.log(`${color}[${APP_CONFIG.applicationName}] Exiting with code: ${code}\u001B[0m`);
     });
   }
@@ -160,6 +162,7 @@ try {
     process.exit(0);
   }
 
-  logger.fatal({ error }, `[${APP_CONFIG.applicationName}] Bootstrap failed`);
+  // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+  logger.fatal({ error }, `[${APP_CONFIG.applicationName}] Bootstrap failed: ` + error);
   process.exit(1);
 }
