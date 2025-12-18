@@ -534,12 +534,6 @@ const result = await createUser(
 
 ## 🔄 Development Workflow
 
-### Type Checking
-```bash
-pnpm check:types:jsdoc    # Check JSDoc types
-pnpm check:types         # Full TypeScript check
-```
-
 ### Database
 ```bash
 pnpm database:generate   # Generate migrations

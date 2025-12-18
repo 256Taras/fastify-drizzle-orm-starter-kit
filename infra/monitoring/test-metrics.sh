@@ -34,3 +34,4 @@ echo ""
 echo "Done! Check Grafana dashboard or Prometheus:"
 echo "  - Grafana: http://localhost:3000"
 echo "  - Prometheus: http://localhost:9090/graph?g0.expr=http_request_duration_seconds_count"
+

@@ -36,3 +36,4 @@ scrape_configs:
           format: RFC3339Nano
       - output:
           source: msg
+

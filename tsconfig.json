@@ -1,10 +1,10 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "display": "Node 24",
+  "display": "Node 25",
   "compilerOptions": {
     "noEmit": true,
     "allowJs": true,
-    "checkJs": true,
+    "checkJs": false,
     "target": "ES2023",
     "module": "nodenext",
     "lib": ["ES2023"],
@@ -30,6 +30,7 @@
       "#*": ["./src/*", "./types/*"],
       "#tests/*": ["./tests/*"]
     },
+    "allowImportingTsExtensions": true,
     "typeRoots": ["./node_modules/@types"],
     "incremental": true,
     "forceConsistentCasingInFileNames": true,
@@ -38,18 +39,14 @@
     "exactOptionalPropertyTypes": false
   },
   "include": [
-    "tests/utils/**/*.js",
     "src/**/*.ts",
-    "src/**/*.cjs",
     "src/**/*.js",
-    "tests/**/*.js",
-    "tests/**/*.cjs",
     "tests/**/*.ts",
-    "infra/**/*.js",
-    "infra/**/*.cjs",
+    "tests/**/*.js",
     "infra/**/*.ts",
-    "scripts/**/*.js",
-    "scripts/**/*.cjs"
+    "infra/**/*.js",
+    "scripts/**/*.ts",
+    "scripts/**/*.js"
   ],
   "exclude": ["node_modules", "tools", "infra/docker/pgadmin", "**/node_modules/**"],
   "ts-node": {

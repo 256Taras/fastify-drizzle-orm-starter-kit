@@ -7,7 +7,7 @@
       "name": "Debug: Start Dev Server",
       "runtimeExecutable": "node",
       "runtimeArgs": ["--watch"],
-      "program": "${workspaceFolder}/src/index.js",
+      "program": "${workspaceFolder}/src/index.ts",
       "cwd": "${workspaceFolder}",
       "env": {
         "NODE_ENV": "development"
@@ -22,6 +22,7 @@
       "request": "launch",
       "name": "Debug: Current File",
       "runtimeExecutable": "node",
+      "runtimeArgs": [],
       "program": "${file}",
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",

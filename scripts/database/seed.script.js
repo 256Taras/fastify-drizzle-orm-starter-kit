@@ -13,10 +13,10 @@ import { and, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
+import { seedTracking } from "./seed-tracking.model.js";
+
 import { ENV_CONFIG } from "#configs/env.config.js";
 import { logger } from "#libs/logging/logger.service.js";
-
-import { seedTracking } from "./seed-tracking.model.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = join(__dirname, "../..");

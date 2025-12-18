@@ -11,3 +11,4 @@ providers:
     options:
       path: /var/lib/grafana/dashboards
       foldersFromFilesStructure: true
+

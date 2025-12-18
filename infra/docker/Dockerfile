@@ -1,4 +1,4 @@
-FROM node:24-alpine AS BUILDER
+FROM node:25-alpine AS BUILDER
 
 WORKDIR /app
 
@@ -11,7 +11,7 @@ RUN pnpm install --frozen-lockfile
 
 COPY . .
 
-FROM node:24-alpine
+FROM node:25-alpine
 
 WORKDIR /app
 

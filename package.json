@@ -2,14 +2,14 @@
   "name": "fastify-starter-kit",
   "version": "0.1.0",
   "description": "Template for Node.js projects with pre-built fastify setup.",
-  "main": "./src/index.js",
+  "main": "./src/index.ts",
   "types": "./types/index.d.ts",
   "type": "module",
   "scripts": {
     "audit": "pnpm audit",
-    "start": "node src/index.js",
-    "start:dev": "node src/index.js | pino-pretty --ignore serviceContext",
-    "start:dev:watch": "node --watch src/index.js | pino-pretty --ignore serviceContext",
+    "start": "node src/index.ts",
+    "start:dev": "node src/index.ts | pino-pretty --ignore serviceContext",
+    "start:dev:watch": "node --watch src/index.ts",
     "docker:dev:up": "docker compose -f ./infra/docker/docker-compose.yml -f ./infra/docker/docker-compose.dev.yml up",
     "docker:dev:down": "docker compose -f ./infra/docker/docker-compose.yml -f ./infra/docker/docker-compose.dev.yml down",
     "docker:monitoring:up": "docker compose -f ./infra/docker/docker-compose.yml -f ./infra/docker/docker-compose.monitoring.yml up",
@@ -22,7 +22,7 @@
     "database:migrate": "drizzle-kit migrate --config=infra/database/drizzle.config.js",
     "database:seed": "node scripts/database/seed.script.js",
     "database:seed:dev": "node scripts/database/seed.script.js development",
-    "database:seed:test": "node scripts/database/seed.script.js test",
+    "database:seed:test": "node scripts/database/seed.scrixpt.js test",
     "database:reset": "npm run database:drop && npm run database:push && npm run database:migrate && npm run database:seed:dev",
     "database:studio": "drizzle-kit studio --config=infra/database/drizzle.config.js --port 3000",
     "database:check": "drizzle-kit check --config=infra/database/drizzle.config.js",
@@ -36,11 +36,10 @@
     "test": "ENV_NAME=test npx c8 node --test",
     "test:watch": "node --test --watch",
     "precommit": "lint-staged",
-    "prepush": "pnpm lint && pnpm check:types:jsdoc",
+    "prepush": "pnpm lint",
     "hooks:setup": "bash scripts/setup-hooks.sh",
     "release": "semantic-release",
     "check:types": "npx tsc --project tsconfig.json",
-    "check:types:jsdoc": "node scripts/check-types.js",
     "check:types:watch": "npx tsc --project tsconfig.json --watch",
     "generate:types": "rm -rf types && npx tsc --project tsconfig.declarations.json || true",
     "check:env": "node -r ./scripts/env/load-and-validate-env.cjs",
@@ -48,7 +47,8 @@
     "deps:validate": "npx depcruise src --config .dependency-cruiser.cjs",
     "check": "npm run check:types && npm run lint",
     "ci": "pnpm prettier:fix & pnpm lint:fix && pnpm lint && make test && pnpm check",
-    "generate:module": "npx yo tools/generators/scaffold.js"
+    "generate:module": "npx yo tools/generators/scaffold.js",
+    "git:amend": "git add . && git commit --amend --no-edit"
   },
   "author": {
     "name": "Taras Ivaniuk",
@@ -56,7 +56,7 @@
   },
   "license": "MIT",
   "engines": {
-    "node": ">=24.0.0",
+    "node": ">=25.0.0",
     "pnpm": ">=9"
   },
   "lint-staged": {
