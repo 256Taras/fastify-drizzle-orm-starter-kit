@@ -3,6 +3,7 @@
   "display": "Node 25",
   "compilerOptions": {
     "noEmit": true,
+    "erasableSyntaxOnly": true,
     "allowJs": true,
     "checkJs": false,
     "target": "ES2024",

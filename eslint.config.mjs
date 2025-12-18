@@ -286,6 +286,7 @@ export default tseslint.config(
   },
 
   // TypeScript files with type checking (only for .ts files, not .d.ts)
+  // Enforces erasable syntax only (no enums, namespaces, parameter properties)
   {
     files: ['**/*.ts'],
     ignores: ['**/*.d.ts'],
@@ -305,6 +306,25 @@ export default tseslint.config(
         {
           argsIgnorePattern: '^_',
           varsIgnorePattern: '^_',
+        },
+      ],
+      // Erasable syntax only - forbid TS features that emit runtime code
+      '@typescript-eslint/no-namespace': 'error',
+      '@typescript-eslint/parameter-properties': 'error',
+      '@typescript-eslint/no-import-type-side-effects': 'error',
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'TSEnumDeclaration',
+          message: 'Enums are not allowed. Use const objects with "as const" instead.',
+        },
+        {
+          selector: 'TSImportEqualsDeclaration',
+          message: 'import = is not allowed. Use ES import instead.',
+        },
+        {
+          selector: 'TSExportAssignment',
+          message: 'export = is not allowed. Use ES export instead.',
         },
       ],
     },
