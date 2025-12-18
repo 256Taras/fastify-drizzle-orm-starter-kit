@@ -1,3 +1,4 @@
+import { FastifyAuthFunction } from "@fastify/auth";
 import fastifyJwt from "@fastify/jwt";
 import type { FastifyInstance, FastifyRequest } from "fastify";
 import fp from "fastify-plugin";
@@ -5,8 +6,6 @@ import fp from "fastify-plugin";
 import { AUTH_CONFIG, FASTIFY_JWT_CONFIG as jwtConfig } from "#configs/index.ts";
 import type { JWTNamespace } from "#libs/auth/jwt.types.d.ts";
 import { UNAUTHORIZED_ACCESS_401 } from "#libs/errors/http.errors.ts";
-
-import type { FastifyAuthFunction } from "#types/fastify-augmentation.d.ts";
 
 const ACCESS_DENIED_MESSAGE = "Access denied";
 

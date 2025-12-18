@@ -7,6 +7,7 @@ import * as awilix from "awilix";
 import fp from "fastify-plugin";
 
 import eventBusService from "#libs/events/event-bus.service.ts";
+import { registerEventHandlers } from "#libs/events/register-event-handlers.ts";
 import { logger } from "#libs/logging/logger.service.ts";
 
 import type { PluginOptions } from "#types/index.d.ts";
@@ -15,9 +16,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const basePath = path.resolve(__dirname, "../../");
 
 const patterns = {
-  // Auto-load: repository, queries, mutations, services for domain modules
   modules: "modules/**/*.{repository,queries,mutations,service}.ts",
-  // Libs services
   services: "libs/{encryption,session-storage,pagination}/**/*.service.ts",
 };
 
@@ -29,14 +28,11 @@ const generateModulePatterns = (basePath: string, subPaths: Record<string, strin
 
 const diContainerPlugin: FastifyPluginAsyncTypebox<PluginOptions> = async (app, opts) => {
   diContainer.register({
-    // Type assertion: app and jwt will be extended with additional properties by plugins
-
-    app: awilix.asValue(app as any),
+    app: awilix.asValue(app),
     configs: awilix.asValue(opts.configs),
     db: awilix.asValue(opts.database.drizzle),
     eventBus: awilix.asFunction(eventBusService),
-
-    jwtService: awilix.asValue(app.jwt as any),
+    jwtService: awilix.asValue(app.jwt),
     logger: awilix.asValue(logger),
   });
 
@@ -52,6 +48,8 @@ const diContainerPlugin: FastifyPluginAsyncTypebox<PluginOptions> = async (app, 
       register: awilix.asFunction,
     },
   });
+
+  await registerEventHandlers(diContainer.cradle);
 
   app.register(fastifyAwilixPlugin, {
     disposeOnClose: true,

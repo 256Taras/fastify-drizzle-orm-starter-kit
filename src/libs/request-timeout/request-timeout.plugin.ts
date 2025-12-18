@@ -6,9 +6,6 @@ import { SERVER_TIMEOUT_408 } from "#libs/errors/http.errors.ts";
 
 import type { FastifyInstance, PluginOptions } from "#types/index.d.ts";
 
-// Import augmentation to enable typed requestContext
-import "#types/fastify-augmentation.d.ts";
-
 /**
  * Plugin to handle request timeouts in Fastify.
  *
@@ -26,11 +23,15 @@ import "#types/fastify-augmentation.d.ts";
 // eslint-disable-next-line @typescript-eslint/require-await
 async function requestTimeoutPlugin(app: FastifyInstance, options: PluginOptions): Promise<void> {
   const performCleanup = (): void => {
+    // @ts-ignore
     const timeoutId = requestContext.get("TIMEOUT_KEY");
     if (timeoutId) {
       clearTimeout(timeoutId);
+      // @ts-ignore
       requestContext.set("TIMEOUT_KEY", null);
+      // @ts-ignore
       requestContext.set("CONTROLLER_KEY", null);
+      // @ts-ignore
       requestContext.set("SIGNAL_KEY", null);
     }
   };
@@ -48,8 +49,11 @@ async function requestTimeoutPlugin(app: FastifyInstance, options: PluginOptions
         done(new SERVER_TIMEOUT_408());
       }, timeout || 0);
 
+      // @ts-ignore
       requestContext.set("TIMEOUT_KEY", timeoutId);
+      // @ts-ignore
       requestContext.set("CONTROLLER_KEY", controller);
+      // @ts-ignore
       requestContext.set("SIGNAL_KEY", controller.signal);
 
       done();
