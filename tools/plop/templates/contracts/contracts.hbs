@@ -1,0 +1,23 @@
+import { Type } from "@sinclair/typebox";
+import type { Static } from "@sinclair/typebox";
+import { createInsertSchema, createSelectSchema } from "drizzle-typebox";
+
+import { paginationSchema } from "#libs/utils/schemas.ts";
+import { {{camelCase name}} } from "#modules/{{camelCase name}}/{{camelCase name}}.model.ts";
+
+export const {{upperSnakeCase (singular name)}}_ENTITY_CONTRACT = createSelectSchema({{camelCase name}});
+export const {{upperSnakeCase (singular name)}}_INSERT_CONTRACT = createInsertSchema({{camelCase name}});
+
+export const {{upperSnakeCase (singular name)}}_OUTPUT_CONTRACT = Type.Omit({{upperSnakeCase (singular name)}}_ENTITY_CONTRACT, [{{#if softDelete}}"deletedAt"{{/if}}]);
+
+export const {{upperSnakeCase (singular name)}}_CREATE_INPUT_CONTRACT = Type.Omit({{upperSnakeCase (singular name)}}_INSERT_CONTRACT, ["id", "createdAt", "updatedAt"{{#if softDelete}}, "deletedAt"{{/if}}]);
+export const {{upperSnakeCase (singular name)}}_UPDATE_INPUT_CONTRACT = Type.Partial({{upperSnakeCase (singular name)}}_CREATE_INPUT_CONTRACT);
+
+export const {{upperSnakeCase (singular name)}}_OUTPUT_LIST = paginationSchema({{upperSnakeCase (singular name)}}_OUTPUT_CONTRACT);
+
+// TypeScript types from TypeBox schemas
+export type Get{{pascalCase name}}ListOutputContract = Static<typeof {{upperSnakeCase (singular name)}}_OUTPUT_LIST>;
+export type {{pascalCase (singular name)}} = Static<typeof {{upperSnakeCase (singular name)}}_OUTPUT_CONTRACT>;
+export type {{pascalCase (singular name)}}CreateInput = Static<typeof {{upperSnakeCase (singular name)}}_CREATE_INPUT_CONTRACT>;
+export type {{pascalCase (singular name)}}Insert = Static<typeof {{upperSnakeCase (singular name)}}_INSERT_CONTRACT>;
+export type {{pascalCase (singular name)}}UpdateInput = Static<typeof {{upperSnakeCase (singular name)}}_UPDATE_INPUT_CONTRACT>;

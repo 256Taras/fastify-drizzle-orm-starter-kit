@@ -1,0 +1,29 @@
+import { PAGINATION_STRATEGY } from "#libs/pagination/pagination.contracts.ts";
+import type { PaginationConfig } from "#libs/pagination/pagination.types.d.ts";
+
+import { {{camelCase name}} } from "./{{camelCase name}}.model.ts";
+
+export const {{upperSnakeCase name}}_PAGINATION_CONFIG: PaginationConfig<typeof {{camelCase name}}> = {
+  table: {{camelCase name}},
+  defaultLimit: 10,
+  defaultSortBy: [
+    ["createdAt", "DESC"],
+    ["id", "DESC"],
+  ],
+  excludeColumns: [],
+  filterableColumns: {
+    {{#each parsedFields}}
+    {{#if (or (eq type "string") (eq type "text"))}}
+    {{camelCase name}}: ["$eq", "$ilike", "$in"],
+    {{/if}}
+    {{/each}}
+  },
+  maxLimit: 100,
+  {{#if softDelete}}
+  optionalColumns: {
+    deletedAt: true,
+  },
+  {{/if}}
+  sortableColumns: [{{#each parsedFields}}"{{camelCase name}}", {{/each}}"createdAt", "updatedAt", "id"],
+  strategy: PAGINATION_STRATEGY.offset,
+};

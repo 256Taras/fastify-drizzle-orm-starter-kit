@@ -1,55 +1,62 @@
-import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
+import type { FastifyPluginAsyncTypebox } from "@fastify/type-provider-typebox";
 
-import type { UserCreateInput, UserUpdateInput } from "./users.contracts.ts";
 import usersSchemas from "./users.schemas.ts";
 
-export default function usersRouterV1(app: FastifyInstance) {
+const usersRouterV1: FastifyPluginAsyncTypebox = async (app) => {
   const { sessionStorageService, usersMutations, usersQueries } = app.diContainer.cradle;
 
   app.get("/profile", {
+    preHandler: app.auth([app.verifyJwt]),
+    schema: usersSchemas.getProfile,
+
     async handler() {
       const { id } = sessionStorageService.get();
       return usersQueries.findOneById(id);
     },
-    preHandler: app.auth([app.verifyJwt]),
-    schema: usersSchemas.getProfile,
   });
 
   app.get("/", {
-    async handler(req: FastifyRequest) {
+    schema: usersSchemas.getList,
+
+    async handler(req) {
       const pagination = app.transformers.getPaginationQuery(req);
       return usersQueries.findMany(pagination);
     },
-    schema: usersSchemas.getList,
   });
 
   app.get("/:id", {
-    async handler(req: FastifyRequest<{ Params: { id: string } }>) {
+    schema: usersSchemas.getById,
+
+    async handler(req) {
       return usersQueries.findOneById(req.params.id);
     },
-    schema: usersSchemas.getById,
   });
 
   app.post("/", {
-    async handler(req: FastifyRequest<{ Body: UserCreateInput }>, rep: FastifyReply) {
+    schema: usersSchemas.create,
+
+    async handler(req, rep) {
       const user = await usersMutations.createUser(req.body);
       rep.status(201);
       return user;
     },
-    schema: usersSchemas.create,
   });
 
   app.put("/:id", {
-    async handler(req: FastifyRequest<{ Body: UserUpdateInput; Params: { id: string } }>) {
+    schema: usersSchemas.update,
+
+    async handler(req) {
       return usersMutations.updateUser(req.params.id, req.body);
     },
-    schema: usersSchemas.update,
   });
 
   app.delete("/:id", {
-    async handler(req: FastifyRequest<{ Params: { id: string } }>) {
+    schema: usersSchemas.delete,
+
+    async handler(req) {
       return usersMutations.deleteUser(req.params.id);
     },
-    schema: usersSchemas.delete,
   });
-}
+};
+
+export default usersRouterV1;

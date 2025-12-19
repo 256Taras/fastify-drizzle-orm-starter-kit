@@ -1,0 +1,69 @@
+import type { FastifyPluginAsyncTypebox } from "@fastify/type-provider-typebox";
+
+import {{camelCase name}}Schemas from "./{{camelCase name}}.schemas.ts";
+
+const {{camelCase name}}RouterV1: FastifyPluginAsyncTypebox = async (app) => {
+  const { {{camelCase name}}Mutations, {{camelCase name}}Queries } = app.diContainer.cradle;
+
+  {{#if withPagination}}
+  app.get("/", {
+    {{#if withAuth}}
+    preHandler: app.auth([app.verifyJwt]),
+    {{/if}}
+    schema: {{camelCase name}}Schemas.getList,
+
+    async handler(req) {
+      const pagination = app.transformers.getPaginationQuery(req);
+      return {{camelCase name}}Queries.findMany(pagination);
+    },
+  });
+  {{/if}}
+
+  app.get("/:id", {
+    {{#if withAuth}}
+    preHandler: app.auth([app.verifyJwt]),
+    {{/if}}
+    schema: {{camelCase name}}Schemas.getById,
+
+    async handler(req) {
+      return {{camelCase name}}Queries.findOneById(req.params.id);
+    },
+  });
+
+  app.post("/", {
+    {{#if withAuth}}
+    preHandler: app.auth([app.verifyJwt]),
+    {{/if}}
+    schema: {{camelCase name}}Schemas.create,
+
+    async handler(req, rep) {
+      const item = await {{camelCase name}}Mutations.create{{pascalCase (singular name)}}(req.body);
+      rep.status(201);
+      return item;
+    },
+  });
+
+  app.put("/:id", {
+    {{#if withAuth}}
+    preHandler: app.auth([app.verifyJwt]),
+    {{/if}}
+    schema: {{camelCase name}}Schemas.update,
+
+    async handler(req) {
+      return {{camelCase name}}Mutations.update{{pascalCase (singular name)}}(req.params.id, req.body);
+    },
+  });
+
+  app.delete("/:id", {
+    {{#if withAuth}}
+    preHandler: app.auth([app.verifyJwt]),
+    {{/if}}
+    schema: {{camelCase name}}Schemas.delete,
+
+    async handler(req) {
+      return {{camelCase name}}Mutations.delete{{pascalCase (singular name)}}(req.params.id);
+    },
+  });
+};
+
+export default {{camelCase name}}RouterV1;

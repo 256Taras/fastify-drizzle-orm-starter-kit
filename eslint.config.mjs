@@ -329,5 +329,13 @@ export default tseslint.config(
       ],
     },
   },
+
+  // Override for Fastify router/plugin files - async is required by type but may have no await
+  {
+    files: ['**/*.router.v1.ts', '**/*.plugin.ts'],
+    rules: {
+      '@typescript-eslint/require-await': 'off',
+    },
+  },
 );
 

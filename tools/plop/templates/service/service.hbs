@@ -1,0 +1,20 @@
+import type { Cradle } from "@fastify/awilix";
+import { partial } from "rambda";
+
+/**
+ * {{pascalCase name}} Service
+ *
+ * Use this for shared business logic that doesn't fit in queries or mutations.
+ * Examples: complex calculations, external API calls, validation logic.
+ */
+
+const exampleMethod = async ({ logger }: Cradle, input: string): Promise<string> => {
+  logger.debug(`[{{pascalCase name}}Service] Example method called with: ${input}`);
+  return input.toUpperCase();
+};
+
+export default function {{camelCase name}}Service(deps: Cradle) {
+  return {
+    exampleMethod: partial(exampleMethod, [deps]),
+  };
+}

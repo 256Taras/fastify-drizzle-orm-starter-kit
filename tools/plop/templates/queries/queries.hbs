@@ -1,0 +1,49 @@
+import type { Cradle } from "@fastify/awilix";
+{{#if softDelete}}
+import { isNull } from "drizzle-orm";
+{{/if}}
+import { partial } from "rambda";
+
+import { ResourceNotFoundException } from "#libs/errors/domain.errors.ts";
+{{#if withPagination}}
+import type { PaginationParams } from "#libs/pagination/pagination.types.d.ts";
+import { {{camelCase name}} } from "#modules/{{camelCase name}}/{{camelCase name}}.model.ts";
+{{/if}}
+
+import type { Get{{pascalCase name}}ListOutputContract, {{pascalCase (singular name)}} } from "./{{camelCase name}}.contracts.ts";
+{{#if withPagination}}
+import { {{upperSnakeCase name}}_PAGINATION_CONFIG } from "./{{camelCase name}}.pagination-config.ts";
+{{/if}}
+
+const findOneById = async ({ {{camelCase name}}Repository, logger }: Cradle, id: string): Promise<{{pascalCase (singular name)}}> => {
+  logger.debug(`[{{pascalCase name}}Queries] Getting {{singular name}}: ${id}`);
+
+  const item = await {{camelCase name}}Repository.findOneById(id);
+  if (!item) throw new ResourceNotFoundException(`{{pascalCase (singular name)}} with id: ${id} not found`);
+
+  return item;
+};
+
+{{#if withPagination}}
+const findMany = async (
+  { paginationService, logger }: Cradle,
+  paginationParams: PaginationParams<"offset">,
+): Promise<Get{{pascalCase name}}ListOutputContract> => {
+  logger.debug(`[{{pascalCase name}}Queries] Getting {{name}} list`);
+
+  return (await paginationService.paginate({{upperSnakeCase name}}_PAGINATION_CONFIG, paginationParams, {
+    {{#if softDelete}}
+    queryBuilder: (qb) => qb.where(isNull({{camelCase name}}.deletedAt)),
+    {{/if}}
+  })) as unknown as Promise<Get{{pascalCase name}}ListOutputContract>;
+};
+{{/if}}
+
+export default function {{camelCase name}}Queries(deps: Cradle) {
+  return {
+    findOneById: partial(findOneById, [deps]),
+    {{#if withPagination}}
+    findMany: partial(findMany, [deps]),
+    {{/if}}
+  };
+}

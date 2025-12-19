@@ -12,10 +12,8 @@ import { USERS_PAGINATION_CONFIG } from "./users.pagination-config.ts";
 const findOneById = async ({ usersRepository, logger }: Cradle, userId: string): Promise<User> => {
   logger.debug(`[UsersQueries] Getting user: ${userId}`);
 
-  const user = (await usersRepository.findOneById(userId)) as undefined | User;
-  if (!user || typeof user !== "object" || !("id" in user)) {
-    throw new ResourceNotFoundException(`User with id: ${userId} not found`);
-  }
+  const user = await usersRepository.findOneById(userId);
+  if (!user) throw new ResourceNotFoundException(`User with id: ${userId} not found`);
 
   return user;
 };
@@ -24,9 +22,7 @@ const findOneByEmail = async ({ usersRepository, logger }: Cradle, email: string
   logger.debug(`[UsersQueries] Getting user by email: ${email}`);
 
   const user = await usersRepository.findOneByEmail(email);
-  if (!user) {
-    throw new ResourceNotFoundException(`User with email: ${email} not found`);
-  }
+  if (!user) throw new ResourceNotFoundException(`User with email: ${email} not found`);
 
   return user;
 };

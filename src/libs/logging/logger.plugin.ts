@@ -10,7 +10,6 @@ import defaultLogger from "./logger.service.ts";
 
 import type { PluginOptions } from "#types/index.d.ts";
 
-// eslint-disable-next-line @typescript-eslint/require-await
 const requestLoggerPlugin: FastifyPluginAsyncTypebox<PluginOptions> = async (app) => {
   const setTraceIdFastifyHook = (request: FastifyRequest, reply: FastifyReply, done: DoneFuncWithErrOrRes): void => {
     const requestId = request.id;

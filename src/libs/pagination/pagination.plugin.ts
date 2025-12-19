@@ -107,7 +107,7 @@ const getPaginationQuery = <TStrategy extends "cursor" | "offset" = "offset">(
 /**
  * Fastify plugin that extracts all pagination params into req.pagination
  */
-// eslint-disable-next-line @typescript-eslint/require-await
+
 const paginationPlugin: FastifyPluginAsync = async (fastify) => {
   // Decorate request with pagination property
   fastify.decorateRequest("pagination", null);
@@ -118,7 +118,7 @@ const paginationPlugin: FastifyPluginAsync = async (fastify) => {
   });
 
   // Add preValidation hook to validate mutually exclusive cursors before schema validation
-  // eslint-disable-next-line @typescript-eslint/require-await
+
   fastify.addHook("preValidation", async (request) => {
     const rawQuery = (request.query ?? {}) as QueryParams;
 
@@ -132,7 +132,7 @@ const paginationPlugin: FastifyPluginAsync = async (fastify) => {
   });
 
   // Add preHandler hook to parse pagination params
-  // eslint-disable-next-line @typescript-eslint/require-await
+
   fastify.addHook("preHandler", async (request) => {
     const rawQuery = (request.query ?? {}) as QueryParams;
 

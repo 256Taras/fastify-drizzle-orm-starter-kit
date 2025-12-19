@@ -28,7 +28,7 @@ declare module "fastify" {
 /**
  * A Fastify plugin to handle JWT authentication and authorization.
  */
-// eslint-disable-next-line @typescript-eslint/require-await
+
 async function authPlugin(app: FastifyInstance, options?: AuthPluginOptions): Promise<void> {
   // Type assertion for JWT namespaces (registered by @fastify/jwt with namespace option)
   const jwt = app.jwt as unknown as JWTNamespace;

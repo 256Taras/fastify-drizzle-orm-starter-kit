@@ -1,6 +1,6 @@
 # ⬢ Node.js Starter Kit
 
-**Production-grade Fastify starter kit built on Matteo Collina's engineering principles.**
+**Production-grade Fastify starter kit with native TypeScript support.**
 
 Stop configuring. Start shipping.
 
@@ -176,7 +176,7 @@ Same capabilities. Less ceremony.
 
 ## 🎯 Engineering Principles
 
-Following Matteo Collina (Fastify CTO) and Uncle Bob:
+Following clean code best practices:
 
 - **KISS** - simple things stay simple
 - **SOLID** - proven OOP principles

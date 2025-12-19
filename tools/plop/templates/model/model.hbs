@@ -1,0 +1,27 @@
+import { getTableColumns } from "drizzle-orm";
+import { index, pgTable, text, timestamp, uuid{{#each parsedFields}}{{#if (eq type "integer")}}, integer{{/if}}{{#if (eq type "number")}}, integer{{/if}}{{#if (eq type "boolean")}}, boolean{{/if}}{{#if (eq type "float")}}, real{{/if}}{{#if length}}, varchar{{/if}}{{#if (eq type "json")}}, jsonb{{/if}}{{/each}} } from "drizzle-orm/pg-core";
+
+import { TABLE_NAMES } from "#infra/database/table-names.ts";
+
+export const {{camelCase name}} = pgTable(
+  TABLE_NAMES.{{camelCase name}},
+  {
+    id: uuid("id").primaryKey().notNull().defaultRandom(),
+    {{#each parsedFields}}
+    {{camelCase name}}: {{#if (eq type "string")}}{{#if length}}varchar("{{snakeCase name}}", { length: {{length}} }){{else}}text("{{snakeCase name}}"){{/if}}{{/if}}{{#if (eq type "text")}}text("{{snakeCase name}}"){{/if}}{{#if (eq type "number")}}integer("{{snakeCase name}}"){{/if}}{{#if (eq type "integer")}}integer("{{snakeCase name}}"){{/if}}{{#if (eq type "float")}}real("{{snakeCase name}}"){{/if}}{{#if (eq type "boolean")}}boolean("{{snakeCase name}}"){{/if}}{{#if (eq type "date")}}timestamp("{{snakeCase name}}", { mode: "string" }){{/if}}{{#if (eq type "timestamp")}}timestamp("{{snakeCase name}}", { mode: "string" }){{/if}}{{#if (eq type "uuid")}}uuid("{{snakeCase name}}"){{/if}}{{#if (eq type "json")}}jsonb("{{snakeCase name}}"){{/if}}{{#unless nullable}}.notNull(){{/unless}},
+    {{/each}}
+    createdAt: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow().notNull(),
+    {{#if softDelete}}
+    deletedAt: timestamp("deleted_at", { mode: "string" }),
+    {{/if}}
+  },
+  (table) => [
+    index("{{snakeCase name}}_created_at_idx").on(table.createdAt),
+    {{#if softDelete}}
+    index("{{snakeCase name}}_deleted_at_idx").on(table.deletedAt),
+    {{/if}}
+  ],
+);
+
+export const {{upperSnakeCase name}}_COLUMNS = getTableColumns({{camelCase name}});

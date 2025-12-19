@@ -20,7 +20,7 @@ import type { FastifyInstance, PluginOptions } from "#types/index.d.ts";
  *   // Your handler logic here
  * });
  */
-// eslint-disable-next-line @typescript-eslint/require-await
+
 async function requestTimeoutPlugin(app: FastifyInstance, options: PluginOptions): Promise<void> {
   const performCleanup = (): void => {
     // @ts-ignore

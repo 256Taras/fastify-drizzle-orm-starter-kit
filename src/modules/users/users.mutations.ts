@@ -45,9 +45,7 @@ const updateUser = async (
   }
 
   const updatedUser = await usersRepository.updateOneById(userId, input);
-  if (!updatedUser) {
-    throw new ResourceNotFoundException(`User with id: ${userId} not found`);
-  }
+  if (!updatedUser) throw new ResourceNotFoundException(`User with id: ${userId} not found`);
 
   await eventBus.emit(USER_EVENTS.UPDATED, {
     userId: updatedUser.id,
@@ -61,9 +59,7 @@ const deleteUser = async ({ usersRepository, eventBus, logger }: Cradle, userId:
   logger.debug(`[UsersMutations] Deleting user: ${userId}`);
 
   const deletedUser = (await usersRepository.softDeleteOneById(userId)) as undefined | User;
-  if (!deletedUser) {
-    throw new ResourceNotFoundException(`User with id: ${userId} not found`);
-  }
+  if (!deletedUser) throw new ResourceNotFoundException(`User with id: ${userId} not found`);
 
   await eventBus.emit(USER_EVENTS.DELETED, {
     userId: deletedUser.id,

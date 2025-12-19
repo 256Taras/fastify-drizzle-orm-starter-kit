@@ -1,18 +1,8 @@
-import type { FastifyRequest } from "fastify";
+import type { FastifyPluginAsyncTypebox } from "@fastify/type-provider-typebox";
 
-import type {
-  ChangePasswordInput,
-  ForgotPasswordInput,
-  ResetPasswordInput,
-  SignInInput,
-  SignUpInput,
-} from "./auth.contracts.ts";
 import authSchemas from "./auth.schemas.ts";
 
-import type { FastifyPluginTypebox } from "#types/index.d.ts";
-
-// eslint-disable-next-line @typescript-eslint/require-await
-const authRouterV1: FastifyPluginTypebox = async function authRouterV1(app) {
+const authRouterV1: FastifyPluginAsyncTypebox = async (app) => {
   const { authMutations } = app.diContainer.cradle;
 
   const FIFTEEN_MINUTES = 15 * 60 * 1000;
@@ -21,27 +11,28 @@ const authRouterV1: FastifyPluginTypebox = async function authRouterV1(app) {
   app.post("/sign-up", {
     schema: authSchemas.signUp,
 
-    handler(req: FastifyRequest<{ Body: SignUpInput }>) {
+    handler(req) {
       return authMutations.signUpUser(req.body);
     },
   });
 
   app.post("/sign-in", {
+    schema: authSchemas.signIn,
     config: {
       rateLimit: {
         max: 15,
         timeWindow: FIFTEEN_MINUTES,
       },
     },
-    handler(req: FastifyRequest<{ Body: SignInInput }>) {
+
+    handler(req) {
       return authMutations.signInUser(req.body);
     },
-    schema: authSchemas.signIn,
   });
 
   app.post("/log-out", {
-    preValidation: [app.auth([app.verifyJwtRefreshToken])],
     schema: authSchemas.logOut,
+    preValidation: [app.auth([app.verifyJwtRefreshToken])],
 
     async handler() {
       return authMutations.signOutUser();
@@ -49,8 +40,8 @@ const authRouterV1: FastifyPluginTypebox = async function authRouterV1(app) {
   });
 
   app.put("/refresh-tokens", {
-    preValidation: [app.auth([app.verifyJwtRefreshToken])],
     schema: authSchemas.refreshTokens,
+    preValidation: [app.auth([app.verifyJwtRefreshToken])],
 
     async handler() {
       return authMutations.refreshUserTokens();
@@ -58,15 +49,15 @@ const authRouterV1: FastifyPluginTypebox = async function authRouterV1(app) {
   });
 
   app.post("/forgot-password", {
+    schema: authSchemas.forgotPassword,
     config: {
       rateLimit: {
         max: 5,
         timeWindow: ONE_HOUR,
       },
     },
-    schema: authSchemas.forgotPassword,
 
-    handler(req: FastifyRequest<{ Body: ForgotPasswordInput }>) {
+    handler(req) {
       return authMutations.forgotUserPassword(req.body);
     },
   });
@@ -74,16 +65,16 @@ const authRouterV1: FastifyPluginTypebox = async function authRouterV1(app) {
   app.post("/reset-password", {
     schema: authSchemas.resetPassword,
 
-    handler(req: FastifyRequest<{ Body: ResetPasswordInput }>) {
+    handler(req) {
       return authMutations.resetUserPassword(req.body);
     },
   });
 
   app.post("/change-password", {
-    preValidation: [app.auth([app.verifyJwt])],
     schema: authSchemas.changePassword,
+    preValidation: [app.auth([app.verifyJwt])],
 
-    handler(req: FastifyRequest<{ Body: ChangePasswordInput }>) {
+    handler(req) {
       return authMutations.changeUserPassword(req.body);
     },
   });
