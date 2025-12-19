@@ -1,36 +1,28 @@
 services:
-  # PostgreSQL database container
   db:
-    # Name of the container
     container_name: postgresql
-    # PostgreSQL image and version to use
-    image: postgres:14.1-alpine
-    # Restart policy for the container
+    image: postgres:16-alpine
     restart: always
-    # Environment variables to pass to the container
     environment:
-      # The image will only initialize the database if the data directory is empty
-      POSTGRES_USER: oonhvxbq
-      POSTGRES_DB: oonhvxbq
-      POSTGRES_PASSWORD: WNDWxbMlQEQLCqkQQybNREkQyOJMZ5eD
-    # Port mapping for the container
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-app_dev}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
     ports:
-      - 5433:5432
-    # Environment file to load environment variables from
-    env_file: [ '../../configs/.env' ]
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - starter-network
-    # Health check for depends_on
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U oonhvxbq -d oonhvxbq"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-app_dev}"]
       interval: 5s
       timeout: 5s
       retries: 5
+
+volumes:
+  postgres_data:
 
 networks:
   starter-network:
     name: starter-network
     driver: bridge
-
-
-

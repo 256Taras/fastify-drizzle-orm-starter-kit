@@ -2,28 +2,18 @@ FROM node:25-alpine
 
 WORKDIR /app
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# Install pnpm with fixed version
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 
-# Copy package files
-COPY package.json pnpm-lock.yaml* .npmrc* ./
+COPY package.json pnpm-lock.yaml .npmrc* ./
 
-# Install dependencies (including dev dependencies for tests)
 RUN pnpm install --frozen-lockfile
 
-# Copy source code
 COPY . .
 
-# Set test environment
 ENV ENV_NAME=test
 ENV NODE_ENV=test
 
-# Expose port (if needed for tests)
 EXPOSE 8001
 
-# Note: Migrations are run in docker-compose.test.yml, not during build
-# This ensures the database container is ready before migrations
-
-# Default command (can be overridden in docker-compose)
-CMD ["npm", "test"]
-
+CMD ["pnpm", "test"]

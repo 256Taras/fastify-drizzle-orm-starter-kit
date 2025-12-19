@@ -1,31 +1,38 @@
-FROM node:25-alpine AS BUILDER
+FROM node:25-alpine AS builder
 
 WORKDIR /app
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# Install pnpm with fixed version
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 
-COPY package.json pnpm-lock.yaml* .npmrc* ./
+# Copy dependency files first (better layer caching)
+COPY package.json pnpm-lock.yaml .npmrc* ./
 
 RUN pnpm install --frozen-lockfile
 
-COPY . .
+# Copy source code
+COPY src ./src
+COPY configs ./configs
+COPY infra/database ./infra/database
+COPY tsconfig.json ./
 
 FROM node:25-alpine
 
 WORKDIR /app
 
-# Install pnpm in final image
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 
-COPY --from=BUILDER /app/node_modules ./node_modules
-COPY --from=BUILDER /app/package.json ./package.json
-COPY --from=BUILDER /app/pnpm-lock.yaml ./pnpm-lock.yaml
-COPY --from=BUILDER /app/.npmrc* ./
-COPY . .
+# Copy only what's needed from builder
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/pnpm-lock.yaml ./
+COPY --from=builder /app/src ./src
+COPY --from=builder /app/configs ./configs
+COPY --from=builder /app/infra/database ./infra/database
+COPY --from=builder /app/tsconfig.json ./
 
 ENV PORT=8000
 
 EXPOSE 8000 9229
 
-CMD [ "pnpm", "start"]
+CMD ["pnpm", "start"]
