@@ -1,121 +1,148 @@
 # ⬢ Node.js Starter Kit
 
-**Production-grade Fastify starter kit with native TypeScript support.**
+**Production-grade Fastify starter kit. Native TypeScript. Zero build step.**
 
-Stop configuring. Start shipping.
+Start simple. Scale when needed.
 
 ---
 
-## 🚀 What Makes This Different
+## 💡 Philosophy
 
-### ⚡ Zero Build Step
+> *"Simple things should be simple, complex things should be possible."* — Alan Kay
 
-Node.js 25+ executes TypeScript natively. No transpilers. No bundlers. No waiting.
+This starter embraces **essential complexity only**. We don't know what your project will become — a simple CRUD API or a complex domain-driven system. So we give you a solid foundation that:
+
+- **Starts simple** — N-layer architecture that anyone can understand in 5 minutes
+- **Scales gracefully** — patterns that naturally evolve into DDD, Clean Architecture, or Hexagonal when you need them
+- **Avoids lock-in** — plain functions over frameworks, conventions over configuration
+
+The architecture is intentionally minimal. Add complexity when requirements demand it, not before.
+
+---
+
+## ⚡ What Makes This Different
+
+### Native TypeScript (Type Stripping)
+
+Node.js 25+ runs `.ts` files directly. Types are stripped at runtime — zero transpilation overhead.
 
 ```bash
-node src/index.ts
+node src/index.ts  # Just works
 ```
 
-Your code runs exactly as written. TypeScript serves one purpose: types. Nothing more.
+### Node.js Native First
 
-### 🏗️ Battle-Tested Architecture
+We use what Node.js provides. Less dependencies = less vulnerabilities.
 
-Built on patterns proven at scale:
+| Instead of | We use |
+|------------|--------|
+| tsc, ts-node, tsx | Node.js type stripping |
+| Jest, Mocha, Vitest | `node:test` |
+| nodemon | `node --watch` |
+| dotenv | `--env-file` |
+| bcrypt | `node:crypto` (scrypt) |
+| cls-hooked | `AsyncLocalStorage` |
+| EventEmitter2 | `EventEmitter` |
+| tsconfig-paths | Subpath imports (`#libs/*`) |
 
-- **CQS (Command Query Separation)** - queries read, mutations write. Never mixed.
-- **Domain Events** - loose coupling between modules via EventEmitter
-- **Repository Pattern** - clean data access abstraction
-- **N-Layer Architecture** - Router → Queries/Mutations → Repository → Database
+### File-System Based Everything
 
+Your folder structure IS your API and DI structure:
+
+```text
+modules/users/users.router.v1.ts  →  /api/v1/users/*
+modules/auth/auth.router.v1.ts    →  /api/v1/auth/*
 ```
-Router Layer        →  HTTP, validation, auth guards
+
+Drop a file with the right suffix — it auto-registers:
+
+| `*.repository.ts` | `*.queries.ts` | `*.mutations.ts` | `*.router.v1.ts` | `*.service.ts` |
+
+### Multi-Paradigm
+
+- **Procedural + FP** — business logic as functions with explicit data flow
+- **OOP where it fits** — infrastructure (App, Server, Database) as classes
+- **No dogma** — use what makes sense
+
+---
+
+## 🏗️ Architecture
+
+```text
+Router Layer        →  HTTP, validation, auth
 Queries/Mutations   →  Business logic, events
-Repository Layer    →  Data access, Drizzle ORM
+Repository Layer    →  Data access (Drizzle)
 Database Layer      →  PostgreSQL
 ```
 
-### 📂 File-System Based Auto-Loading
+**Current patterns:**
+- CQS (Command Query Separation)
+- Repository Pattern
+- Domain Events (EventEmitter)
+- Unit of Work (transactions)
 
-Drop a file. It works.
+**When you outgrow this**, the structure supports evolution to:
+- DDD (add domain layer, aggregates, value objects)
+- Clean Architecture (add use cases, entities)
+- Hexagonal/Ports & Adapters (add ports, adapters)
 
-| Pattern | Auto-loaded as |
-|---------|----------------|
-| `*.repository.ts` | Repository |
-| `*.queries.ts` | Query operations |
-| `*.mutations.ts` | Command operations |
-| `*.service.ts` | Shared service |
-| `*.plugin.ts` | Fastify plugin |
-| `*.router.v1.ts` | HTTP routes |
-| `*.event-handlers.ts` | Event subscribers |
-
-No manual registration. No import chains. Awilix discovers and wires everything.
-
-### 📝 Contract-First Development
-
-TypeBox contracts define your API. Types flow from contract to database:
-
-```typescript
-// One source of truth
-export const UserCreateContract = Type.Object({
-  email: Type.String({ format: "email" }),
-  firstName: Type.String({ minLength: 2 }),
-  password: Type.String({ minLength: 8 }),
-});
-
-// Compile-time + runtime validation
-// Swagger docs generated automatically
-// TypeScript types inferred
-```
-
-### 📊 Observability Built-In
-
-Know what's happening in production:
-
-- **Pino** - structured JSON logging with request tracing
-- **Prometheus** - metrics out of the box
-- **Grafana** - dashboards ready to use
-- **Loki** - log aggregation
-- **Health checks** - `/api/health-check`
-
-```bash
-pnpm docker:monitoring:up  # Prometheus + Grafana + Loki
-```
-
-### 🛠️ Developer Experience
-
-Every detail optimized for productivity:
-
-- **Code generators** - scaffold modules in seconds
-- **IDE snippets** - ready-made snippets for your editor
-- **Claude Code** - AI assistant pre-configured
-- **Hot reload** - `pnpm start:dev:watch`
-- **Drizzle Studio** - visual database browser
+The foundation is the same. Complexity is added incrementally.
 
 ---
 
-## 🧰 The Stack
+## ✅ Features
 
-| Layer | Technology |
-|-------|------------|
-| Runtime | Node.js 25+, native TypeScript, ESM |
-| Framework | Fastify 5 (fastest Node.js framework) |
-| Database | PostgreSQL 15 + Drizzle ORM |
-| Validation | TypeBox (compile-time + runtime) |
-| DI | Awilix (file-system auto-discovery) |
-| Auth | JWT (access + refresh tokens) |
-| Security | Helmet, rate limiting, CORS |
-| Logging | Pino (structured, high-performance) |
-| Metrics | Prometheus + Grafana |
-| Testing | Node.js native test runner |
-| Quality | ESLint, Prettier, Husky |
+**Infrastructure**
+- Fastify 5 with TypeBox validation
+- PostgreSQL + Drizzle ORM
+- JWT authentication (access + refresh tokens)
+- Rate limiting (global + per route)
+- Graceful shutdown (`AbortController`)
+- Request timeouts
+- CORS, Helmet security
+- Environment validation (TypeBox schema)
+
+**Architecture**
+- CQS (queries/mutations separation)
+- Domain events (native `EventEmitter`)
+- Repository pattern
+- Unit of Work (transactions)
+- Request-scoped context (`AsyncLocalStorage`)
+- Soft delete, Pagination (cursor + offset)
+
+**Quality**
+- Strong ESLint config (security, unicorn, perfectionist)
+- Prettier, Husky, lint-staged
+- Node.js native test runner
+- Type checking
+
+**Observability**
+- Pino structured logging + trace ID
+- Prometheus metrics
+- Grafana dashboards
+- Health check endpoint
+
+---
+
+## 🧰 Stack
+
+| | |
+|-|-|
+| **Runtime** | Node.js 25+, native TypeScript, ESM |
+| **Framework** | Fastify 5 |
+| **Database** | PostgreSQL + Drizzle ORM |
+| **Validation** | TypeBox |
+| **DI** | Awilix |
+| **Auth** | JWT (access + refresh) |
+| **Logging** | Pino |
+| **Metrics** | Prometheus + Grafana |
+| **Package Manager** | pnpm |
 
 ---
 
 ## 📦 Module Structure
 
-Every feature follows a consistent pattern:
-
-```
+```text
 modules/users/
 ├── users.model.ts           # Drizzle schema
 ├── users.contracts.ts       # TypeBox types
@@ -128,105 +155,22 @@ modules/users/
 └── users.event-handlers.ts  # Event subscribers
 ```
 
-Clear separation. Predictable structure. Easy to navigate.
-
 ---
 
 ## ⚡ Quick Start
 
 ```bash
-# Enable corepack
 corepack enable
-
-# Install
 pnpm install
-
-# Environment
 cp .environment.example .environment
-
-# Database
 pnpm docker:infra:up
 pnpm database:push
-
-# Run
 pnpm start:dev
 ```
 
-API: http://localhost:8000
-Swagger: http://localhost:8000/docs
-Metrics: http://localhost:8000/metrics
-
----
-
-## 🤔 Why Not NestJS?
-
-NestJS is powerful. But also:
-
-| NestJS | This Starter |
-|--------|--------------|
-| Decorators everywhere | Plain functions |
-| Angular-style DI | File-system auto-loading |
-| Metadata reflection | Zero runtime overhead |
-| Complex module system | Drop file, it works |
-| Learning curve | Read and understand |
-
-Same capabilities. Less ceremony.
-
----
-
-## 🎯 Engineering Principles
-
-Following clean code best practices:
-
-- **KISS** - simple things stay simple
-- **SOLID** - proven OOP principles
-- **Clean Code** - readable, maintainable
-- **Essential Complexity Only** - no over-engineering
-- **Low Cognitive Load** - understand in 30 seconds
-
-> *"Code is written once, read hundreds of times."*
-
----
-
-## ✅ What's Included
-
-### Infrastructure
-- [x] Fastify 5 with TypeBox validation
-- [x] PostgreSQL + Drizzle ORM
-- [x] JWT authentication (access + refresh)
-- [x] Rate limiting per route
-- [x] Graceful shutdown with AbortController
-- [x] Request timeouts
-- [x] CORS, Helmet security
-
-### Developer Experience
-- [x] Native TypeScript (no build step)
-- [x] Auto-loading (plugins, routes, DI)
-- [x] Code generators
-- [x] IDE snippets
-- [x] Claude Code configured
-- [x] Hot reload
-
-### Observability
-- [x] Pino structured logging
-- [x] Request tracing (trace ID)
-- [x] Prometheus metrics
-- [x] Grafana dashboards
-- [x] Health check endpoint
-
-### Architecture
-- [x] CQS pattern (queries/mutations)
-- [x] Domain events
-- [x] Repository pattern
-- [x] Unit of Work (transactions)
-- [x] Soft delete
-- [x] Pagination (cursor + offset)
-
-### Quality
-- [x] ESLint + Prettier
-- [x] Husky + lint-staged
-- [x] Node.js native tests
-- [x] Type checking
+- API: `http://localhost:8000`
+- Swagger: `http://localhost:8000/docs`
+- Metrics: `http://localhost:8000/metrics`
 
 ---
 
@@ -239,7 +183,6 @@ pnpm start:dev:watch     # Hot reload
 
 # Database
 pnpm database:push       # Push schema
-pnpm database:generate   # Generate migrations
 pnpm database:studio     # Visual browser
 
 # Quality
@@ -249,8 +192,18 @@ pnpm test                # Tests
 
 # Docker
 pnpm docker:infra:up     # PostgreSQL
-pnpm docker:monitoring:up # Full observability stack
+pnpm docker:monitoring:up # Observability stack
 ```
+
+---
+
+## 🛠️ Developer Experience
+
+- **Code generators** — `pnpm generate:module`
+- **IDE snippets** — VS Code snippets included
+- **Hot reload** — `node --watch`
+- **Drizzle Studio** — visual database browser
+- **Claude Code** — AI assistant configured
 
 ---
 
@@ -260,4 +213,4 @@ MIT
 
 ---
 
-**Built for developers who value simplicity, performance, and clean code.**
+**Start simple. Add complexity when you need it. Not before.**

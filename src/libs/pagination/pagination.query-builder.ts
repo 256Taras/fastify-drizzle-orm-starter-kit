@@ -5,8 +5,6 @@ import type { Column, SQL } from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import { createSelectSchema } from "drizzle-typebox";
 
-import { BadRequestException } from "#libs/errors/domain.errors.ts";
-
 import type {
   FilterOperator,
   PaginationConfig,
@@ -14,6 +12,8 @@ import type {
   QueryExecutionResult,
   SortParam,
 } from "./pagination.types.d.ts";
+
+import { BadRequestException } from "#libs/errors/domain.errors.ts";
 
 type DrizzleColumn = Column;
 type TableColumns = Record<string, DrizzleColumn>;

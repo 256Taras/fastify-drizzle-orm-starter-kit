@@ -1,10 +1,10 @@
 import type { FastifyPluginAsync, FastifyRequest } from "fastify";
 import fp from "fastify-plugin";
 
-import { BadRequestException } from "#libs/errors/domain.errors.ts";
-
 import type { QueryParams } from "./pagination.common-types.d.ts";
 import type { PaginationParams } from "./pagination.types.d.ts";
+
+import { BadRequestException } from "#libs/errors/domain.errors.ts";
 
 /**
  * Parse select parameter - supports both comma-separated and multiple params

@@ -3,7 +3,6 @@ import type { FastifyInstance, FastifyReply, FastifyRequest, HookHandlerDoneFunc
 import fp from "fastify-plugin";
 
 import { SERVER_TIMEOUT_408 } from "#libs/errors/http.errors.ts";
-
 import type { PluginOptions } from "#types/index.d.ts";
 
 /**

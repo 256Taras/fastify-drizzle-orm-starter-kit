@@ -2,12 +2,12 @@ import type { Cradle } from "@fastify/awilix";
 import { isNull } from "drizzle-orm";
 import { partial } from "rambda";
 
+import type { GetUsersListOutputContract, User } from "./users.contracts.ts";
+import { USERS_PAGINATION_CONFIG } from "./users.pagination-config.ts";
+
 import { ResourceNotFoundException } from "#libs/errors/domain.errors.ts";
 import type { PaginationParams } from "#libs/pagination/pagination.types.d.ts";
 import { users } from "#modules/users/users.model.ts";
-
-import type { GetUsersListOutputContract, User } from "./users.contracts.ts";
-import { USERS_PAGINATION_CONFIG } from "./users.pagination-config.ts";
 
 const findOneById = async ({ usersRepository, logger }: Cradle, userId: string): Promise<User> => {
   logger.debug(`[UsersQueries] Getting user: ${userId}`);

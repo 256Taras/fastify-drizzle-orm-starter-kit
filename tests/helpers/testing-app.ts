@@ -4,7 +4,6 @@ import * as configs from "#configs/index.ts";
 import { RestApiServer } from "#infra/api/http/fastify-server.ts";
 import { DatabaseManager } from "#infra/database/db.ts";
 import { logger } from "#libs/logging/logger.service.ts";
-
 import type { Configs } from "#types/config.types.d.ts";
 
 interface CreateTestingAppOptions {

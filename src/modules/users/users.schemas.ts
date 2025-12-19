@@ -1,14 +1,14 @@
 import { pick } from "rambda";
 
+import { USER_CREATE_INPUT_CONTRACT, USER_OUTPUT_CONTRACT, USER_UPDATE_INPUT_CONTRACT } from "./users.contracts.ts";
+import { USERS_PAGINATION_CONFIG } from "./users.pagination-config.ts";
+
 import { SWAGGER_TAGS } from "#libs/constants/swagger-tags.constants.ts";
 import { COMMON_CONTRACTS_V1 } from "#libs/contracts/v1/index.ts";
 import { defaultHttpErrorCollection } from "#libs/errors/default-http-error-collection.ts";
 import { BadRequestException, ConflictException, ResourceNotFoundException } from "#libs/errors/domain.errors.ts";
 import { generatePaginatedRouteSchema } from "#libs/pagination/index.ts";
 import { mapHttpErrorsToSchemaErrorCollection } from "#libs/utils/schemas.ts";
-
-import { USER_CREATE_INPUT_CONTRACT, USER_OUTPUT_CONTRACT, USER_UPDATE_INPUT_CONTRACT } from "./users.contracts.ts";
-import { USERS_PAGINATION_CONFIG } from "./users.pagination-config.ts";
 
 const usersSchemas = {
   getList: generatePaginatedRouteSchema({

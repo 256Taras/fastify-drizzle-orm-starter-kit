@@ -3,8 +3,6 @@ import type { Cradle } from "@fastify/awilix";
 import { gt, lt } from "drizzle-orm";
 import type { Column } from "drizzle-orm";
 
-import { BadRequestException } from "#libs/errors/domain.errors.ts";
-
 import { PaginationQueryBuilder } from "./pagination.query-builder.ts";
 import type {
   CursorPaginatedResponse,
@@ -12,6 +10,8 @@ import type {
   PaginationOptions,
   PaginationParams,
 } from "./pagination.types.d.ts";
+
+import { BadRequestException } from "#libs/errors/domain.errors.ts";
 
 type DrizzleColumn = Column;
 type TableColumns = Record<string, DrizzleColumn>;

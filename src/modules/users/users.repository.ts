@@ -3,10 +3,10 @@ import { and, eq, isNull } from "drizzle-orm";
 import type { InferSelectModel } from "drizzle-orm";
 import { partial } from "rambda";
 
+import type { User, UserInsert } from "./users.contracts.ts";
+
 import { createBaseRepository } from "#libs/persistence/base-repository.ts";
 import { NON_PASSWORD_COLUMNS, users } from "#modules/users/users.model.ts";
-
-import type { User, UserInsert } from "./users.contracts.ts";
 
 type UserWithPassword = InferSelectModel<typeof users>;
 

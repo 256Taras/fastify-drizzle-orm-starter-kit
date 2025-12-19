@@ -4,7 +4,6 @@ import type { FastifyInstance } from "fastify";
 
 import type { schema } from "#infra/database/db-schema.ts";
 import type { JWTNamespace } from "#libs/auth/jwt.types.d.ts";
-
 import type { Configs } from "#types/config.types.d.ts";
 
 /**

@@ -4,10 +4,9 @@ import type { DoneFuncWithErrOrRes, FastifyReply, FastifyRequest } from "fastify
 import fp from "fastify-plugin";
 import type { Logger as _Logger } from "pino";
 
-import { APP_CONFIG, LOGGER_CONFIG } from "#configs/index.ts";
-
 import defaultLogger from "./logger.service.ts";
 
+import { APP_CONFIG, LOGGER_CONFIG } from "#configs/index.ts";
 import type { PluginOptions } from "#types/index.d.ts";
 
 const requestLoggerPlugin: FastifyPluginAsyncTypebox<PluginOptions> = async (app) => {

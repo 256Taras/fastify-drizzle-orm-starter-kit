@@ -1,7 +1,7 @@
+import { users } from "./users.model.ts";
+
 import { PAGINATION_STRATEGY } from "#libs/pagination/pagination.contracts.ts";
 import type { PaginationConfig } from "#libs/pagination/pagination.types.d.ts";
-
-import { users } from "./users.model.ts";
 
 export const USERS_PAGINATION_CONFIG: PaginationConfig<typeof users> = {
   table: users,

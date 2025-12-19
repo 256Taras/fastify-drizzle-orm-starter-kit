@@ -7,7 +7,6 @@ import type { Sql } from "postgres";
 
 import { isAbortError } from "#libs/errors/lifecycle.errors.ts";
 import { databaseLogger, logger } from "#libs/logging/logger.service.ts";
-
 import type { Configs } from "#types/config.types.d.ts";
 
 type DatabaseManagerOptions = {

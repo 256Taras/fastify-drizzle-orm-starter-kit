@@ -2,10 +2,10 @@
 import assert from "node:assert/strict";
 import { after, before, beforeEach, describe, it } from "node:test";
 
+import { usersListFixtures as fixtures, getEndpoint, TESTING_METHOD } from "./get-many-user.fixtures.ts";
+
 import type { User } from "#modules/users/users.contracts.ts";
 import { assertHasValidPagination, assertMatchesShape, createDbHelper, createTestingApp } from "#tests/helpers/index.ts";
-
-import { usersListFixtures as fixtures, getEndpoint, TESTING_METHOD } from "./get-many-user.fixtures.ts";
 
 describe(`${TESTING_METHOD}-${getEndpoint()}`, () => {
   let app: Awaited<ReturnType<typeof createTestingApp>>["app"];

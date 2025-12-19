@@ -1,6 +1,15 @@
 import type { Cradle } from "@fastify/awilix";
 import { partial } from "rambda";
 
+import type {
+  ChangePasswordInput,
+  Credentials,
+  ForgotPasswordInput,
+  ResetPasswordInput,
+  SignInInput,
+  SignUpInput,
+} from "./auth.contracts.ts";
+
 import { APP_CONFIG } from "#configs/index.ts";
 import { STATUS_SUCCESS } from "#libs/constants/common.constants.ts";
 import {
@@ -10,15 +19,6 @@ import {
   UnauthorizedException,
 } from "#libs/errors/domain.errors.ts";
 import type { User } from "#modules/users/users.contracts.ts";
-
-import type {
-  ChangePasswordInput,
-  Credentials,
-  ForgotPasswordInput,
-  ResetPasswordInput,
-  SignInInput,
-  SignUpInput,
-} from "./auth.contracts.ts";
 
 const signUpUser = async (
   { authTokenService, encrypterService, logger, usersRepository }: Cradle,

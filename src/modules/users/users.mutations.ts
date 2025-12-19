@@ -1,10 +1,10 @@
 import type { Cradle } from "@fastify/awilix";
 import { partial } from "rambda";
 
-import { ConflictException, ResourceNotFoundException } from "#libs/errors/domain.errors.ts";
-
 import type { User, UserCreateInput, UserUpdateInput } from "./users.contracts.ts";
 import { USER_EVENTS } from "./users.events.ts";
+
+import { ConflictException, ResourceNotFoundException } from "#libs/errors/domain.errors.ts";
 
 const createUser = async (
   { usersRepository, encrypterService, eventBus, logger }: Cradle,

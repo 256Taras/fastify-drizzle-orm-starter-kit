@@ -10,7 +10,6 @@ import type { JWTNamespace } from "#libs/auth/jwt.types.d.ts";
 import eventBusService from "#libs/events/event-bus.service.ts";
 import { registerEventHandlers } from "#libs/events/register-event-handlers.ts";
 import { logger } from "#libs/logging/logger.service.ts";
-
 import type { PluginOptions } from "#types/index.d.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));

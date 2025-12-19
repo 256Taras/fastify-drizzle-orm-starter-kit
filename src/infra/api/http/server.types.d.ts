@@ -3,7 +3,6 @@
 import type { FastifyInstance } from "fastify";
 
 import type { DatabaseManager } from "#infra/database/db.ts";
-
 import type { Configs } from "#types/config.types.d.ts";
 
 /**

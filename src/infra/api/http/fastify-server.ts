@@ -21,7 +21,6 @@ import healthCheckRouter from "#infra/api/http/routes/health-check.router.ts";
 import defaultLogger, { logger } from "#libs/logging/logger.service.ts";
 import { paginationPlugin } from "#libs/pagination/index.ts";
 import { getDirName } from "#libs/utils/files.ts";
-
 import type { Configs, ServerOptions } from "#types/index.d.ts";
 
 export class RestApiServer {

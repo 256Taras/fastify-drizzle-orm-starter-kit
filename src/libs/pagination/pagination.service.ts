@@ -1,11 +1,11 @@
 import type { Cradle } from "@fastify/awilix";
 
-import { BadRequestException } from "#libs/errors/domain.errors.ts";
-
 import { PAGINATION_STRATEGY } from "./pagination.contracts.ts";
 import { paginateCursor } from "./pagination.cursor.service.ts";
 import { paginateOffset } from "./pagination.offset.service.ts";
 import type { PaginatedResponse, PaginationConfig, PaginationOptions, PaginationParams } from "./pagination.types.d.ts";
+
+import { BadRequestException } from "#libs/errors/domain.errors.ts";
 
 /**
  * Universal pagination function that chooses strategy based on config
