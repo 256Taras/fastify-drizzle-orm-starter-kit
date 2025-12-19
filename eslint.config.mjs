@@ -106,21 +106,6 @@ export default tseslint.config(
         sourceType: 'module',
       },
     },
-    settings: {
-      'import/resolver': {
-        'eslint-import-resolver-custom-alias': {
-          alias: {
-            '@types': './src/@types',
-            '#configs': './src/configs',
-            '#infra': './src/infra',
-            '#libs': './src/libs',
-            '#modules': './src/modules',
-            '#tests': './tests',
-          },
-          extensions: ['.js', '.cjs', '.mjs', '.ts', '.d.ts'],
-        },
-      },
-    },
     rules: {
       // Base rules
       'no-console': 'error',
