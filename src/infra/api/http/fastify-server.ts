@@ -23,8 +23,6 @@ import { paginationPlugin } from "#libs/pagination/index.ts";
 import { getDirName } from "#libs/utils/files.ts";
 
 import type { Configs, ServerOptions } from "#types/index.d.ts";
-// Module augmentation for @fastify/awilix is automatically loaded from:
-// src/libs/di-container/awilix.d.ts
 
 export class RestApiServer {
   #configs: Configs;

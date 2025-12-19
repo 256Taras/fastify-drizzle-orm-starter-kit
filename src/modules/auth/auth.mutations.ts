@@ -71,7 +71,11 @@ const signInUser = async (
 };
 
 const signOutUser = async ({ authRepository, logger, sessionStorageService }: Cradle): Promise<typeof STATUS_SUCCESS> => {
-  const { ppid, userId } = sessionStorageService.getUserCredentials();
+  const credentials = sessionStorageService.getUserCredentials();
+  if (!credentials) {
+    throw new UnauthorizedException("User credentials not found in session");
+  }
+  const { ppid, userId } = credentials;
 
   logger.debug(`[AuthMutations] Signing out user: ${userId}`);
 
@@ -93,7 +97,11 @@ const refreshUserTokens = async ({
   sessionStorageService,
   usersRepository,
 }: Cradle): Promise<Credentials> => {
-  const { ppid, userId } = sessionStorageService.getUserCredentials();
+  const credentials = sessionStorageService.getUserCredentials();
+  if (!credentials) {
+    throw new UnauthorizedException("User credentials not found in session");
+  }
+  const { ppid, userId } = credentials;
 
   logger.debug(`[AuthMutations] Refreshing tokens for user: ${userId}`);
 
@@ -184,7 +192,11 @@ const changeUserPassword = async (
   { emailService, encrypterService, logger, sessionStorageService, usersRepository }: Cradle,
   input: ChangePasswordInput,
 ): Promise<typeof STATUS_SUCCESS> => {
-  const { userId } = sessionStorageService.getUserCredentials();
+  const credentials = sessionStorageService.getUserCredentials();
+  if (!credentials) {
+    throw new UnauthorizedException("User credentials not found in session");
+  }
+  const { userId } = credentials;
 
   logger.debug(`[AuthMutations] Password change requested for user: ${userId}`);
 

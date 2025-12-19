@@ -6,6 +6,7 @@ import type { FastifyPluginAsyncTypebox } from "@fastify/type-provider-typebox";
 import * as awilix from "awilix";
 import fp from "fastify-plugin";
 
+import type { JWTNamespace } from "#libs/auth/jwt.types.d.ts";
 import eventBusService from "#libs/events/event-bus.service.ts";
 import { registerEventHandlers } from "#libs/events/register-event-handlers.ts";
 import { logger } from "#libs/logging/logger.service.ts";
@@ -32,7 +33,7 @@ const diContainerPlugin: FastifyPluginAsyncTypebox<PluginOptions> = async (app, 
     configs: awilix.asValue(opts.configs),
     db: awilix.asValue(opts.database.drizzle),
     eventBus: awilix.asFunction(eventBusService),
-    jwtService: awilix.asValue(app.jwt),
+    jwtService: awilix.asValue(app.jwt as unknown as JWTNamespace),
     logger: awilix.asValue(logger),
   });
 

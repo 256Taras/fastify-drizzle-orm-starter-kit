@@ -13,9 +13,10 @@ type UserJwtData = {
   userId: string;
 };
 
-const getUser = (): undefined | UserJwtData => {
+const getUser = (): UserJwtData => {
   // @ts-expect-error - requestContext.get has generic type issues
   const user = requestContext.get(TOKENS.userJwtData) as undefined | UserJwtData;
+  if (!user) throw new Error("User not found in session");
   return user;
 };
 

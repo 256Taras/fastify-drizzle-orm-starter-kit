@@ -10,8 +10,8 @@ const usersRouterV1: FastifyPluginAsyncTypebox = async (app) => {
     schema: usersSchemas.getProfile,
 
     async handler() {
-      const { id } = sessionStorageService.get();
-      return usersQueries.findOneById(id);
+      const user = sessionStorageService.getUser();
+      return usersQueries.findOneById(user.userId);
     },
   });
 

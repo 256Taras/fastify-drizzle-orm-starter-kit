@@ -205,3 +205,10 @@ export interface SortParam {
   /** Sort direction */
   direction: "ASC" | "DESC";
 }
+
+// Declaration merging for DI container
+declare module "@fastify/awilix" {
+  interface Cradle {
+    paginationService: ReturnType<typeof import("./pagination.service.ts").default>;
+  }
+}

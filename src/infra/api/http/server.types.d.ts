@@ -1,4 +1,4 @@
-/** @file Server options types */
+/** @file Server and plugin options types */
 
 import type { FastifyInstance } from "fastify";
 
@@ -7,26 +7,18 @@ import type { DatabaseManager } from "#infra/database/db.ts";
 import type { Configs } from "#types/config.types.d.ts";
 
 /**
- * Configuration object for Fastify plugins
- * This is the same structure as RestApiServerOptions but used for plugin options
- * The database property is passed as-is from DatabaseManager, which has a drizzle property
+ * Plugin options passed to Fastify plugins
  */
-export interface FastifyGlobalOptionConfig {
-  /** Fastify instance (not used in options, but kept for compatibility) */
+export interface PluginOptions {
   app: FastifyInstance;
-  /** All application configurations */
   configs: Configs;
-  /** Database manager instance (plugins access database.drizzle) */
   database: DatabaseManager;
 }
 
 /**
- * Options for RestApiServer constructor
- * Contains all configurations and database manager instance
+ * Server options for RestApiServer constructor
  */
-export interface RestApiServerOptions {
-  /** All application configurations */
+export interface ServerOptions {
   configs: Configs;
-  /** Database manager instance with drizzle and postgres connections */
   database: DatabaseManager;
 }

@@ -1,10 +1,10 @@
 import { requestContext } from "@fastify/request-context";
-import type { FastifyReply, FastifyRequest, HookHandlerDoneFunction } from "fastify";
+import type { FastifyInstance, FastifyReply, FastifyRequest, HookHandlerDoneFunction } from "fastify";
 import fp from "fastify-plugin";
 
 import { SERVER_TIMEOUT_408 } from "#libs/errors/http.errors.ts";
 
-import type { FastifyInstance, PluginOptions } from "#types/index.d.ts";
+import type { PluginOptions } from "#types/index.d.ts";
 
 /**
  * Plugin to handle request timeouts in Fastify.

@@ -9,18 +9,21 @@
 
 /**
  * Access token payload type
+ * Contains user identity and refresh token reference
  */
 export interface AccessTokenPayload {
-  id: number;
-  name: string;
+  refreshTokenId: string;
+  userId: string;
 }
 
 /**
  * Refresh token payload type
+ * Contains user identity, refresh token ID, and PPID for token rotation
  */
 export interface RefreshTokenPayload {
-  id: number;
+  ppid: string;
   refreshTokenId: string;
+  userId: string;
 }
 
 /**
