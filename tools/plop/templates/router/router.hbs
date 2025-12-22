@@ -10,11 +10,11 @@ const {{camelCase name}}RouterV1: FastifyPluginAsyncTypebox = async (app) => {
     {{#if withAuth}}
     preHandler: app.auth([app.verifyJwt]),
     {{/if}}
-    schema: {{camelCase name}}Schemas.getList,
+    schema: {{camelCase name}}Schemas.getMany,
 
     async handler(req) {
       const pagination = app.transformers.getPaginationQuery(req);
-      return {{camelCase name}}Queries.findMany(pagination);
+      return {{camelCase name}}Queries.getMany(pagination);
     },
   });
   {{/if}}
@@ -23,10 +23,10 @@ const {{camelCase name}}RouterV1: FastifyPluginAsyncTypebox = async (app) => {
     {{#if withAuth}}
     preHandler: app.auth([app.verifyJwt]),
     {{/if}}
-    schema: {{camelCase name}}Schemas.getById,
+    schema: {{camelCase name}}Schemas.getOne,
 
     async handler(req) {
-      return {{camelCase name}}Queries.findOneById(req.params.id);
+      return {{camelCase name}}Queries.getOne(req.params.id);
     },
   });
 
@@ -34,10 +34,10 @@ const {{camelCase name}}RouterV1: FastifyPluginAsyncTypebox = async (app) => {
     {{#if withAuth}}
     preHandler: app.auth([app.verifyJwt]),
     {{/if}}
-    schema: {{camelCase name}}Schemas.create,
+    schema: {{camelCase name}}Schemas.createOne,
 
     async handler(req, rep) {
-      const item = await {{camelCase name}}Mutations.create{{pascalCase (singular name)}}(req.body);
+      const item = await {{camelCase name}}Mutations.createOne(req.body);
       rep.status(201);
       return item;
     },
@@ -47,10 +47,10 @@ const {{camelCase name}}RouterV1: FastifyPluginAsyncTypebox = async (app) => {
     {{#if withAuth}}
     preHandler: app.auth([app.verifyJwt]),
     {{/if}}
-    schema: {{camelCase name}}Schemas.update,
+    schema: {{camelCase name}}Schemas.updateOne,
 
     async handler(req) {
-      return {{camelCase name}}Mutations.update{{pascalCase (singular name)}}(req.params.id, req.body);
+      return {{camelCase name}}Mutations.updateOne(req.params.id, req.body);
     },
   });
 
@@ -58,10 +58,10 @@ const {{camelCase name}}RouterV1: FastifyPluginAsyncTypebox = async (app) => {
     {{#if withAuth}}
     preHandler: app.auth([app.verifyJwt]),
     {{/if}}
-    schema: {{camelCase name}}Schemas.delete,
+    schema: {{camelCase name}}Schemas.deleteOne,
 
     async handler(req) {
-      return {{camelCase name}}Mutations.delete{{pascalCase (singular name)}}(req.params.id);
+      return {{camelCase name}}Mutations.deleteOne(req.params.id);
     },
   });
 };

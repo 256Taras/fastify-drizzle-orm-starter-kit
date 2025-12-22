@@ -58,8 +58,8 @@ export class RestApiServer {
       this.#fastify.register(fastifyRequestContextPlugin, { defaultStoreValues: { logger: defaultLogger } }),
       // Register pagination plugin explicitly before autoload to ensure it's available for all routes
       this.#fastify.register(paginationPlugin),
-      // Compress plugin for response compression (gzip, brotli).
-      this.#fastify.register(fastifyCompress),
+      // Compress plugin for response compression (gzip, deflate).
+      this.#fastify.register(fastifyCompress, { threshold: 1024, encodings: ["gzip", "deflate"] }),
       // FormBody plugin for parsing form bodies into JS objects.
       this.#fastify.register(fastifyFormBody),
       // CORS plugin

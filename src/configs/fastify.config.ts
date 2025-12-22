@@ -36,6 +36,8 @@ export const FASTIFY_CONFIG = {
       verbose: true,
     } as AjvCustomOptions,
   },
+  bodyLimit: 2_097_152, // 2MB
+  connectionTimeout: 10_000,
   disableRequestLogging: true,
   genReqId: () => randomUUID(),
   keepAliveTimeout: 5000,

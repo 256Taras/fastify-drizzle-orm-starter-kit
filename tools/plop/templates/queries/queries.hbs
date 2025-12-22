@@ -10,12 +10,12 @@ import type { PaginationParams } from "#libs/pagination/pagination.types.d.ts";
 import { {{camelCase name}} } from "#modules/{{camelCase name}}/{{camelCase name}}.model.ts";
 {{/if}}
 
-import type { Get{{pascalCase name}}ListOutputContract, {{pascalCase (singular name)}} } from "./{{camelCase name}}.contracts.ts";
+import type { {{pascalCase (singular name)}}Many, {{pascalCase (singular name)}}One } from "./{{camelCase name}}.contracts.ts";
 {{#if withPagination}}
 import { {{upperSnakeCase name}}_PAGINATION_CONFIG } from "./{{camelCase name}}.pagination-config.ts";
 {{/if}}
 
-const findOneById = async ({ {{camelCase name}}Repository, logger }: Cradle, id: string): Promise<{{pascalCase (singular name)}}> => {
+const getOne = async ({ {{camelCase name}}Repository, logger }: Cradle, id: string): Promise<{{pascalCase (singular name)}}One> => {
   logger.debug(`[{{pascalCase name}}Queries] Getting {{singular name}}: ${id}`);
 
   const item = await {{camelCase name}}Repository.findOneById(id);
@@ -25,25 +25,25 @@ const findOneById = async ({ {{camelCase name}}Repository, logger }: Cradle, id:
 };
 
 {{#if withPagination}}
-const findMany = async (
+const getMany = async (
   { paginationService, logger }: Cradle,
   paginationParams: PaginationParams<"offset">,
-): Promise<Get{{pascalCase name}}ListOutputContract> => {
+): Promise<{{pascalCase (singular name)}}Many> => {
   logger.debug(`[{{pascalCase name}}Queries] Getting {{name}} list`);
 
   return (await paginationService.paginate({{upperSnakeCase name}}_PAGINATION_CONFIG, paginationParams, {
     {{#if softDelete}}
     queryBuilder: (qb) => qb.where(isNull({{camelCase name}}.deletedAt)),
     {{/if}}
-  })) as unknown as Promise<Get{{pascalCase name}}ListOutputContract>;
+  })) as unknown as Promise<{{pascalCase (singular name)}}Many>;
 };
 {{/if}}
 
 export default function {{camelCase name}}Queries(deps: Cradle) {
   return {
-    findOneById: partial(findOneById, [deps]),
+    getOne: partial(getOne, [deps]),
     {{#if withPagination}}
-    findMany: partial(findMany, [deps]),
+    getMany: partial(getMany, [deps]),
     {{/if}}
   };
 }
