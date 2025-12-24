@@ -192,11 +192,7 @@ const changeUserPassword = async (
   { emailService, encrypterService, logger, sessionStorageService, usersRepository }: Cradle,
   input: ChangePasswordInput,
 ): Promise<typeof STATUS_SUCCESS> => {
-  const credentials = sessionStorageService.getUserCredentials();
-  if (!credentials) {
-    throw new UnauthorizedException("User credentials not found in session");
-  }
-  const { userId } = credentials;
+  const { userId } = sessionStorageService.getUser();
 
   logger.debug(`[AuthMutations] Password change requested for user: ${userId}`);
 

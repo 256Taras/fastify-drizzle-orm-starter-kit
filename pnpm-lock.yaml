@@ -132,6 +132,9 @@ importers:
       eslint-plugin-unicorn:
         specifier: ^62.0.0
         version: 62.0.0(eslint@9.39.2(jiti@2.6.1))
+      fast-jwt:
+        specifier: ^6.1.0
+        version: 6.1.0
       globals:
         specifier: ^15.12.0
         version: 15.15.0

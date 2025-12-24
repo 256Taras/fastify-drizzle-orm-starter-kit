@@ -16,8 +16,10 @@ export const USER_UPDATE_INPUT_CONTRACT = Type.Partial(USER_CREATE_INPUT_CONTRAC
 export const USER_OUTPUT_LIST = paginationSchema(USER_OUTPUT_CONTRACT);
 
 // TypeScript types from TypeBox schemas
-export type GetUsersListOutputContract = Static<typeof USER_OUTPUT_LIST>;
 export type User = Static<typeof USER_OUTPUT_CONTRACT>;
 export type UserCreateInput = Static<typeof USER_CREATE_INPUT_CONTRACT>;
 export type UserInsert = Static<typeof USER_INSERT_CONTRACT>;
+export type UsersListResponse = Static<typeof USER_OUTPUT_LIST>;
 export type UserUpdateInput = Static<typeof USER_UPDATE_INPUT_CONTRACT>;
+
+export { type PaginationMeta } from "#libs/utils/schemas.ts";

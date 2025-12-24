@@ -2,7 +2,7 @@ import type { Cradle } from "@fastify/awilix";
 import { isNull } from "drizzle-orm";
 import { partial } from "rambda";
 
-import type { GetUsersListOutputContract, User } from "./users.contracts.ts";
+import type { User, UsersListResponse } from "./users.contracts.ts";
 import { USERS_PAGINATION_CONFIG } from "./users.pagination-config.ts";
 
 import { ResourceNotFoundException } from "#libs/errors/domain.errors.ts";
@@ -30,12 +30,12 @@ const findOneByEmail = async ({ usersRepository, logger }: Cradle, email: string
 const findMany = async (
   { paginationService, logger }: Cradle,
   paginationParams: PaginationParams<"offset">,
-): Promise<GetUsersListOutputContract> => {
+): Promise<UsersListResponse> => {
   logger.debug(`[UsersQueries] Getting users list`);
 
   return (await paginationService.paginate(USERS_PAGINATION_CONFIG, paginationParams, {
     queryBuilder: (qb) => qb.where(isNull(users.deletedAt)),
-  })) as unknown as Promise<GetUsersListOutputContract>;
+  })) as unknown as Promise<UsersListResponse>;
 };
 
 export default function usersQueries(deps: Cradle) {

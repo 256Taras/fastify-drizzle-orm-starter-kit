@@ -4,25 +4,27 @@ import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 
 import { ENV_CONFIG } from "#configs/env.config.ts";
 import { logger } from "#libs/logging/logger.service.ts";
+import { authPasswordResetTokens } from "#modules/auth/auth-password-reset-token.model.ts";
+import { authTokens } from "#modules/auth/auth-token.model.ts";
 import { users } from "#modules/users/users.model.ts";
+import type { SeedConfig } from "#tests/helpers/types/seed.types.ts";
 
 const TEST_DB_NAME = "test_db";
 const TEST_DB_PORT = "5434";
 
 export const TABLE_NAMES = {
+  authPasswordResetTokens: "AUTH_PASSWORD_RESET_TOKENS",
+  authTokens: "AUTH_TOKENS",
   users: "USERS",
 } as const;
 
 const DRIZZLE_TABLES: Record<string, PgTable> = {
+  [TABLE_NAMES.authPasswordResetTokens]: authPasswordResetTokens,
+  [TABLE_NAMES.authTokens]: authTokens,
   [TABLE_NAMES.users]: users,
 };
 
-interface SeedConfig {
-  data: Record<string, unknown>[];
-  table: string;
-}
-
-export function createDbHelper(drizzleDb: PostgresJsDatabase) {
+export function createDbHelper(drizzleDb: PostgresJsDatabase<any>) {
   return {
     async cleanUp(): Promise<void> {
       await validateTestDatabase(drizzleDb);
@@ -49,7 +51,6 @@ export function createDbHelper(drizzleDb: PostgresJsDatabase) {
       }
       if (data.length === 0) return;
 
-      // If table is a string, resolve it from tablesMap
       // eslint-disable-next-line security/detect-object-injection
       const ormTable = DRIZZLE_TABLES[table];
 

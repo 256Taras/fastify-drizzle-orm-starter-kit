@@ -2,7 +2,7 @@
 
 test:
 	@echo "🧪 Running tests with coverage..."
-	ENV_NAME=test npx c8 node --test
+	ENV_NAME=test npx c8 node --test --test-concurrency=1
 
 test-local:
 	@echo "🐳 Starting test dependencies..."
@@ -11,7 +11,7 @@ test-local:
 	@echo "📦 Running database migrations..."
 	@ENV_NAME=test npm run database:push:test || true
 	@echo "🧪 Running tests with coverage..."
-	ENV_NAME=test npx c8 node --test
+	ENV_NAME=test npx c8 node --test --test-concurrency=1
 	@echo "✅ Done!"
 
 test-ci:

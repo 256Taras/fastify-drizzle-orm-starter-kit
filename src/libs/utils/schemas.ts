@@ -1,5 +1,5 @@
 import { Type } from "@sinclair/typebox";
-import type { TObject, TSchema, TUnion } from "@sinclair/typebox";
+import type { Static, TObject, TSchema, TUnion } from "@sinclair/typebox";
 
 import { ERROR_CODE_FORMAT } from "#libs/constants/error-codes.ts";
 
@@ -27,17 +27,21 @@ export const createFileTypeSchema = (mimetypes: string[]): TObject => {
   return Type.Object(baseSchema, { isFile: true });
 };
 
-export const paginationSchema = (dataType: TSchema): TObject =>
+export const PAGINATION_META_SCHEMA = Type.Object({
+  hasNextPage: Type.Boolean(),
+  hasPreviousPage: Type.Boolean(),
+  itemCount: Type.Number(),
+  limit: Type.Number(),
+  page: Type.Number(),
+  pageCount: Type.Number(),
+});
+
+export type PaginationMeta = Static<typeof PAGINATION_META_SCHEMA>;
+
+export const paginationSchema = <T extends TSchema>(dataType: T) =>
   Type.Object({
     data: Type.Array(dataType),
-    meta: Type.Object({
-      hasNextPage: Type.Boolean(),
-      hasPreviousPage: Type.Boolean(),
-      itemCount: Type.Number(),
-      limit: Type.Number(),
-      page: Type.Number(),
-      pageCount: Type.Number(),
-    }),
+    meta: PAGINATION_META_SCHEMA,
   });
 
 const ERROR_DETAIL_SCHEMA = Type.Array(
@@ -66,7 +70,7 @@ const mapHttpErrorToSchemaError = (httpFastifyError: HttpFastifyError): Record<s
       statusCode: createEnumTypeUnionSchema([httpFastifyError.statusCode], { description: "HTTP status code" }),
       url: Type.String({ description: "Error URL" }),
       userMessage: createEnumTypeUnionSchema([httpFastifyError.userMessage], { description: "Message for the user" }),
-      ...(httpFastifyError.statusCode === 400 ? { errorDetails: ERROR_DETAIL_SCHEMA } : {}),
+      ...(httpFastifyError.statusCode === 400 ? { errorDetails: Type.Optional(ERROR_DETAIL_SCHEMA) } : {}),
       traceId: Type.Optional(Type.String({ description: "Trace ID for debugging" })),
     },
     { additionalProperties: false },

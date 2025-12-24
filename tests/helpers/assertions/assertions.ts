@@ -1,10 +1,11 @@
 import assert from "node:assert/strict";
 
+import type { PaginationMeta } from "#libs/utils/schemas.ts";
+
 interface PaginationAssertionOptions {
   expectedLimit?: number;
   expectedPage?: number;
   minItemCount?: number;
-  requireCursors?: boolean;
 }
 
 interface ShapeAssertion {
@@ -18,7 +19,7 @@ interface UserAssertionOptions {
   requiredFields?: string[];
 }
 
-export function assertHasValidPagination(meta: Record<string, unknown>, options: PaginationAssertionOptions = {}): void {
+export function assertHasValidPagination(meta: PaginationMeta, options: PaginationAssertionOptions = {}): void {
   assert.ok(meta, "Pagination metadata should exist");
   assert.strictEqual(typeof meta.itemCount, "number", "itemCount should be a number");
   assert.strictEqual(typeof meta.limit, "number", "limit should be a number");
@@ -37,11 +38,6 @@ export function assertHasValidPagination(meta: Record<string, unknown>, options:
 
   if (options.expectedLimit !== undefined) {
     assert.strictEqual(meta.limit, options.expectedLimit, `limit should be ${options.expectedLimit}`);
-  }
-
-  if (options.requireCursors) {
-    assert.ok(meta.startCursor, "startCursor should exist for cursor pagination");
-    assert.ok(meta.endCursor, "endCursor should exist for cursor pagination");
   }
 }
 
@@ -73,8 +69,6 @@ export function assertHasValidUser(user: Record<string, unknown>, options: UserA
 }
 
 export function assertMatchesShape(obj: Record<string, unknown>, shape: ShapeAssertion): void {
-  // Extract values safely to avoid Proxy issues with fixtureFactory
-  // Use hasOwnProperty check to avoid triggering Proxy errors
   const required = shape?.required || [];
   const optional = shape?.optional || [];
   const allAllowedFields = new Set([...optional, ...required]);

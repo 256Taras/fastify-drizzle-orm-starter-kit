@@ -4,6 +4,8 @@ import * as configs from "#configs/index.ts";
 import { RestApiServer } from "#infra/api/http/fastify-server.ts";
 import { DatabaseManager } from "#infra/database/db.ts";
 import { logger } from "#libs/logging/logger.service.ts";
+import type { TestContext } from "#tests/helpers/types/test-context.types.ts";
+import { createDbHelper } from "#tests/helpers/utils/db.utils.ts";
 import type { Configs } from "#types/config.types.d.ts";
 
 interface CreateTestingAppOptions {
@@ -15,6 +17,17 @@ interface TestingAppResult {
   app: FastifyInstance;
   database: DatabaseManager;
   teardown: () => Promise<void>;
+}
+
+export async function createTestContext(): Promise<TestContext> {
+  const payload = await createTestingApp();
+  const db = createDbHelper(payload.database.drizzle);
+
+  return {
+    app: payload.app,
+    db,
+    teardown: payload.teardown,
+  };
 }
 
 export async function createTestingApp(options: CreateTestingAppOptions = {}): Promise<TestingAppResult> {
@@ -30,7 +43,6 @@ export async function createTestingApp(options: CreateTestingAppOptions = {}): P
     await testDatabase.initialize();
   }
 
-  // TypeScript guard: ensure testDatabase is defined
   if (!testDatabase) {
     throw new Error("Database initialization failed");
   }
@@ -42,10 +54,8 @@ export async function createTestingApp(options: CreateTestingAppOptions = {}): P
 
   await server.buildServerApp();
 
-  // Type assertion: getFastifyInstance returns the internal Fastify instance
   const app = server.getFastifyInstance() as unknown as FastifyInstance;
 
-  // Wait for all plugins and routes to be loaded
   await app.ready();
 
   return {

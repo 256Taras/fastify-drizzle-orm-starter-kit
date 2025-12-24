@@ -17,7 +17,7 @@ const basePath = path.resolve(__dirname, "../../");
 
 const patterns = {
   modules: "modules/**/*.{repository,queries,mutations,service}.ts",
-  services: "libs/{encryption,session-storage,pagination,persistence}/**/*.service.ts",
+  services: "libs/{email,encryption,session-storage,pagination,persistence}/**/*.service.ts",
 };
 
 /**

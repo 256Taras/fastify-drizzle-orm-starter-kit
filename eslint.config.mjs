@@ -322,5 +322,20 @@ export default tseslint.config(
       '@typescript-eslint/require-await': 'off',
     },
   },
+
+  // Override for test files - relax strict typing for test convenience
+  {
+    files: ['tests/**/*.ts'],
+    rules: {
+      // node:test describe/it return promises that don't need to be awaited
+      '@typescript-eslint/no-floating-promises': 'off',
+      // response.json() returns unknown, we cast it in tests
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+    },
+  },
 );
 

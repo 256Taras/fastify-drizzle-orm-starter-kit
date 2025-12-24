@@ -1,6 +1,7 @@
 import { Type } from "@sinclair/typebox";
 import type { Static } from "@sinclair/typebox";
 
+import { COMMON_CONTRACTS_V1 } from "#libs/contracts/v1/index.ts";
 import { USER_OUTPUT_CONTRACT } from "#modules/users/users.contracts.ts";
 
 /**
@@ -64,10 +65,20 @@ export const CHANGE_PASSWORD_INPUT_CONTRACT = Type.Object(
   { additionalProperties: false },
 );
 
+export const FORGOT_PASSWORD_OUTPUT_CONTRACT = Type.Object(
+  {
+    status: Type.Boolean(),
+    resetToken: Type.Optional(Type.String()),
+  },
+  { additionalProperties: false },
+);
+
 // TypeScript types from TypeBox schemas
 export type ChangePasswordInput = Static<typeof CHANGE_PASSWORD_INPUT_CONTRACT>;
 export type Credentials = Static<typeof SIGN_IN_UP_OUTPUT_CONTRACT>;
 export type ForgotPasswordInput = Static<typeof FORGOT_PASSWORD_INPUT_CONTRACT>;
+export type ForgotPasswordOutput = Static<typeof FORGOT_PASSWORD_OUTPUT_CONTRACT>;
 export type ResetPasswordInput = Static<typeof RESET_PASSWORD_INPUT_CONTRACT>;
 export type SignInInput = Static<typeof SIGN_IN_INPUT_CONTRACT>;
 export type SignUpInput = Static<typeof SIGN_UP_INPUT_CONTRACT>;
+export type StatusOutput = Static<typeof COMMON_CONTRACTS_V1.status>;

@@ -1,4 +1,3 @@
-import { Type } from "@sinclair/typebox";
 import { pick } from "rambda";
 
 import { SWAGGER_SECURITY } from "#libs/constants/swagger-security.constants.ts";
@@ -15,7 +14,9 @@ import { mapHttpErrorsToSchemaErrorCollection } from "#libs/utils/schemas.ts";
 import {
   CHANGE_PASSWORD_INPUT_CONTRACT,
   FORGOT_PASSWORD_INPUT_CONTRACT,
+  FORGOT_PASSWORD_OUTPUT_CONTRACT,
   RESET_PASSWORD_INPUT_CONTRACT,
+  SIGN_IN_INPUT_CONTRACT,
   SIGN_IN_UP_OUTPUT_CONTRACT,
   SIGN_UP_INPUT_CONTRACT,
 } from "#modules/auth/auth.contracts.ts";
@@ -43,7 +44,7 @@ const authSchemas = {
 
   signIn: {
     tags: SWAGGER_TAGS.AUTH,
-    body: Type.Pick(SIGN_UP_INPUT_CONTRACT, ["email", "password"]),
+    body: SIGN_IN_INPUT_CONTRACT,
     response: {
       200: SIGN_IN_UP_OUTPUT_CONTRACT,
       ...mapHttpErrorsToSchemaErrorCollection(
@@ -69,10 +70,7 @@ const authSchemas = {
     tags: SWAGGER_TAGS.AUTH,
     body: FORGOT_PASSWORD_INPUT_CONTRACT,
     response: {
-      200: Type.Object({
-        status: Type.Boolean(),
-        resetToken: Type.Optional(Type.String()),
-      }),
+      200: FORGOT_PASSWORD_OUTPUT_CONTRACT,
       ...mapHttpErrorsToSchemaErrorCollection(pick([BadRequestException.name], defaultHttpErrorCollection)),
     },
     summary: "Request password reset email.",
