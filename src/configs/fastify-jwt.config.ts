@@ -2,7 +2,7 @@ import { ENV_CONFIG } from "./env.config.ts";
 
 export const FASTIFY_JWT_CONFIG = {
   accessTokenExpirationTime: ENV_CONFIG.JWT_ACCESS_TOKEN_EXPIRATION_TIME,
-  accessTokenSecret: ENV_CONFIG.JWT_ACCESS_TOKEN_SECRET ?? "jwt",
+  accessTokenSecret: ENV_CONFIG.JWT_ACCESS_TOKEN_SECRET,
   messages: {
     authorizationTokenExpiredMessage: "You are not authorized to access",
     authorizationTokenInvalid: "You are not authorized to access",
@@ -10,5 +10,5 @@ export const FASTIFY_JWT_CONFIG = {
     noAuthorizationInCookieMessage: "You are not authorized to access",
   },
   refreshTokenExpirationTime: ENV_CONFIG.JWT_REFRESH_TOKEN_EXPIRATION_TIME,
-  refreshTokenSecret: ENV_CONFIG.JWT_REFRESH_TOKEN_SECRET ?? "jwt",
+  refreshTokenSecret: ENV_CONFIG.JWT_REFRESH_TOKEN_SECRET,
 } as const;

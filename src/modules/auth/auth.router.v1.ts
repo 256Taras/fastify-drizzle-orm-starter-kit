@@ -2,7 +2,7 @@ import type { FastifyPluginAsyncTypebox } from "@fastify/type-provider-typebox";
 
 import authSchemas from "./auth.schemas.ts";
 
-import { TIME_IN_MILLISECONDS } from "#libs/constants/time.constants.ts";
+import { AUTH_RATE_LIMITS } from "#libs/constants/rate-limits.constants.ts";
 
 const authRouterV1: FastifyPluginAsyncTypebox = async (app) => {
   const { authMutations } = app.diContainer.cradle;
@@ -18,10 +18,7 @@ const authRouterV1: FastifyPluginAsyncTypebox = async (app) => {
   app.post("/sign-in", {
     schema: authSchemas.signIn,
     config: {
-      rateLimit: {
-        max: 15,
-        timeWindow: TIME_IN_MILLISECONDS.FIFTEEN_MINUTES,
-      },
+      rateLimit: AUTH_RATE_LIMITS.signIn,
     },
 
     handler(req) {
@@ -50,10 +47,7 @@ const authRouterV1: FastifyPluginAsyncTypebox = async (app) => {
   app.post("/forgot-password", {
     schema: authSchemas.forgotPassword,
     config: {
-      rateLimit: {
-        max: 5,
-        timeWindow: TIME_IN_MILLISECONDS.ONE_HOUR,
-      },
+      rateLimit: AUTH_RATE_LIMITS.forgotPassword,
     },
 
     handler(req) {

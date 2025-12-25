@@ -35,4 +35,8 @@ ENV PORT=8000
 
 EXPOSE 8000 9229
 
+# Health check - verify the application is responding
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:8000/api/healthcheck || exit 1
+
 CMD ["pnpm", "start"]

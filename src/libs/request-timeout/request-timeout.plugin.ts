@@ -35,7 +35,7 @@ async function requestTimeoutPlugin(app: FastifyInstance, options: PluginOptions
     }
   };
 
-  const setupRequestTimeout = (request: FastifyRequest, reply: FastifyReply, done: HookHandlerDoneFunction): void => {
+  const setupRequestTimeout = (_request: FastifyRequest, reply: FastifyReply, done: HookHandlerDoneFunction): void => {
     try {
       const controller = new AbortController();
       const routeConfig = reply.routeOptions?.config as { timeout?: number } | undefined;

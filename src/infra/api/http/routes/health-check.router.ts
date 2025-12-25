@@ -22,12 +22,14 @@ const HEALTHCHECK_SCHEMA = Type.Object(
 export default (async (fastify) => {
   fastify.get("/healthcheck", {
     handler: async () => {
+      const { db, logger } = fastify.diContainer.cradle;
       let dbStatus = false;
+
       try {
-        await fastify.diContainer.cradle.db.execute(sql`SELECT 1`);
+        await db.execute(sql`SELECT 1`);
         dbStatus = true;
-      } catch {
-        // Database connection failed
+      } catch (error) {
+        logger.error({ error }, "Health check: database connection failed");
       }
 
       return {

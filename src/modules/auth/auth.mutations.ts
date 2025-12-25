@@ -71,7 +71,11 @@ const signInUser = async (
   return authTokenService.generateTokens(userWithoutPassword);
 };
 
-const signOutUser = async ({ authRepository, logger, sessionStorageService }: Cradle): Promise<typeof STATUS_SUCCESS> => {
+const signOutUser = async ({
+  authTokenRepository,
+  logger,
+  sessionStorageService,
+}: Cradle): Promise<typeof STATUS_SUCCESS> => {
   const credentials = sessionStorageService.getUserCredentials();
   if (!credentials) {
     throw new UnauthorizedException("User credentials not found in session");
@@ -80,7 +84,7 @@ const signOutUser = async ({ authRepository, logger, sessionStorageService }: Cr
 
   logger.debug(`[AuthMutations] Signing out user: ${userId}`);
 
-  const result = await authRepository.deleteManyAuthTokens(ppid, userId);
+  const result = await authTokenRepository.deleteManyAuthTokens(ppid, userId);
 
   if (result.length === 0) {
     throw new UnauthorizedException("Failed to sign out");
@@ -92,7 +96,7 @@ const signOutUser = async ({ authRepository, logger, sessionStorageService }: Cr
 };
 
 const refreshUserTokens = async ({
-  authRepository,
+  authTokenRepository,
   authTokenService,
   logger,
   sessionStorageService,
@@ -112,7 +116,7 @@ const refreshUserTokens = async ({
     throw new ResourceNotFoundException("User not found");
   }
 
-  const result = await authRepository.deleteManyAuthTokens(ppid, userId);
+  const result = await authTokenRepository.deleteManyAuthTokens(ppid, userId);
 
   if (result.length === 0) {
     throw new UnauthorizedException("Failed to refresh tokens");
@@ -124,7 +128,7 @@ const refreshUserTokens = async ({
 };
 
 const forgotUserPassword = async (
-  { authRepository, configs, emailService, encrypterService, logger, usersRepository }: Cradle,
+  { authPasswordResetTokenRepository, configs, emailService, encrypterService, logger, usersRepository }: Cradle,
   input: ForgotPasswordInput,
 ): Promise<{ resetToken: string; status: boolean } | typeof STATUS_SUCCESS> => {
   logger.debug(`[AuthMutations] Password reset requested for email: ${input.email}`);
@@ -139,7 +143,7 @@ const forgotUserPassword = async (
   const resetToken = encrypterService.randomBytes(32);
   const expiresAt = new Date(Date.now() + TIME_IN_MILLISECONDS.ONE_HOUR);
 
-  await authRepository.createOnePasswordResetToken({
+  await authPasswordResetTokenRepository.createOnePasswordResetToken({
     email: input.email,
     expiresAt,
     token: resetToken,
@@ -158,12 +162,12 @@ const forgotUserPassword = async (
 };
 
 const resetUserPassword = async (
-  { authRepository, encrypterService, logger, usersRepository }: Cradle,
+  { authPasswordResetTokenRepository, encrypterService, logger, usersRepository }: Cradle,
   input: ResetPasswordInput,
 ): Promise<typeof STATUS_SUCCESS> => {
   logger.debug(`[AuthMutations] Attempting password reset with token`);
 
-  const resetTokenRecord = await authRepository.findOnePasswordResetToken(input.token);
+  const resetTokenRecord = await authPasswordResetTokenRepository.findOnePasswordResetToken(input.token);
 
   if (!resetTokenRecord) {
     throw new UnauthorizedException("Invalid or already used reset token");
@@ -182,7 +186,7 @@ const resetUserPassword = async (
   const hashedPassword = await encrypterService.getHash(input.password);
 
   await usersRepository.updateOnePasswordById(user.id, hashedPassword);
-  await authRepository.updateOneTokenAsUsed(resetTokenRecord.id);
+  await authPasswordResetTokenRepository.updateOneTokenAsUsed(resetTokenRecord.id);
 
   logger.info(`[AuthMutations] Password successfully reset for user: ${user.email}`);
 

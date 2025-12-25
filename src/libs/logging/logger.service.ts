@@ -29,8 +29,6 @@ export const TerminalOptions = {
   transport: LOGGER_CONFIG.enablePrettyPrint ? PinoPrettyTransport : undefined,
 };
 
-type _LogLevel = "debug" | "error" | "fatal" | "info" | "trace" | "warn";
-
 // @ts-expect-error - pino is callable but TypeScript doesn't recognize it properly with complex options
 const loggerService: Logger = pino(TerminalOptions) as Logger;
 

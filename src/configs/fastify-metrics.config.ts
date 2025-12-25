@@ -1,3 +1,7 @@
+import { ENV_CONFIG } from "./env.config.ts";
+
+import { createApiKeyPreHandler } from "#libs/auth/api-key.hook.ts";
+
 /**
  * Configuration for fastify-metrics plugin
  * Prometheus metrics collection and exposure
@@ -5,23 +9,24 @@
  */
 export const FASTIFY_METRICS_CONFIG = {
   endpoint: {
-    url: "/api/metrics",
     method: "GET",
+    preHandler: createApiKeyPreHandler(ENV_CONFIG.METRICS_API_KEY),
     schema: {
-      tags: ["System"],
       description: "Prometheus metrics endpoint",
-      summary: "Get Prometheus metrics",
       response: {
         200: {
-          type: "string",
           description: "Prometheus metrics in text format",
+          type: "string",
         },
       },
+      summary: "Get Prometheus metrics",
+      tags: ["System"],
     },
+    url: "/api/metrics",
   },
   routeMetrics: {
     enabled: true,
-    registeredRoutesOnly: true,
     groupStatusCodes: false,
+    registeredRoutesOnly: true,
   },
 };

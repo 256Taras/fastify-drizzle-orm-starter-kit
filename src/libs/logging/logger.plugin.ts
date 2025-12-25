@@ -2,7 +2,6 @@ import { requestContext } from "@fastify/request-context";
 import type { FastifyPluginAsyncTypebox } from "@fastify/type-provider-typebox";
 import type { DoneFuncWithErrOrRes, FastifyReply, FastifyRequest } from "fastify";
 import fp from "fastify-plugin";
-import type { Logger as _Logger } from "pino";
 
 import defaultLogger from "./logger.service.ts";
 
@@ -10,7 +9,7 @@ import { APP_CONFIG, LOGGER_CONFIG } from "#configs/index.ts";
 import type { PluginOptions } from "#types/index.d.ts";
 
 const requestLoggerPlugin: FastifyPluginAsyncTypebox<PluginOptions> = async (app) => {
-  const setTraceIdFastifyHook = (request: FastifyRequest, reply: FastifyReply, done: DoneFuncWithErrOrRes): void => {
+  const setTraceIdFastifyHook = (request: FastifyRequest, _reply: FastifyReply, done: DoneFuncWithErrOrRes): void => {
     const requestId = request.id;
     const childLogger = defaultLogger.child({ traceId: requestId });
     requestContext.set("logger", childLogger);

@@ -62,7 +62,7 @@ async function authPlugin(app: FastifyInstance, options?: AuthPluginOptions): Pr
   };
 
   /**
-   * Verifies refresh token and sets user credentials in session storage.
+   * Verifies refresh token and checks if token exists in database (not revoked).
    * Uses callback pattern required by @fastify/auth.
    */
   const defaultVerifyJwtRefreshToken: FastifyAuthFunction = (
@@ -70,7 +70,7 @@ async function authPlugin(app: FastifyInstance, options?: AuthPluginOptions): Pr
     _reply: FastifyReply,
     done: (error?: Error) => void,
   ): void => {
-    const { sessionStorageService } = app.diContainer.cradle;
+    const { authTokenRepository, sessionStorageService } = app.diContainer.cradle;
     const jwt = app.jwt as unknown as JWTNamespace;
     const refreshToken = request.headers[AUTH_CONFIG.refreshTokenKey];
 
@@ -83,8 +83,20 @@ async function authPlugin(app: FastifyInstance, options?: AuthPluginOptions): Pr
 
     try {
       const data = jwt.refreshToken.verify(tokenString);
-      sessionStorageService.setUserCredentials(data);
-      done();
+
+      authTokenRepository
+        .findOneByIdAndUserId(data.refreshTokenId, data.userId)
+        .then((token) => {
+          if (!token) {
+            done(new UNAUTHORIZED_ACCESS_401(ACCESS_DENIED_MESSAGE));
+            return;
+          }
+          sessionStorageService.setUserCredentials(data);
+          done();
+        })
+        .catch(() => {
+          done(new UNAUTHORIZED_ACCESS_401(ACCESS_DENIED_MESSAGE));
+        });
     } catch {
       done(new UNAUTHORIZED_ACCESS_401(ACCESS_DENIED_MESSAGE));
     }

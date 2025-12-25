@@ -9,6 +9,7 @@ const TypeEnable = Type.Integer({
 
 export const CONFIG_SCHEMA = Type.Object(
   {
+    ALLOWED_ORIGINS: Type.Optional(Type.String()),
     APPLICATION_DOMAIN: Type.String(),
     APPLICATION_NAME: Type.String(),
     APPLICATION_URL: Type.String(),
@@ -29,10 +30,11 @@ export const CONFIG_SCHEMA = Type.Object(
     HTTP_PORT: Type.Integer(),
     IP: Type.String(),
     JWT_ACCESS_TOKEN_EXPIRATION_TIME: Type.String(),
-    JWT_ACCESS_TOKEN_SECRET: Type.String(),
+    JWT_ACCESS_TOKEN_SECRET: Type.String({ minLength: 32 }),
     JWT_REFRESH_TOKEN_EXPIRATION_TIME: Type.String(),
-    JWT_REFRESH_TOKEN_SECRET: Type.String(),
+    JWT_REFRESH_TOKEN_SECRET: Type.String({ minLength: 32 }),
     LOG_LEVEL: Type.Union(["trace", "debug", "info", "warn", "error", "fatal"].map((i) => Type.Literal(i))),
+    METRICS_API_KEY: Type.Optional(Type.String({ minLength: 16 })),
     RATE_LIMIT_MAX: Type.Integer(),
     RATE_LIMIT_TIME_WINDOW: Type.Integer(),
     REQUEST_TIMEOUT: Type.Integer(),
