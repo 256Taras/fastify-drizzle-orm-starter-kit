@@ -16,3 +16,7 @@ scrape_configs:
     scrape_timeout: 5s
     # Don't fail if target is unavailable
     honor_labels: true
+    # API key authentication (reads from file mounted by docker-compose)
+    # File should contain just the API key value, no newlines
+    authorization:
+      credentials_file: /run/secrets/metrics_api_key

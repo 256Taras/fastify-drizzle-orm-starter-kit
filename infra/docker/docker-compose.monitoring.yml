@@ -8,6 +8,8 @@ services:
     volumes:
       - ../monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus-data:/prometheus
+    secrets:
+      - metrics_api_key
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -68,6 +70,10 @@ services:
     depends_on:
       - loki
 
+secrets:
+  metrics_api_key:
+    environment: METRICS_API_KEY
+
 volumes:
   prometheus-data:
   grafana-data:
@@ -77,4 +83,3 @@ networks:
   starter-network:
     name: starter-network
     driver: bridge
-

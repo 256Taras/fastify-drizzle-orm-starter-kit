@@ -12,7 +12,26 @@ const safeCompare = (a: string, b: string): boolean => {
 };
 
 /**
- * Creates a preHandler hook that validates API key from x-api-key header.
+ * Extracts API key from request headers.
+ * Supports both x-api-key header and Bearer token (for Prometheus compatibility).
+ */
+const extractApiKey = (request: FastifyRequest): string | undefined => {
+  const xApiKey = request.headers["x-api-key"];
+  if (typeof xApiKey === "string") {
+    return xApiKey;
+  }
+
+  const authorization = request.headers.authorization;
+  if (typeof authorization === "string" && authorization.startsWith("Bearer ")) {
+    return authorization.slice(7);
+  }
+
+  return undefined;
+};
+
+/**
+ * Creates a preHandler hook that validates API key.
+ * Accepts key from x-api-key header or Authorization: Bearer token.
  * Uses timing-safe comparison to prevent timing attacks.
  *
  * @param apiKey - The expected API key. If undefined/empty, validation is skipped.
@@ -26,7 +45,7 @@ export const createApiKeyPreHandler = (
       return;
     }
 
-    const providedKey = request.headers["x-api-key"];
+    const providedKey = extractApiKey(request);
 
     if (typeof providedKey !== "string" || !safeCompare(providedKey, apiKey)) {
       done(new UNAUTHORIZED_ACCESS_401("Invalid API key"));
