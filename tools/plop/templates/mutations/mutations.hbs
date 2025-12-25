@@ -3,18 +3,18 @@ import { partial } from "rambda";
 
 import { ResourceNotFoundException } from "#libs/errors/domain.errors.ts";
 
-import type { {{pascalCase (singular name)}}CreateOne, {{pascalCase (singular name)}}One, {{pascalCase (singular name)}}UpdateOne } from "./{{camelCase name}}.contracts.ts";
+import type { {{pascalCase (singular name)}}, {{pascalCase (singular name)}}CreateInput, {{pascalCase (singular name)}}UpdateInput } from "./{{camelCase name}}.contracts.ts";
 {{#if withEvents}}
 import { {{upperSnakeCase (singular name)}}_EVENTS } from "./{{camelCase name}}.events.ts";
 {{/if}}
 
 const createOne = async (
   { {{camelCase name}}Repository{{#if withEvents}}, eventBus{{/if}}, logger }: Cradle,
-  input: {{pascalCase (singular name)}}CreateOne,
-): Promise<{{pascalCase (singular name)}}One> => {
+  input: {{pascalCase (singular name)}}CreateInput,
+): Promise<{{pascalCase (singular name)}}> => {
   logger.debug(`[{{pascalCase name}}Mutations] Creating {{singular name}}`);
 
-  const created = (await {{camelCase name}}Repository.createOne(input)) as {{pascalCase (singular name)}}One;
+  const created = await {{camelCase name}}Repository.createOne(input);
 
   {{#if withEvents}}
   await eventBus.emit({{upperSnakeCase (singular name)}}_EVENTS.CREATED, created);
@@ -28,15 +28,15 @@ const createOne = async (
 const updateOne = async (
   { {{camelCase name}}Repository{{#if withEvents}}, eventBus{{/if}}, logger }: Cradle,
   id: string,
-  input: {{pascalCase (singular name)}}UpdateOne,
-): Promise<{{pascalCase (singular name)}}One> => {
+  input: {{pascalCase (singular name)}}UpdateInput,
+): Promise<{{pascalCase (singular name)}}> => {
   logger.debug(`[{{pascalCase name}}Mutations] Updating {{singular name}}: ${id}`);
 
   const updated = await {{camelCase name}}Repository.updateOneById(id, input);
   if (!updated) throw new ResourceNotFoundException(`{{pascalCase (singular name)}} with id: ${id} not found`);
 
   {{#if withEvents}}
-  await eventBus.emit({{upperSnakeCase (singular name)}}_EVENTS.UPDATED, { id: updated.id });
+  await eventBus.emit({{upperSnakeCase (singular name)}}_EVENTS.UPDATED, updated);
   {{/if}}
 
   logger.info(`[{{pascalCase name}}Mutations] {{pascalCase (singular name)}} updated: ${updated.id}`);
@@ -47,14 +47,14 @@ const updateOne = async (
 const deleteOne = async (
   { {{camelCase name}}Repository{{#if withEvents}}, eventBus{{/if}}, logger }: Cradle,
   id: string,
-): Promise<{{pascalCase (singular name)}}One> => {
+): Promise<{{pascalCase (singular name)}}> => {
   logger.debug(`[{{pascalCase name}}Mutations] Deleting {{singular name}}: ${id}`);
 
-  const deleted = (await {{camelCase name}}Repository.{{#if softDelete}}softDeleteOneById{{else}}deleteOneById{{/if}}(id)) as undefined | {{pascalCase (singular name)}}One;
+  const deleted = await {{camelCase name}}Repository.{{#if softDelete}}softDeleteOneById{{else}}deleteOneById{{/if}}(id);
   if (!deleted) throw new ResourceNotFoundException(`{{pascalCase (singular name)}} with id: ${id} not found`);
 
   {{#if withEvents}}
-  await eventBus.emit({{upperSnakeCase (singular name)}}_EVENTS.DELETED, { id: deleted.id });
+  await eventBus.emit({{upperSnakeCase (singular name)}}_EVENTS.DELETED, deleted);
   {{/if}}
 
   logger.info(`[{{pascalCase name}}Mutations] {{pascalCase (singular name)}} deleted: ${deleted.id}`);
@@ -65,7 +65,7 @@ const deleteOne = async (
 export default function {{camelCase name}}Mutations(deps: Cradle) {
   return {
     createOne: partial(createOne, [deps]),
-    updateOne: partial(updateOne, [deps]),
     deleteOne: partial(deleteOne, [deps]),
+    updateOne: partial(updateOne, [deps]),
   };
 }

@@ -1,0 +1,99 @@
+import assert from "node:assert/strict";
+import { after, before, beforeEach, describe, it } from "node:test";
+
+import { getMany{{pascalCase (singular name)}}Fixtures as fixtures } from "./get-many-{{kebabCase (singular name)}}.fixtures.ts";
+
+import type { {{pascalCase name}}ListResponse } from "#modules/{{camelCase name}}/{{camelCase name}}.contracts.ts";
+import { assertHasValidPagination } from "#tests/helpers/assertions/assertions.ts";
+import type { TestContext } from "#tests/helpers/types/test-context.types.ts";
+import { createEndpoint } from "#tests/helpers/utils/endpoint.utils.ts";
+import { createTestContext } from "#tests/helpers/utils/testing-app.utils.ts";
+
+const TESTING_METHOD = "GET";
+const endpoint = createEndpoint("/v1/{{kebabCase name}}/");
+
+describe(`${TESTING_METHOD} ${endpoint()}`, () => {
+  let ctx: TestContext;
+
+  before(async () => {
+    ctx = await createTestContext();
+  });
+
+  beforeEach(async () => {
+    await ctx.db.cleanUp();
+  });
+
+  after(async () => {
+    await ctx.teardown();
+  });
+
+  describe("Success Cases", () => {
+    it("[200] should return paginated {{name}} list", async () => {
+      await ctx.db.seed(fixtures.seeds.MULTIPLE_{{upperSnakeCase name}});
+      const { PAGINATED_LIST } = fixtures.positive;
+
+      const response = await ctx.app.inject({
+        method: TESTING_METHOD,
+        path: endpoint(),
+        query: PAGINATED_LIST.input.query,
+      });
+
+      const data = response.json<{{pascalCase name}}ListResponse>();
+
+      assert.strictEqual(response.statusCode, 200);
+      assert.ok(Array.isArray(data.data));
+      assert.ok(data.data.length >= 2);
+      assertHasValidPagination(data.meta, { expectedPage: 1, expectedLimit: 10 });
+    });
+
+    it("[200] should return empty array when no {{name}} exist", async () => {
+      const { EMPTY_RESULT } = fixtures.positive;
+
+      const response = await ctx.app.inject({
+        method: TESTING_METHOD,
+        path: endpoint(),
+        query: EMPTY_RESULT.input.query,
+      });
+
+      const data = response.json<{{pascalCase name}}ListResponse>();
+
+      assert.strictEqual(response.statusCode, 200);
+      assert.strictEqual(data.data.length, 0);
+      assert.strictEqual(data.meta.itemCount, 0);
+    });
+
+    it("[200] should handle pagination correctly", async () => {
+      await ctx.db.seed(fixtures.seeds.MANY_{{upperSnakeCase name}}(15));
+      const { PAGINATION_METADATA } = fixtures.positive;
+
+      const response = await ctx.app.inject({
+        method: TESTING_METHOD,
+        path: endpoint(),
+        query: PAGINATION_METADATA.input.query,
+      });
+
+      const data = response.json<{{pascalCase name}}ListResponse>();
+
+      assert.strictEqual(response.statusCode, 200);
+      assertHasValidPagination(data.meta, {
+        minItemCount: 15,
+        expectedPage: 2,
+        expectedLimit: 5,
+      });
+    });
+  });
+
+  describe("Error Cases - Validation", () => {
+    it("[400] should return error for invalid limit", async () => {
+      const { INVALID_LIMIT } = fixtures.negative;
+
+      const response = await ctx.app.inject({
+        method: TESTING_METHOD,
+        path: endpoint(),
+        query: INVALID_LIMIT.input.query,
+      });
+
+      assert.strictEqual(response.statusCode, 400);
+    });
+  });
+});

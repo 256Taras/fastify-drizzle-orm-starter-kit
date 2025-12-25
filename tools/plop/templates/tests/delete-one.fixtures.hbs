@@ -1,0 +1,22 @@
+import crypto from "node:crypto";
+
+import { {{camelCase (singular name)}}Factory } from "#tests/helpers/factories/{{kebabCase (singular name)}}.factory.ts";
+import { TABLE_NAMES } from "#tests/helpers/utils/db.utils.ts";
+import { fixtureFactory } from "#tests/helpers/utils/fixture.utils.ts";
+
+const SAMPLE_{{upperSnakeCase (singular name)}} = {{camelCase (singular name)}}Factory.create();
+
+export const deleteOne{{pascalCase (singular name)}}Fixtures = fixtureFactory({
+  seeds: {
+    SINGLE_{{upperSnakeCase (singular name)}}: {
+      table: TABLE_NAMES.{{camelCase name}},
+      data: [SAMPLE_{{upperSnakeCase (singular name)}}],
+    },
+  },
+  positive: {},
+  negative: {
+    NON_EXISTENT: {
+      input: { id: crypto.randomUUID() },
+    },
+  },
+});

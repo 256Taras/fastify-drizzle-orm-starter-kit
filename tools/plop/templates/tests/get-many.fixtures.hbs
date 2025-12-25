@@ -1,0 +1,29 @@
+import { {{camelCase (singular name)}}Factory } from "#tests/helpers/factories/{{kebabCase (singular name)}}.factory.ts";
+import { TABLE_NAMES } from "#tests/helpers/utils/db.utils.ts";
+import { fixtureFactory } from "#tests/helpers/utils/fixture.utils.ts";
+
+export const getMany{{pascalCase (singular name)}}Fixtures = fixtureFactory({
+  seeds: {
+    MULTIPLE_{{upperSnakeCase name}}: {
+      table: TABLE_NAMES.{{camelCase name}},
+      data: {{camelCase (singular name)}}Factory.createMany(5),
+    },
+    MANY_{{upperSnakeCase name}}: (count = 10) => {{camelCase (singular name)}}Factory.createManySeed(count),
+  },
+  positive: {
+    PAGINATED_LIST: {
+      input: { query: { limit: "10", page: "1" } },
+    },
+    PAGINATION_METADATA: {
+      input: { query: { limit: "5", page: "2" } },
+    },
+    EMPTY_RESULT: {
+      input: { query: { limit: "10", page: "1" } },
+    },
+  },
+  negative: {
+    INVALID_LIMIT: {
+      input: { query: { limit: "-1", page: "1" } },
+    },
+  },
+});

@@ -1,24 +1,24 @@
 import type { Cradle } from "@fastify/awilix";
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq{{#if softDelete}}, isNull{{/if}} } from "drizzle-orm";
 import { partial } from "rambda";
 
 import { createBaseRepository } from "#libs/persistence/base-repository.ts";
-import { {{camelCase name}}{{#if softDelete}}, {{upperSnakeCase name}}_COLUMNS{{/if}} } from "#modules/{{camelCase name}}/{{camelCase name}}.model.ts";
 
 import type { {{pascalCase (singular name)}}, {{pascalCase (singular name)}}Insert } from "./{{camelCase name}}.contracts.ts";
+import { {{camelCase name}} } from "./{{camelCase name}}.model.ts";
 
 const updateOneById = async (
   { db }: Cradle,
   id: string,
   data: Partial<{{pascalCase (singular name)}}Insert>,
-): Promise<undefined | {{pascalCase (singular name)}}> => {
+): Promise<{{pascalCase (singular name)}} | null> => {
   const [updated] = await db
     .update({{camelCase name}})
     .set({ ...data, updatedAt: new Date().toISOString() })
     .where(and(eq({{camelCase name}}.id, id){{#if softDelete}}, isNull({{camelCase name}}.deletedAt){{/if}}))
     .returning();
 
-  return updated as undefined | {{pascalCase (singular name)}};
+  return updated ?? null;
 };
 
 export default function {{camelCase name}}Repository(deps: Cradle) {

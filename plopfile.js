@@ -111,7 +111,10 @@ function toPlural(str) {
 
 function toSingular(str) {
   if (str.endsWith("ies")) return str.slice(0, -3) + "y";
-  if (str.endsWith("es") && !str.endsWith("ses")) return str.slice(0, -2);
+  // Handle -es endings: boxes -> box, churches -> church, but articles -> article
+  if (str.endsWith("xes") || str.endsWith("ches") || str.endsWith("shes") || str.endsWith("sses")) {
+    return str.slice(0, -2);
+  }
   if (str.endsWith("s") && !str.endsWith("ss")) return str.slice(0, -1);
   return str;
 }

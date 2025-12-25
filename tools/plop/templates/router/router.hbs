@@ -5,11 +5,12 @@ import {{camelCase name}}Schemas from "./{{camelCase name}}.schemas.ts";
 const {{camelCase name}}RouterV1: FastifyPluginAsyncTypebox = async (app) => {
   const { {{camelCase name}}Mutations, {{camelCase name}}Queries } = app.diContainer.cradle;
 
+  {{#if withAuth}}
+  app.addHook("preHandler", app.auth([app.verifyJwt]));
+
+  {{/if}}
   {{#if withPagination}}
   app.get("/", {
-    {{#if withAuth}}
-    preHandler: app.auth([app.verifyJwt]),
-    {{/if}}
     schema: {{camelCase name}}Schemas.getMany,
 
     async handler(req) {
@@ -20,9 +21,6 @@ const {{camelCase name}}RouterV1: FastifyPluginAsyncTypebox = async (app) => {
   {{/if}}
 
   app.get("/:id", {
-    {{#if withAuth}}
-    preHandler: app.auth([app.verifyJwt]),
-    {{/if}}
     schema: {{camelCase name}}Schemas.getOne,
 
     async handler(req) {
@@ -31,9 +29,6 @@ const {{camelCase name}}RouterV1: FastifyPluginAsyncTypebox = async (app) => {
   });
 
   app.post("/", {
-    {{#if withAuth}}
-    preHandler: app.auth([app.verifyJwt]),
-    {{/if}}
     schema: {{camelCase name}}Schemas.createOne,
 
     async handler(req, rep) {
@@ -44,9 +39,6 @@ const {{camelCase name}}RouterV1: FastifyPluginAsyncTypebox = async (app) => {
   });
 
   app.put("/:id", {
-    {{#if withAuth}}
-    preHandler: app.auth([app.verifyJwt]),
-    {{/if}}
     schema: {{camelCase name}}Schemas.updateOne,
 
     async handler(req) {
@@ -55,9 +47,6 @@ const {{camelCase name}}RouterV1: FastifyPluginAsyncTypebox = async (app) => {
   });
 
   app.delete("/:id", {
-    {{#if withAuth}}
-    preHandler: app.auth([app.verifyJwt]),
-    {{/if}}
     schema: {{camelCase name}}Schemas.deleteOne,
 
     async handler(req) {

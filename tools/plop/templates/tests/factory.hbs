@@ -1,0 +1,61 @@
+import crypto from "node:crypto";
+
+import { TABLE_NAMES } from "#tests/helpers/utils/db.utils.ts";
+
+export interface {{pascalCase (singular name)}}Seed extends Record<string, unknown> {
+  id: string;
+  {{#each parsedFields}}
+  {{camelCase name}}{{#if nullable}}?{{/if}}: {{#if (eq type "string")}}string{{/if}}{{#if (eq type "text")}}string{{/if}}{{#if (eq type "number")}}number{{/if}}{{#if (eq type "integer")}}number{{/if}}{{#if (eq type "float")}}number{{/if}}{{#if (eq type "boolean")}}boolean{{/if}}{{#if (eq type "date")}}string{{/if}}{{#if (eq type "timestamp")}}string{{/if}}{{#if (eq type "uuid")}}string{{/if}}{{#if (eq type "json")}}Record<string, unknown>{{/if}};
+  {{/each}}
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface {{pascalCase (singular name)}}Overrides {
+  id?: string;
+  {{#each parsedFields}}
+  {{camelCase name}}?: {{#if (eq type "string")}}string{{/if}}{{#if (eq type "text")}}string{{/if}}{{#if (eq type "number")}}number{{/if}}{{#if (eq type "integer")}}number{{/if}}{{#if (eq type "float")}}number{{/if}}{{#if (eq type "boolean")}}boolean{{/if}}{{#if (eq type "date")}}string{{/if}}{{#if (eq type "timestamp")}}string{{/if}}{{#if (eq type "uuid")}}string{{/if}}{{#if (eq type "json")}}Record<string, unknown>{{/if}};
+  {{/each}}
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+function create{{pascalCase (singular name)}}(overrides: {{pascalCase (singular name)}}Overrides = {}): {{pascalCase (singular name)}}Seed {
+  return {
+    id: crypto.randomUUID(),
+    {{#each parsedFields}}
+    {{camelCase name}}: {{#if (eq type "string")}}"test-{{camelCase name}}"{{/if}}{{#if (eq type "text")}}"Test {{camelCase name}} content"{{/if}}{{#if (eq type "number")}}1{{/if}}{{#if (eq type "integer")}}1{{/if}}{{#if (eq type "float")}}1.5{{/if}}{{#if (eq type "boolean")}}false{{/if}}{{#if (eq type "date")}}new Date().toISOString(){{/if}}{{#if (eq type "timestamp")}}new Date().toISOString(){{/if}}{{#if (eq type "uuid")}}crypto.randomUUID(){{/if}}{{#if (eq type "json")}}{}{{/if}},
+    {{/each}}
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    ...overrides,
+  };
+}
+
+function createMany{{pascalCase (singular name)}}s(count: number, overrides: {{pascalCase (singular name)}}Overrides = {}): {{pascalCase (singular name)}}Seed[] {
+  return Array.from({ length: count }, () => ({
+    ...create{{pascalCase (singular name)}}(overrides),
+    id: crypto.randomUUID(),
+  }));
+}
+
+function createMany{{pascalCase (singular name)}}sSeed(count: number, overrides: {{pascalCase (singular name)}}Overrides = {}) {
+  return {
+    table: TABLE_NAMES.{{camelCase name}},
+    data: createMany{{pascalCase (singular name)}}s(count, overrides),
+  };
+}
+
+function create{{pascalCase (singular name)}}Seed(data: {{pascalCase (singular name)}}Seed) {
+  return {
+    table: TABLE_NAMES.{{camelCase name}},
+    data: [data],
+  };
+}
+
+export const {{camelCase (singular name)}}Factory = {
+  create: create{{pascalCase (singular name)}},
+  createSeed: (overrides: {{pascalCase (singular name)}}Overrides = {}) => create{{pascalCase (singular name)}}Seed(create{{pascalCase (singular name)}}(overrides)),
+  createMany: createMany{{pascalCase (singular name)}}s,
+  createManySeed: createMany{{pascalCase (singular name)}}sSeed,
+};

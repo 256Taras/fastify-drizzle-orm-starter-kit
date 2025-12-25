@@ -1,41 +1,45 @@
 import type { Cradle } from "@fastify/awilix";
+{{#if withPagination}}
 {{#if softDelete}}
 import { isNull } from "drizzle-orm";
+{{/if}}
 {{/if}}
 import { partial } from "rambda";
 
 import { ResourceNotFoundException } from "#libs/errors/domain.errors.ts";
 {{#if withPagination}}
 import type { PaginationParams } from "#libs/pagination/pagination.types.d.ts";
-import { {{camelCase name}} } from "#modules/{{camelCase name}}/{{camelCase name}}.model.ts";
 {{/if}}
 
-import type { {{pascalCase (singular name)}}Many, {{pascalCase (singular name)}}One } from "./{{camelCase name}}.contracts.ts";
+{{#if withPagination}}
+import { {{camelCase name}} } from "./{{camelCase name}}.model.ts";
+{{/if}}
+import type { {{pascalCase (singular name)}}, {{pascalCase name}}ListResponse } from "./{{camelCase name}}.contracts.ts";
 {{#if withPagination}}
 import { {{upperSnakeCase name}}_PAGINATION_CONFIG } from "./{{camelCase name}}.pagination-config.ts";
 {{/if}}
 
-const getOne = async ({ {{camelCase name}}Repository, logger }: Cradle, id: string): Promise<{{pascalCase (singular name)}}One> => {
+const getOne = async ({ {{camelCase name}}Repository, logger }: Cradle, id: string): Promise<{{pascalCase (singular name)}}> => {
   logger.debug(`[{{pascalCase name}}Queries] Getting {{singular name}}: ${id}`);
 
   const item = await {{camelCase name}}Repository.findOneById(id);
   if (!item) throw new ResourceNotFoundException(`{{pascalCase (singular name)}} with id: ${id} not found`);
 
-  return item;
+  return item as {{pascalCase (singular name)}};
 };
 
 {{#if withPagination}}
 const getMany = async (
   { paginationService, logger }: Cradle,
   paginationParams: PaginationParams<"offset">,
-): Promise<{{pascalCase (singular name)}}Many> => {
+): Promise<{{pascalCase name}}ListResponse> => {
   logger.debug(`[{{pascalCase name}}Queries] Getting {{name}} list`);
 
   return (await paginationService.paginate({{upperSnakeCase name}}_PAGINATION_CONFIG, paginationParams, {
     {{#if softDelete}}
     queryBuilder: (qb) => qb.where(isNull({{camelCase name}}.deletedAt)),
     {{/if}}
-  })) as unknown as Promise<{{pascalCase (singular name)}}Many>;
+  })) as {{pascalCase name}}ListResponse;
 };
 {{/if}}
 

@@ -1,0 +1,37 @@
+import crypto from "node:crypto";
+
+import { {{camelCase (singular name)}}Factory } from "#tests/helpers/factories/{{kebabCase (singular name)}}.factory.ts";
+import { TABLE_NAMES } from "#tests/helpers/utils/db.utils.ts";
+import { fixtureFactory } from "#tests/helpers/utils/fixture.utils.ts";
+
+const SAMPLE_{{upperSnakeCase (singular name)}} = {{camelCase (singular name)}}Factory.create();
+
+export const updateOne{{pascalCase (singular name)}}Fixtures = fixtureFactory({
+  seeds: {
+    SINGLE_{{upperSnakeCase (singular name)}}: {
+      table: TABLE_NAMES.{{camelCase name}},
+      data: [SAMPLE_{{upperSnakeCase (singular name)}}],
+    },
+  },
+  positive: {
+    VALID_UPDATE: {
+      input: {
+        body: {
+          {{#each parsedFields}}
+          {{#if (eq @index 0)}}
+          {{camelCase name}}: {{#if (eq type "string")}}"updated-{{camelCase name}}"{{/if}}{{#if (eq type "text")}}"Updated {{camelCase name}} content"{{/if}}{{#if (eq type "number")}}2{{/if}}{{#if (eq type "integer")}}2{{/if}}{{#if (eq type "float")}}2.5{{/if}}{{#if (eq type "boolean")}}true{{/if}}{{#if (eq type "date")}}new Date().toISOString(){{/if}}{{#if (eq type "timestamp")}}new Date().toISOString(){{/if}}{{#if (eq type "uuid")}}crypto.randomUUID(){{/if}}{{#if (eq type "json")}}{ updated: true }{{/if}},
+          {{/if}}
+          {{/each}}
+        },
+      },
+    },
+  },
+  negative: {
+    NON_EXISTENT: {
+      input: {
+        id: crypto.randomUUID(),
+        body: {},
+      },
+    },
+  },
+});

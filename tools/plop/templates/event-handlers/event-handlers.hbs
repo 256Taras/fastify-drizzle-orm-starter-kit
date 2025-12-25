@@ -10,12 +10,12 @@ export default function setup{{pascalCase name}}EventHandlers({ eventBus, logger
   });
 
   // eslint-disable-next-line @typescript-eslint/require-await
-  eventBus.on({{upperSnakeCase (singular name)}}_EVENTS.UPDATED, async (payload: { id: string }): Promise<void> => {
+  eventBus.on({{upperSnakeCase (singular name)}}_EVENTS.UPDATED, async (payload: {{pascalCase (singular name)}}): Promise<void> => {
     logger.info(`[{{pascalCase name}}EventHandlers] {{pascalCase (singular name)}} updated: ${payload.id}`);
   });
 
   // eslint-disable-next-line @typescript-eslint/require-await
-  eventBus.on({{upperSnakeCase (singular name)}}_EVENTS.DELETED, async (payload: { id: string }): Promise<void> => {
+  eventBus.on({{upperSnakeCase (singular name)}}_EVENTS.DELETED, async (payload: {{pascalCase (singular name)}}): Promise<void> => {
     logger.info(`[{{pascalCase name}}EventHandlers] {{pascalCase (singular name)}} deleted: ${payload.id}`);
   });
 }

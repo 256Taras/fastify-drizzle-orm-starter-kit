@@ -48,10 +48,17 @@ export default function moduleGenerator(plop) {
         message: "Enable soft delete?",
         default: true,
       },
+      {
+        type: "confirm",
+        name: "withTests",
+        message: "Generate e2e tests?",
+        default: true,
+      },
     ],
     actions: (data) => {
       data.parsedFields = parseFields(data.fields);
       data.modulePath = `src/modules/{{camelCase name}}`;
+      data.testsPath = `tests/e2e/{{kebabCase name}}/v1`;
 
       const actions = [
         // Model
@@ -161,6 +168,112 @@ export default function moduleGenerator(plop) {
         path: `${data.modulePath}/{{camelCase name}}.types.d.ts`,
         templateFile: join(templatesPath, "types/types.hbs"),
       });
+
+      // Optional: E2E Tests
+      if (data.withTests) {
+        // Add table name to test db.utils.ts TABLE_NAMES
+        actions.push({
+          type: "append",
+          path: "tests/helpers/utils/db.utils.ts",
+          pattern: /export const TABLE_NAMES = \{/,
+          template: '  {{camelCase name}}: "{{upperSnakeCase name}}",',
+        });
+
+        // Add import for drizzle table to db.utils.ts
+        actions.push({
+          type: "append",
+          path: "tests/helpers/utils/db.utils.ts",
+          pattern: /import \{ users \} from "#modules\/users\/users\.model\.ts";/,
+          template: 'import { {{camelCase name}} } from "#modules/{{camelCase name}}/{{camelCase name}}.model.ts";',
+        });
+
+        // Add to DRIZZLE_TABLES in db.utils.ts
+        actions.push({
+          type: "append",
+          path: "tests/helpers/utils/db.utils.ts",
+          pattern: /\[TABLE_NAMES\.users\]: users,/,
+          template: "  [TABLE_NAMES.{{camelCase name}}]: {{camelCase name}},",
+        });
+
+        // Factory
+        actions.push({
+          type: "add",
+          path: `tests/helpers/factories/{{kebabCase (singular name)}}.factory.ts`,
+          templateFile: join(templatesPath, "tests/factory.hbs"),
+        });
+
+        // GET /:id
+        actions.push(
+          {
+            type: "add",
+            path: `${data.testsPath}/get-one/get-one-{{kebabCase (singular name)}}.test.ts`,
+            templateFile: join(templatesPath, "tests/get-one.test.hbs"),
+          },
+          {
+            type: "add",
+            path: `${data.testsPath}/get-one/get-one-{{kebabCase (singular name)}}.fixtures.ts`,
+            templateFile: join(templatesPath, "tests/get-one.fixtures.hbs"),
+          },
+        );
+
+        // GET / (list with pagination)
+        if (data.withPagination) {
+          actions.push(
+            {
+              type: "add",
+              path: `${data.testsPath}/get-many/get-many-{{kebabCase (singular name)}}.test.ts`,
+              templateFile: join(templatesPath, "tests/get-many.test.hbs"),
+            },
+            {
+              type: "add",
+              path: `${data.testsPath}/get-many/get-many-{{kebabCase (singular name)}}.fixtures.ts`,
+              templateFile: join(templatesPath, "tests/get-many.fixtures.hbs"),
+            },
+          );
+        }
+
+        // POST /
+        actions.push(
+          {
+            type: "add",
+            path: `${data.testsPath}/create-one/create-one-{{kebabCase (singular name)}}.test.ts`,
+            templateFile: join(templatesPath, "tests/create-one.test.hbs"),
+          },
+          {
+            type: "add",
+            path: `${data.testsPath}/create-one/create-one-{{kebabCase (singular name)}}.fixtures.ts`,
+            templateFile: join(templatesPath, "tests/create-one.fixtures.hbs"),
+          },
+        );
+
+        // PUT /:id
+        actions.push(
+          {
+            type: "add",
+            path: `${data.testsPath}/update-one/update-one-{{kebabCase (singular name)}}.test.ts`,
+            templateFile: join(templatesPath, "tests/update-one.test.hbs"),
+          },
+          {
+            type: "add",
+            path: `${data.testsPath}/update-one/update-one-{{kebabCase (singular name)}}.fixtures.ts`,
+            templateFile: join(templatesPath, "tests/update-one.fixtures.hbs"),
+          },
+        );
+
+        // DELETE /:id
+        actions.push(
+          {
+            type: "add",
+            path: `${data.testsPath}/delete-one/delete-one-{{kebabCase (singular name)}}.test.ts`,
+            templateFile: join(templatesPath, "tests/delete-one.test.hbs"),
+          },
+          {
+            type: "add",
+            path: `${data.testsPath}/delete-one/delete-one-{{kebabCase (singular name)}}.fixtures.ts`,
+            templateFile: join(templatesPath, "tests/delete-one.fixtures.hbs"),
+          },
+        );
+      }
 
       return actions;
     },

@@ -1,0 +1,61 @@
+import assert from "node:assert/strict";
+import { after, before, beforeEach, describe, it } from "node:test";
+
+import { updateOne{{pascalCase (singular name)}}Fixtures as fixtures } from "./update-one-{{kebabCase (singular name)}}.fixtures.ts";
+
+import type { {{pascalCase (singular name)}} } from "#modules/{{camelCase name}}/{{camelCase name}}.contracts.ts";
+import type { TestContext } from "#tests/helpers/types/test-context.types.ts";
+import { createEndpoint } from "#tests/helpers/utils/endpoint.utils.ts";
+import { createTestContext } from "#tests/helpers/utils/testing-app.utils.ts";
+
+const TESTING_METHOD = "PUT";
+const endpoint = createEndpoint("/v1/{{kebabCase name}}/:id");
+
+describe(`${TESTING_METHOD} /v1/{{kebabCase name}}/:id`, () => {
+  let ctx: TestContext;
+
+  before(async () => {
+    ctx = await createTestContext();
+  });
+
+  beforeEach(async () => {
+    await ctx.db.cleanUp();
+  });
+
+  after(async () => {
+    await ctx.teardown();
+  });
+
+  describe("Success Cases", () => {
+    it("[200] should update {{singular name}}", async () => {
+      await ctx.db.seed(fixtures.seeds.SINGLE_{{upperSnakeCase (singular name)}});
+      const seeded = fixtures.seeds.SINGLE_{{upperSnakeCase (singular name)}}.data[0];
+      const { VALID_UPDATE } = fixtures.positive;
+
+      const response = await ctx.app.inject({
+        method: TESTING_METHOD,
+        path: endpoint({ id: seeded.id }),
+        payload: VALID_UPDATE.input.body,
+      });
+
+      const data = response.json<{{pascalCase (singular name)}}>();
+
+      assert.strictEqual(response.statusCode, 200);
+      assert.strictEqual(data.id, seeded.id);
+    });
+  });
+
+  describe("Error Cases", () => {
+    it("[404] should return error when {{singular name}} not found", async () => {
+      const { NON_EXISTENT } = fixtures.negative;
+
+      const response = await ctx.app.inject({
+        method: TESTING_METHOD,
+        path: endpoint({ id: NON_EXISTENT.input.id }),
+        payload: NON_EXISTENT.input.body,
+      });
+
+      assert.strictEqual(response.statusCode, 404);
+    });
+  });
+});

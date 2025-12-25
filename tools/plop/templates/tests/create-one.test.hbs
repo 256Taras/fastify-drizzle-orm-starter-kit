@@ -1,0 +1,59 @@
+import assert from "node:assert/strict";
+import { after, before, beforeEach, describe, it } from "node:test";
+
+import { createOne{{pascalCase (singular name)}}Fixtures as fixtures } from "./create-one-{{kebabCase (singular name)}}.fixtures.ts";
+
+import type { {{pascalCase (singular name)}} } from "#modules/{{camelCase name}}/{{camelCase name}}.contracts.ts";
+import type { TestContext } from "#tests/helpers/types/test-context.types.ts";
+import { createEndpoint } from "#tests/helpers/utils/endpoint.utils.ts";
+import { createTestContext } from "#tests/helpers/utils/testing-app.utils.ts";
+
+const TESTING_METHOD = "POST";
+const endpoint = createEndpoint("/v1/{{kebabCase name}}/");
+
+describe(`${TESTING_METHOD} ${endpoint()}`, () => {
+  let ctx: TestContext;
+
+  before(async () => {
+    ctx = await createTestContext();
+  });
+
+  beforeEach(async () => {
+    await ctx.db.cleanUp();
+  });
+
+  after(async () => {
+    await ctx.teardown();
+  });
+
+  describe("Success Cases", () => {
+    it("[201] should create {{singular name}}", async () => {
+      const { VALID_{{upperSnakeCase (singular name)}} } = fixtures.positive;
+
+      const response = await ctx.app.inject({
+        method: TESTING_METHOD,
+        path: endpoint(),
+        payload: VALID_{{upperSnakeCase (singular name)}}.input.body,
+      });
+
+      const data = response.json<{{pascalCase (singular name)}}>();
+
+      assert.strictEqual(response.statusCode, 201);
+      assert.ok(data.id);
+    });
+  });
+
+  describe("Error Cases - Validation", () => {
+    it("[400] should return error for empty body", async () => {
+      const { EMPTY_BODY } = fixtures.negative;
+
+      const response = await ctx.app.inject({
+        method: TESTING_METHOD,
+        path: endpoint(),
+        payload: EMPTY_BODY.input.body,
+      });
+
+      assert.strictEqual(response.statusCode, 400);
+    });
+  });
+});

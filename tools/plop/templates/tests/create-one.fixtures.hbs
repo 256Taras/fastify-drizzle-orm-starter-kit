@@ -1,0 +1,26 @@
+import { {{camelCase (singular name)}}Factory } from "#tests/helpers/factories/{{kebabCase (singular name)}}.factory.ts";
+import { fixtureFactory } from "#tests/helpers/utils/fixture.utils.ts";
+
+const VALID_INPUT = {{camelCase (singular name)}}Factory.create();
+
+export const createOne{{pascalCase (singular name)}}Fixtures = fixtureFactory({
+  seeds: {},
+  positive: {
+    VALID_{{upperSnakeCase (singular name)}}: {
+      input: {
+        body: {
+          {{#each parsedFields}}
+          {{#unless nullable}}
+          {{camelCase name}}: VALID_INPUT.{{camelCase name}},
+          {{/unless}}
+          {{/each}}
+        },
+      },
+    },
+  },
+  negative: {
+    EMPTY_BODY: {
+      input: { body: {} },
+    },
+  },
+});
