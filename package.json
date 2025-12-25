@@ -96,7 +96,7 @@
     "@fastify/type-provider-typebox": "^5.2.0",
     "@sinclair/typebox": "^0.34.41",
     "ajv": "^8.12.0",
-    "awilix": "^10.0.2",
+    "awilix": "^12.0.5",
     "drizzle-orm": "^0.45.0",
     "drizzle-typebox": "^0.3.3",
     "env-schema": "^5.2.1",
