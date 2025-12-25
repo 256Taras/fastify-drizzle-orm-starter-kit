@@ -1,6 +1,7 @@
 import { requestContext } from "@fastify/request-context";
 
 import { TOKENS } from "#libs/constants/common.constants.ts";
+import { UnauthorizedException } from "#libs/errors/domain.errors.ts";
 
 type UserCredentials = {
   ppid: string;
@@ -16,7 +17,7 @@ type UserJwtData = {
 const getUser = (): UserJwtData => {
   // @ts-expect-error - requestContext.get has generic type issues
   const user = requestContext.get(TOKENS.userJwtData) as undefined | UserJwtData;
-  if (!user) throw new Error("User not found in session");
+  if (!user) throw new UnauthorizedException("User not found in session");
   return user;
 };
 

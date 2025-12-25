@@ -12,6 +12,7 @@ import type {
 
 import { APP_CONFIG } from "#configs/index.ts";
 import { STATUS_SUCCESS } from "#libs/constants/common.constants.ts";
+import { TIME_IN_MILLISECONDS } from "#libs/constants/time.constants.ts";
 import {
   BadRequestException,
   ConflictException,
@@ -33,12 +34,12 @@ const signUpUser = async (
 
   const hashedPassword = await encrypterService.getHash(input.password);
 
-  const newUser = (await usersRepository.createOne({
+  const newUser = await usersRepository.createOne({
     email: input.email,
     firstName: input.firstName,
     lastName: input.lastName,
     password: hashedPassword,
-  })) as User;
+  });
 
   logger.info(`[AuthMutations] User signed up: ${newUser.id}`);
 
@@ -136,7 +137,7 @@ const forgotUserPassword = async (
   }
 
   const resetToken = encrypterService.randomBytes(32);
-  const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+  const expiresAt = new Date(Date.now() + TIME_IN_MILLISECONDS.ONE_HOUR);
 
   await authRepository.createOnePasswordResetToken({
     email: input.email,

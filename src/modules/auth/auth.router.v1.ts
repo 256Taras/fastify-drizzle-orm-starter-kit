@@ -2,11 +2,10 @@ import type { FastifyPluginAsyncTypebox } from "@fastify/type-provider-typebox";
 
 import authSchemas from "./auth.schemas.ts";
 
+import { TIME_IN_MILLISECONDS } from "#libs/constants/time.constants.ts";
+
 const authRouterV1: FastifyPluginAsyncTypebox = async (app) => {
   const { authMutations } = app.diContainer.cradle;
-
-  const FIFTEEN_MINUTES = 15 * 60 * 1000;
-  const ONE_HOUR = 60 * 60 * 1000;
 
   app.post("/sign-up", {
     schema: authSchemas.signUp,
@@ -21,7 +20,7 @@ const authRouterV1: FastifyPluginAsyncTypebox = async (app) => {
     config: {
       rateLimit: {
         max: 15,
-        timeWindow: FIFTEEN_MINUTES,
+        timeWindow: TIME_IN_MILLISECONDS.FIFTEEN_MINUTES,
       },
     },
 
@@ -53,7 +52,7 @@ const authRouterV1: FastifyPluginAsyncTypebox = async (app) => {
     config: {
       rateLimit: {
         max: 5,
-        timeWindow: ONE_HOUR,
+        timeWindow: TIME_IN_MILLISECONDS.ONE_HOUR,
       },
     },
 

@@ -3,6 +3,8 @@ import { DefaultLogger } from "drizzle-orm";
 import pino from "pino";
 import type { Logger } from "pino";
 
+export type { Logger } from "pino";
+
 import { APP_CONFIG, LOGGER_CONFIG } from "#configs/index.ts";
 
 const PinoPrettyTransport = {
