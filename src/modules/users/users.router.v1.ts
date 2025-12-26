@@ -1,18 +1,16 @@
+import type { UUID } from "node:crypto";
+
 import type { FastifyPluginAsyncTypebox } from "@fastify/type-provider-typebox";
 
 import usersSchemas from "./users.schemas.ts";
 
 const usersRouterV1: FastifyPluginAsyncTypebox = async (app) => {
-  const { sessionStorageService, usersMutations, usersQueries } = app.diContainer.cradle;
+  const { usersMutations, usersQueries } = app.diContainer.cradle;
 
   app.get("/profile", {
     preHandler: app.auth([app.verifyJwt]),
     schema: usersSchemas.getProfile,
-
-    async handler() {
-      const user = sessionStorageService.getUser();
-      return usersQueries.findOneById(user.userId);
-    },
+    handler: () => usersQueries.getProfile(),
   });
 
   app.get("/", {
@@ -46,7 +44,7 @@ const usersRouterV1: FastifyPluginAsyncTypebox = async (app) => {
     schema: usersSchemas.update,
 
     async handler(req) {
-      return usersMutations.updateUser(req.params.id, req.body);
+      return usersMutations.updateUser(req.params.id as UUID, req.body);
     },
   });
 

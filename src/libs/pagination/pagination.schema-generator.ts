@@ -610,6 +610,7 @@ type GeneratePaginatedRouteSchemaOptions<T> = {
   description?: string;
   errorSchemas?: Record<number, TSchema>;
   paramsSchema?: TSchema;
+  security?: Record<string, any>;
   summary?: string;
   tags?: string[];
 };
@@ -625,6 +626,7 @@ export const generatePaginatedRouteSchema = <T>({
   paramsSchema,
   summary,
   tags,
+  security,
 }: GeneratePaginatedRouteSchemaOptions<T>): Record<string, unknown> => {
   validatePaginationConfig(config);
 
@@ -642,6 +644,7 @@ export const generatePaginatedRouteSchema = <T>({
   if (description) schema.description = description;
   if (summary) schema.summary = summary;
   if (tags) schema.tags = tags;
+  if (security) schema.security = security;
 
   return schema;
 };

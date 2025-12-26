@@ -1,5 +1,3 @@
-/** @file Event Bus type declarations */
-
 import type { EventBus } from "./event-bus.service.ts";
 
 declare module "@fastify/awilix" {

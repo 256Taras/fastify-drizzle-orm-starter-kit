@@ -18,6 +18,17 @@ const findOneById = async ({ usersRepository, logger }: Cradle, userId: string):
   return user;
 };
 
+const getProfile = async ({ usersRepository, logger, sessionStorageService }: Cradle): Promise<User> => {
+  const { userId } = sessionStorageService.getUser();
+
+  logger.debug(`[UsersQueries] Getting profile for user: ${userId}`);
+
+  const user = await usersRepository.findOneById(userId);
+  if (!user) throw new ResourceNotFoundException(`User with id: ${userId} not found`);
+
+  return user;
+};
+
 const findOneByEmail = async ({ usersRepository, logger }: Cradle, email: string): Promise<User> => {
   logger.debug(`[UsersQueries] Getting user by email: ${email}`);
 
@@ -33,9 +44,11 @@ const findMany = async (
 ): Promise<UsersListResponse> => {
   logger.debug(`[UsersQueries] Getting users list`);
 
-  return (await paginationService.paginate(USERS_PAGINATION_CONFIG, paginationParams, {
-    queryBuilder: (qb) => qb.where(isNull(users.deletedAt)),
-  })) as unknown as Promise<UsersListResponse>;
+  return paginationService.paginate<typeof users, UsersListResponse["data"][number]>(
+    USERS_PAGINATION_CONFIG,
+    paginationParams,
+    { queryBuilder: (qb) => qb.where(isNull(users.deletedAt)) },
+  );
 };
 
 export default function usersQueries(deps: Cradle) {
@@ -43,5 +56,6 @@ export default function usersQueries(deps: Cradle) {
     findOneByEmail: partial(findOneByEmail, [deps]),
     findOneById: partial(findOneById, [deps]),
     findMany: partial(findMany, [deps]),
+    getProfile: () => getProfile(deps),
   };
 }

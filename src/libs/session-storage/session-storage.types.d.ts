@@ -1,5 +1,3 @@
-/** @file Session Storage type declarations */
-
 import type sessionStorageService from "./session-storage.service.ts";
 
 declare module "@fastify/awilix" {

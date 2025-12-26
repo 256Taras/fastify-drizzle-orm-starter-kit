@@ -1,3 +1,5 @@
+import type { UUID } from "node:crypto";
+
 import { index, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 import { TABLE_NAMES } from "#infra/database/table-names.ts";
@@ -8,7 +10,7 @@ export const authPasswordResetTokens = pgTable(
     createdAt: timestamp("created_at").defaultNow().notNull(),
     email: text("email").notNull(),
     expiresAt: timestamp("expires_at").notNull(),
-    id: uuid("id").primaryKey().notNull().defaultRandom(),
+    id: uuid("id").$type<UUID>().primaryKey().notNull().defaultRandom(),
     token: text("token").notNull().unique(),
     used: timestamp("used_at"),
   },

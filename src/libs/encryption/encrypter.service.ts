@@ -1,4 +1,4 @@
-import crypto, { createCipheriv, createDecipheriv, createHash, randomBytes, randomUUID } from "node:crypto";
+import crypto, { createCipheriv, createDecipheriv, createHash, randomBytes, randomUUID, type UUID } from "node:crypto";
 
 import { ENCRYPTION_CONFIG } from "#configs/index.ts";
 
@@ -36,10 +36,7 @@ const generateRandomBytes = (length = 16, encoding: BufferEncoding = "hex"): str
 /**
  * Generates a UUID.
  */
-const generateUUID = (clean = false): string => {
-  const uuid = randomUUID();
-  return clean ? uuid.replaceAll("-", "") : uuid;
-};
+const generateUUID = (): UUID => randomUUID();
 
 /**
  * Generates a hash from a password.

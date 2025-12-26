@@ -1,3 +1,5 @@
+import type { UUID } from "node:crypto";
+
 import { getTableColumns } from "drizzle-orm";
 import { index, pgEnum, pgTable, text, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
 import { omit } from "rambda";
@@ -14,7 +16,7 @@ export const users = pgTable(
     deletedAt: timestamp("deleted_at", { mode: "string" }),
     email: varchar("email", { length: 256 }).notNull(),
     firstName: text("first_name").notNull(),
-    id: uuid("id").primaryKey().notNull().defaultRandom(),
+    id: uuid("id").$type<UUID>().primaryKey().notNull().defaultRandom(),
     lastName: text("last_name").notNull(),
     password: text("password").notNull(),
     role: roleEnum("role").notNull().default(ROLES_NAMES.user),

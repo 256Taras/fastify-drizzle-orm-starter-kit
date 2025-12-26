@@ -10,7 +10,6 @@ services:
       - "9229:9229"
     environment:
       - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@db:5432/app_dev}
-      - METRICS_API_KEY=${METRICS_API_KEY:-}
     depends_on:
       db:
         condition: service_healthy

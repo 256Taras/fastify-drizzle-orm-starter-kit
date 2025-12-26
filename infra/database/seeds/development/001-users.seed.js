@@ -1,8 +1,8 @@
 import { inArray } from "drizzle-orm";
 
-import { ROLES_NAMES } from "#libs/constants/common.constants.js";
-import encrypterService from "#libs/encryption/encrypter.service.js";
-import { users } from "#modules/users/users.model.js";
+import { ROLES_NAMES } from "#libs/constants/common.constants.ts";
+import encrypterService from "#libs/encryption/encrypter.service.ts";
+import { users } from "#modules/users/users.model.ts";
 
 /**
  * Seed users table with initial data

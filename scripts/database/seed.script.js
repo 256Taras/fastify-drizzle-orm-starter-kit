@@ -15,8 +15,8 @@ import postgres from "postgres";
 
 import { seedTracking } from "./seed-tracking.model.js";
 
-import { ENV_CONFIG } from "#configs/env.config.js";
-import { logger } from "#libs/logging/logger.service.js";
+import { ENV_CONFIG } from "#configs/env.config.ts";
+import { logger } from "#libs/logging/logger.service.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = join(__dirname, "../..");
@@ -398,7 +398,8 @@ try {
   logger.info("Seeding process completed");
   process.exit(0);
 } catch (error) {
-  logger.error("Seeding process failed:", error);
+  logger.error("Seeding process failed:");
+  logger.error(error);
   await seeder.close();
   process.exit(1);
 }

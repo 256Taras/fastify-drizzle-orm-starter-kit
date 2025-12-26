@@ -7,13 +7,15 @@
  * - refreshToken: For long-lived refresh tokens
  */
 
+import type { UUID } from "node:crypto";
+
 /**
  * Access token payload type
  * Contains user identity and refresh token reference
  */
 export interface AccessTokenPayload {
-  refreshTokenId: string;
-  userId: string;
+  refreshTokenId: UUID;
+  userId: UUID;
 }
 
 /**
@@ -22,8 +24,8 @@ export interface AccessTokenPayload {
  */
 export interface RefreshTokenPayload {
   ppid: string;
-  refreshTokenId: string;
-  userId: string;
+  refreshTokenId: UUID;
+  userId: UUID;
 }
 
 /**

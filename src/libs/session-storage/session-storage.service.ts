@@ -1,3 +1,5 @@
+import type { UUID } from "node:crypto";
+
 import { requestContext } from "@fastify/request-context";
 
 import { TOKENS } from "#libs/constants/common.constants.ts";
@@ -5,13 +7,13 @@ import { UnauthorizedException } from "#libs/errors/domain.errors.ts";
 
 type UserCredentials = {
   ppid: string;
-  refreshTokenId: string;
-  userId: string;
+  refreshTokenId: UUID;
+  userId: UUID;
 };
 
 type UserJwtData = {
-  refreshTokenId: string;
-  userId: string;
+  refreshTokenId: UUID;
+  userId: UUID;
 };
 
 const getUser = (): UserJwtData => {

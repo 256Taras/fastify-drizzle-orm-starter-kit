@@ -1,3 +1,5 @@
+import type { UUID } from "node:crypto";
+
 import type { Cradle } from "@fastify/awilix";
 import { partial } from "rambda";
 
@@ -9,20 +11,19 @@ import type {
   SignInInput,
   SignUpInput,
 } from "./auth.contracts.ts";
+import { AUTH_EVENTS } from "./auth.events.ts";
 
 import { APP_CONFIG } from "#configs/index.ts";
 import { STATUS_SUCCESS } from "#libs/constants/common.constants.ts";
-import { TIME_IN_MILLISECONDS } from "#libs/constants/time.constants.ts";
 import {
   BadRequestException,
   ConflictException,
   ResourceNotFoundException,
   UnauthorizedException,
 } from "#libs/errors/domain.errors.ts";
-import type { User } from "#modules/users/users.contracts.ts";
 
 const signUpUser = async (
-  { authTokenService, encrypterService, logger, usersRepository }: Cradle,
+  { authTokenService, encrypterService, eventBus, logger, usersRepository }: Cradle,
   input: SignUpInput,
 ): Promise<Credentials> => {
   logger.debug(`[AuthMutations] Sign up user with email: ${input.email}`);
@@ -41,13 +42,15 @@ const signUpUser = async (
     password: hashedPassword,
   });
 
+  await eventBus.emit(AUTH_EVENTS.SIGNED_UP, { user: newUser });
+
   logger.info(`[AuthMutations] User signed up: ${newUser.id}`);
 
   return authTokenService.generateTokens(newUser);
 };
 
 const signInUser = async (
-  { authTokenService, encrypterService, logger, usersRepository }: Cradle,
+  { authTokenService, encrypterService, eventBus, logger, usersRepository }: Cradle,
   input: SignInInput,
 ): Promise<Credentials> => {
   logger.debug(`[AuthMutations] Sign in attempt for email: ${input.email}`);
@@ -66,6 +69,8 @@ const signInUser = async (
 
   const { password: _password, ...userWithoutPassword } = user;
 
+  await eventBus.emit(AUTH_EVENTS.SIGNED_IN, { user: userWithoutPassword });
+
   logger.info(`[AuthMutations] User signed in: ${user.id}`);
 
   return authTokenService.generateTokens(userWithoutPassword);
@@ -73,6 +78,7 @@ const signInUser = async (
 
 const signOutUser = async ({
   authTokenRepository,
+  eventBus,
   logger,
   sessionStorageService,
 }: Cradle): Promise<typeof STATUS_SUCCESS> => {
@@ -89,6 +95,8 @@ const signOutUser = async ({
   if (result.length === 0) {
     throw new UnauthorizedException("Failed to sign out");
   }
+
+  await eventBus.emit(AUTH_EVENTS.SIGNED_OUT, { userId });
 
   logger.info(`[AuthMutations] User signed out: ${userId}`);
 
@@ -110,7 +118,7 @@ const refreshUserTokens = async ({
 
   logger.debug(`[AuthMutations] Refreshing tokens for user: ${userId}`);
 
-  const user = (await usersRepository.findOneById(userId)) as undefined | User;
+  const user = await usersRepository.findOneById(userId);
 
   if (!user) {
     throw new ResourceNotFoundException("User not found");
@@ -128,7 +136,15 @@ const refreshUserTokens = async ({
 };
 
 const forgotUserPassword = async (
-  { authPasswordResetTokenRepository, configs, emailService, encrypterService, logger, usersRepository }: Cradle,
+  {
+    authPasswordResetTokenRepository,
+    configs,
+    dateTimeService,
+    emailService,
+    encrypterService,
+    logger,
+    usersRepository,
+  }: Cradle,
   input: ForgotPasswordInput,
 ): Promise<{ resetToken: string; status: boolean } | typeof STATUS_SUCCESS> => {
   logger.debug(`[AuthMutations] Password reset requested for email: ${input.email}`);
@@ -141,7 +157,7 @@ const forgotUserPassword = async (
   }
 
   const resetToken = encrypterService.randomBytes(32);
-  const expiresAt = new Date(Date.now() + TIME_IN_MILLISECONDS.ONE_HOUR);
+  const expiresAt = dateTimeService.toDate(dateTimeService.addHours(dateTimeService.now(), 1));
 
   await authPasswordResetTokenRepository.createOnePasswordResetToken({
     email: input.email,
@@ -162,7 +178,7 @@ const forgotUserPassword = async (
 };
 
 const resetUserPassword = async (
-  { authPasswordResetTokenRepository, encrypterService, logger, usersRepository }: Cradle,
+  { authPasswordResetTokenRepository, dateTimeService, encrypterService, logger, usersRepository }: Cradle,
   input: ResetPasswordInput,
 ): Promise<typeof STATUS_SUCCESS> => {
   logger.debug(`[AuthMutations] Attempting password reset with token`);
@@ -173,7 +189,7 @@ const resetUserPassword = async (
     throw new UnauthorizedException("Invalid or already used reset token");
   }
 
-  if (new Date() > new Date(resetTokenRecord.expiresAt)) {
+  if (dateTimeService.isPast(resetTokenRecord.expiresAt)) {
     throw new UnauthorizedException("Reset token has expired");
   }
 
@@ -185,7 +201,7 @@ const resetUserPassword = async (
 
   const hashedPassword = await encrypterService.getHash(input.password);
 
-  await usersRepository.updateOnePasswordById(user.id, hashedPassword);
+  await usersRepository.updateOnePasswordById(user.id as UUID, hashedPassword);
   await authPasswordResetTokenRepository.updateOneTokenAsUsed(resetTokenRecord.id);
 
   logger.info(`[AuthMutations] Password successfully reset for user: ${user.email}`);
@@ -194,7 +210,7 @@ const resetUserPassword = async (
 };
 
 const changeUserPassword = async (
-  { emailService, encrypterService, logger, sessionStorageService, usersRepository }: Cradle,
+  { emailService, encrypterService, eventBus, logger, sessionStorageService, usersRepository }: Cradle,
   input: ChangePasswordInput,
 ): Promise<typeof STATUS_SUCCESS> => {
   const { userId } = sessionStorageService.getUser();
@@ -223,6 +239,9 @@ const changeUserPassword = async (
 
   await usersRepository.updateOnePasswordById(userId, hashedPassword);
   emailService.sendPasswordChangedEmail({ email: user.email });
+
+  const { password: _password, ...userWithoutPassword } = user;
+  await eventBus.emit(AUTH_EVENTS.PASSWORD_CHANGED, { user: userWithoutPassword });
 
   logger.info(`[AuthMutations] Password successfully changed for user: ${userId}`);
 

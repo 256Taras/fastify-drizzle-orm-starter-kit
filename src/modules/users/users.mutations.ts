@@ -1,3 +1,5 @@
+import type { UUID } from "node:crypto";
+
 import type { Cradle } from "@fastify/awilix";
 import { partial } from "rambda";
 
@@ -18,12 +20,12 @@ const createUser = async (
   }
 
   const hashedPassword = await encrypterService.getHash(input.password);
-  const newUser = (await usersRepository.createOne({
+  const newUser = await usersRepository.createOne({
     ...input,
     password: hashedPassword,
-  })) as User;
+  });
 
-  await eventBus.emit(USER_EVENTS.CREATED, newUser);
+  await eventBus.emit(USER_EVENTS.CREATED, { userId: newUser.id });
 
   logger.info(`[UsersMutations] User created: ${newUser.id}`);
 
@@ -32,7 +34,7 @@ const createUser = async (
 
 const updateUser = async (
   { usersRepository, eventBus, logger }: Cradle,
-  userId: string,
+  userId: UUID,
   input: UserUpdateInput,
 ): Promise<User> => {
   logger.debug(`[UsersMutations] Updating user: ${userId}`);
@@ -47,9 +49,7 @@ const updateUser = async (
   const updatedUser = await usersRepository.updateOneById(userId, input);
   if (!updatedUser) throw new ResourceNotFoundException(`User with id: ${userId} not found`);
 
-  await eventBus.emit(USER_EVENTS.UPDATED, {
-    userId: updatedUser.id,
-  });
+  await eventBus.emit(USER_EVENTS.UPDATED, { userId: updatedUser.id });
 
   logger.info(`[UsersMutations] User updated: ${updatedUser.id}`);
   return updatedUser;
@@ -58,12 +58,10 @@ const updateUser = async (
 const deleteUser = async ({ usersRepository, eventBus, logger }: Cradle, userId: string): Promise<User> => {
   logger.debug(`[UsersMutations] Deleting user: ${userId}`);
 
-  const deletedUser = (await usersRepository.softDeleteOneById(userId)) as undefined | User;
+  const deletedUser = await usersRepository.softDeleteOneById(userId);
   if (!deletedUser) throw new ResourceNotFoundException(`User with id: ${userId} not found`);
 
-  await eventBus.emit(USER_EVENTS.DELETED, {
-    userId: deletedUser.id,
-  });
+  await eventBus.emit(USER_EVENTS.DELETED, { userId: deletedUser.id });
 
   logger.info(`[UsersMutations] User deleted: ${deletedUser.id}`);
   return deletedUser;

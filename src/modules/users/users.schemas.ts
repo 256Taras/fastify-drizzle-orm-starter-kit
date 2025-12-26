@@ -3,6 +3,7 @@ import { pick } from "rambda";
 import { USER_CREATE_INPUT_CONTRACT, USER_OUTPUT_CONTRACT, USER_UPDATE_INPUT_CONTRACT } from "./users.contracts.ts";
 import { USERS_PAGINATION_CONFIG } from "./users.pagination-config.ts";
 
+import { SWAGGER_SECURITY } from "#libs/constants/swagger-security.constants.ts";
 import { SWAGGER_TAGS } from "#libs/constants/swagger-tags.constants.ts";
 import { COMMON_CONTRACTS_V1 } from "#libs/contracts/v1/index.ts";
 import { defaultHttpErrorCollection } from "#libs/errors/default-http-error-collection.ts";
@@ -20,13 +21,14 @@ const usersSchemas = {
   }),
 
   getProfile: {
-    tags: SWAGGER_TAGS.USERS,
     description: "Get all information of an authorized user.",
     response: {
       200: USER_OUTPUT_CONTRACT,
       ...mapHttpErrorsToSchemaErrorCollection(defaultHttpErrorCollection),
     },
+    security: SWAGGER_SECURITY.BEARER_TOKEN,
     summary: "Get User info.",
+    tags: SWAGGER_TAGS.USERS,
   },
 
   getById: {

@@ -1,3 +1,5 @@
+import type { UUID } from "node:crypto";
+
 import type { Cradle } from "@fastify/awilix";
 import { and, eq, isNull } from "drizzle-orm";
 import type { InferSelectModel } from "drizzle-orm";
@@ -28,7 +30,7 @@ const findOneByEmailWithPassword = async ({ db }: Cradle, email: string): Promis
   return maybeUser as undefined | UserWithPassword;
 };
 
-const findOneByIdWithPassword = async ({ db }: Cradle, id: string): Promise<undefined | UserWithPassword> => {
+const findOneByIdWithPassword = async ({ db }: Cradle, id: UUID): Promise<undefined | UserWithPassword> => {
   const [maybeUser] = await db
     .select()
     .from(users)
@@ -37,20 +39,28 @@ const findOneByIdWithPassword = async ({ db }: Cradle, id: string): Promise<unde
   return maybeUser as undefined | UserWithPassword;
 };
 
-const updateOnePasswordById = async ({ db }: Cradle, id: string, password: string): Promise<undefined | User> => {
+const updateOnePasswordById = async (
+  { db, dateTimeService }: Cradle,
+  id: UUID,
+  password: string,
+): Promise<undefined | User> => {
   const [updatedUser] = await db
     .update(users)
-    .set({ password, updatedAt: new Date().toISOString() })
+    .set({ password, updatedAt: dateTimeService.now() })
     .where(and(eq(users.id, id), isNull(users.deletedAt)))
     .returning(NON_PASSWORD_COLUMNS);
 
   return updatedUser as undefined | User;
 };
 
-const updateOneById = async ({ db }: Cradle, id: string, data: Partial<UserInsert>): Promise<undefined | User> => {
+const updateOneById = async (
+  { db, dateTimeService }: Cradle,
+  id: UUID,
+  data: Partial<Omit<UserInsert, "id">>,
+): Promise<undefined | User> => {
   const [updatedUser] = await db
     .update(users)
-    .set({ ...data, updatedAt: new Date().toISOString() })
+    .set({ ...data, updatedAt: dateTimeService.now() })
     .where(and(eq(users.id, id), isNull(users.deletedAt)))
     .returning(NON_PASSWORD_COLUMNS);
 
@@ -58,7 +68,7 @@ const updateOneById = async ({ db }: Cradle, id: string, data: Partial<UserInser
 };
 
 export default function usersRepository(deps: Cradle) {
-  const baseRepo = createBaseRepository({
+  const baseRepo = createBaseRepository<typeof users, User, UserInsert>({
     table: users,
     logger: deps.logger,
     db: deps.db,

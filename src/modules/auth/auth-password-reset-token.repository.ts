@@ -1,3 +1,5 @@
+import type { UUID } from "node:crypto";
+
 import type { Cradle } from "@fastify/awilix";
 import { and, eq, isNull } from "drizzle-orm";
 import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
@@ -23,10 +25,10 @@ const createOnePasswordResetToken = async ({ db }: Cradle, data: PasswordResetTo
   return token;
 };
 
-const updateOneTokenAsUsed = async ({ db }: Cradle, tokenId: string): Promise<PasswordResetToken> => {
+const updateOneTokenAsUsed = async ({ db, dateTimeService }: Cradle, tokenId: UUID): Promise<PasswordResetToken> => {
   const [token] = await db
     .update(authPasswordResetTokens)
-    .set({ used: new Date() })
+    .set({ used: dateTimeService.nowDate() })
     .where(eq(authPasswordResetTokens.id, tokenId))
     .returning();
 

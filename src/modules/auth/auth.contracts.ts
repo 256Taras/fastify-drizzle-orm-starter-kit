@@ -4,12 +4,6 @@ import type { Static } from "@sinclair/typebox";
 import { COMMON_CONTRACTS_V1 } from "#libs/contracts/v1/index.ts";
 import { USER_OUTPUT_CONTRACT } from "#modules/users/users.contracts.ts";
 
-/**
- * Requirements:
- * - Minimum 6 characters
- * - At least one letter
- * - At least one number
- */
 const PASSWORD_SCHEMA = Type.String({
   minLength: 6,
   pattern: String.raw`^(?=.*[A-Za-z])(?=.*\d).+$`,
@@ -37,7 +31,7 @@ export const SIGN_UP_INPUT_CONTRACT = Type.Object(
 export const SIGN_IN_INPUT_CONTRACT = Type.Object(
   {
     email: Type.String({ format: "email" }),
-    password: Type.String(), // No validation on sign-in, just check if exists
+    password: Type.String(),
   },
   { additionalProperties: false },
 );
@@ -73,7 +67,6 @@ export const FORGOT_PASSWORD_OUTPUT_CONTRACT = Type.Object(
   { additionalProperties: false },
 );
 
-// TypeScript types from TypeBox schemas
 export type ChangePasswordInput = Static<typeof CHANGE_PASSWORD_INPUT_CONTRACT>;
 export type Credentials = Static<typeof SIGN_IN_UP_OUTPUT_CONTRACT>;
 export type ForgotPasswordInput = Static<typeof FORGOT_PASSWORD_INPUT_CONTRACT>;

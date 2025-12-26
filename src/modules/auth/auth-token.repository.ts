@@ -1,3 +1,5 @@
+import type { UUID } from "node:crypto";
+
 import type { Cradle } from "@fastify/awilix";
 import { and, eq } from "drizzle-orm";
 import type { InferSelectModel } from "drizzle-orm";
@@ -7,7 +9,7 @@ import { authTokens } from "./auth-token.model.ts";
 
 type AuthToken = InferSelectModel<typeof authTokens>;
 
-const findOneByIdAndUserId = async ({ db }: Cradle, id: string, userId: string): Promise<AuthToken | undefined> => {
+const findOneByIdAndUserId = async ({ db }: Cradle, id: UUID, userId: UUID): Promise<AuthToken | undefined> => {
   const [token] = await db
     .select()
     .from(authTokens)
@@ -16,7 +18,7 @@ const findOneByIdAndUserId = async ({ db }: Cradle, id: string, userId: string):
   return token;
 };
 
-const deleteManyAuthTokens = async ({ db }: Cradle, ppid: string, userId: string): Promise<AuthToken[]> => {
+const deleteManyAuthTokens = async ({ db }: Cradle, ppid: string, userId: UUID): Promise<AuthToken[]> => {
   return db
     .delete(authTokens)
     .where(and(eq(authTokens.ppid, ppid), eq(authTokens.userId, userId)))

@@ -97,6 +97,7 @@
     "@sinclair/typebox": "^0.34.41",
     "ajv": "^8.12.0",
     "awilix": "^12.0.5",
+    "dayjs": "^1.11.19",
     "drizzle-orm": "^0.45.0",
     "drizzle-typebox": "^0.3.3",
     "env-schema": "^5.2.1",
