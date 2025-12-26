@@ -9,6 +9,8 @@ import type {
 } from "./pagination.types.d.ts";
 import { calculatePaginationOffset, createPaginatedResponse } from "./pagination.utils.ts";
 
+import { BadRequestException } from "#libs/errors/domain.errors.ts";
+
 /**
  * Offset-based pagination service
  */
@@ -21,7 +23,7 @@ export const paginateOffset = async <TTable, TItem>(
 ): Promise<OffsetPaginatedResponse<TItem>> => {
   if (!paginationParams) {
     logger.error("paginationParams is undefined", { config, options, table });
-    throw new Error("paginationParams is required");
+    throw new BadRequestException("paginationParams is required");
   }
 
   const { filters, query, select: selectFields, sortBy } = paginationParams;
