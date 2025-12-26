@@ -18,8 +18,8 @@ importers:
         specifier: ^8.2.0
         version: 8.2.0(awilix@12.0.5)(fastify@5.6.2)
       '@fastify/compress':
-        specifier: ^8.3.0
-        version: 8.3.0
+        specifier: ^8.3.1
+        version: 8.3.1
       '@fastify/cors':
         specifier: ^11.1.0
         version: 11.2.0
@@ -46,10 +46,10 @@ importers:
         version: 5.2.3
       '@fastify/type-provider-typebox':
         specifier: ^5.2.0
-        version: 5.2.0(@sinclair/typebox@0.34.41)
+        version: 5.2.0(@sinclair/typebox@0.34.45)
       '@sinclair/typebox':
-        specifier: ^0.34.41
-        version: 0.34.41
+        specifier: ^0.34.45
+        version: 0.34.45
       ajv:
         specifier: ^8.12.0
         version: 8.17.1
@@ -64,7 +64,7 @@ importers:
         version: 0.45.1(@opentelemetry/api@1.9.0)(@types/pg@8.16.0)(postgres@3.4.7)
       drizzle-typebox:
         specifier: ^0.3.3
-        version: 0.3.3(@sinclair/typebox@0.34.41)(drizzle-orm@0.45.1(@opentelemetry/api@1.9.0)(@types/pg@8.16.0)(postgres@3.4.7))
+        version: 0.3.3(@sinclair/typebox@0.34.45)(drizzle-orm@0.45.1(@opentelemetry/api@1.9.0)(@types/pg@8.16.0)(postgres@3.4.7))
       env-schema:
         specifier: ^5.2.1
         version: 5.2.1
@@ -620,8 +620,8 @@ packages:
     resolution: {integrity: sha512-vBZP4NlzfOlerQTnba4aqZoMhE/a9HY7HRqoOPaETQcSQuWEIyZMHGfVu6w9wGtGK5fED5qRs2DteVCjOH60sA==}
     engines: {node: '>=14'}
 
-  '@fastify/compress@8.3.0':
-    resolution: {integrity: sha512-zYp6SCa7nJMxAse8+TXWNF0l0xV9K9GeMFwdr0aESAKfCEGo7N96b5vjFDFEz/pg8eyo1Am1B249UX79mS3x9A==}
+  '@fastify/compress@8.3.1':
+    resolution: {integrity: sha512-BUpItLr6MUX9e9ukg5Y6xekyA/7pBFG8QWtFCrUDm9ctoBc3R2/nA16yOaOWtVoccpXGjdDEYA/MxAb5+8cxag==}
 
   '@fastify/cors@11.2.0':
     resolution: {integrity: sha512-LbLHBuSAdGdSFZYTLVA3+Ch2t+sA6nq3Ejc6XLAKiQ6ViS2qFnvicpj0htsx03FyYeLs04HfRNBsz/a8SvbcUw==}
@@ -851,8 +851,8 @@ packages:
     peerDependencies:
       semantic-release: '>=20.1.0'
 
-  '@sinclair/typebox@0.34.41':
-    resolution: {integrity: sha512-6gS8pZzSXdyRHTIqoqSVknxolr1kzfy4/CeDnrzsVz8TTIWUbOBr6gnzOmTYJ3eXQNh4IYHIGi5aIL7sOZ2G/g==}
+  '@sinclair/typebox@0.34.45':
+    resolution: {integrity: sha512-qJcFVfCa5jxBFSuv7S5WYbA8XdeCPmhnaVVfX/2Y6L8WYg8sk3XY2+6W0zH+3mq1Cz+YC7Ki66HfqX6IHAwnkg==}
 
   '@sindresorhus/is@4.6.0':
     resolution: {integrity: sha512-t09vSN3MdfsyCHoFcTRCH/iUtG7OJ0CsjzB8cjAmKc/va/kIgeDI/TxsigdncE/4be734m0cvIYwNaV4i2XqAw==}
@@ -4399,7 +4399,7 @@ snapshots:
 
   '@fastify/busboy@2.1.1': {}
 
-  '@fastify/compress@8.3.0':
+  '@fastify/compress@8.3.1':
     dependencies:
       '@fastify/accept-negotiator': 2.0.1
       fastify-plugin: 5.1.0
@@ -4495,9 +4495,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@fastify/type-provider-typebox@5.2.0(@sinclair/typebox@0.34.41)':
+  '@fastify/type-provider-typebox@5.2.0(@sinclair/typebox@0.34.45)':
     dependencies:
-      '@sinclair/typebox': 0.34.41
+      '@sinclair/typebox': 0.34.45
 
   '@humanfs/core@0.19.1': {}
 
@@ -4727,7 +4727,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@sinclair/typebox@0.34.41': {}
+  '@sinclair/typebox@0.34.45': {}
 
   '@sindresorhus/is@4.6.0': {}
 
@@ -5425,9 +5425,9 @@ snapshots:
       '@types/pg': 8.16.0
       postgres: 3.4.7
 
-  drizzle-typebox@0.3.3(@sinclair/typebox@0.34.41)(drizzle-orm@0.45.1(@opentelemetry/api@1.9.0)(@types/pg@8.16.0)(postgres@3.4.7)):
+  drizzle-typebox@0.3.3(@sinclair/typebox@0.34.45)(drizzle-orm@0.45.1(@opentelemetry/api@1.9.0)(@types/pg@8.16.0)(postgres@3.4.7)):
     dependencies:
-      '@sinclair/typebox': 0.34.41
+      '@sinclair/typebox': 0.34.45
       drizzle-orm: 0.45.1(@opentelemetry/api@1.9.0)(@types/pg@8.16.0)(postgres@3.4.7)
 
   dunder-proto@1.0.1:
