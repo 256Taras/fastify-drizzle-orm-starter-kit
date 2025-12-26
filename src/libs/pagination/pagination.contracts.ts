@@ -17,6 +17,14 @@ export const PAGINATION_STRATEGY = {
   offset: "offset",
 } as const;
 
+/** Global pagination defaults */
+export const PAGINATION_DEFAULTS = {
+  /** Default items per page */
+  defaultLimit: 10,
+  /** Maximum items per page */
+  maxLimit: 100,
+} as const;
+
 /** Base pagination meta fields shared between strategies */
 const basePaginationMeta = {
   itemCount: Type.Integer({

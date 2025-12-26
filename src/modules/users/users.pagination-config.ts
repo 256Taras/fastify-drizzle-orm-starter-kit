@@ -1,21 +1,21 @@
 import { users } from "./users.model.ts";
 
-import { PAGINATION_STRATEGY } from "#libs/pagination/pagination.contracts.ts";
+import { FILTER_OPERATORS, PAGINATION_DEFAULTS, PAGINATION_STRATEGY } from "#libs/pagination/pagination.contracts.ts";
 import type { PaginationConfig } from "#libs/pagination/pagination.types.d.ts";
 
 export const USERS_PAGINATION_CONFIG: PaginationConfig<typeof users> = {
   table: users,
-  defaultLimit: 10,
+  defaultLimit: PAGINATION_DEFAULTS.defaultLimit,
   defaultSortBy: [
     ["createdAt", "DESC"],
     ["id", "DESC"],
   ],
   excludeColumns: ["password"],
   filterableColumns: {
-    email: ["$eq", "$ilike", "$in"],
-    role: ["$eq", "$in"],
+    email: [FILTER_OPERATORS.$eq, FILTER_OPERATORS.$ilike, FILTER_OPERATORS.$in],
+    role: [FILTER_OPERATORS.$eq, FILTER_OPERATORS.$in],
   },
-  maxLimit: 100,
+  maxLimit: PAGINATION_DEFAULTS.maxLimit,
   optionalColumns: {
     deletedAt: true,
   },

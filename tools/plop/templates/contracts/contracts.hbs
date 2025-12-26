@@ -4,7 +4,7 @@ import { createInsertSchema, createSelectSchema } from "drizzle-typebox";
 
 import { paginationSchema } from "#libs/utils/schemas.ts";
 
-import { {{camelCase name}} } from "./{{camelCase name}}.model.ts";
+import { {{camelCase name}} } from "./{{kebabCase name}}.model.ts";
 
 export const {{upperSnakeCase (singular name)}}_ENTITY_CONTRACT = createSelectSchema({{camelCase name}});
 export const {{upperSnakeCase (singular name)}}_INSERT_CONTRACT = createInsertSchema({{camelCase name}});

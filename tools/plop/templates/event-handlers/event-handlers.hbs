@@ -1,7 +1,7 @@
 import type { Cradle } from "@fastify/awilix";
 
-import type { {{pascalCase (singular name)}} } from "./{{camelCase name}}.contracts.ts";
-import { {{upperSnakeCase (singular name)}}_EVENTS } from "./{{camelCase name}}.events.ts";
+import type { {{pascalCase (singular name)}} } from "./{{kebabCase name}}.contracts.ts";
+import { {{upperSnakeCase (singular name)}}_EVENTS } from "./{{kebabCase name}}.events.ts";
 
 export default function setup{{pascalCase name}}EventHandlers({ eventBus, logger }: Cradle): void {
   // eslint-disable-next-line @typescript-eslint/require-await

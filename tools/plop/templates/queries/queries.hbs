@@ -12,11 +12,11 @@ import type { PaginationParams } from "#libs/pagination/pagination.types.d.ts";
 {{/if}}
 
 {{#if withPagination}}
-import { {{camelCase name}} } from "./{{camelCase name}}.model.ts";
+import { {{camelCase name}} } from "./{{kebabCase name}}.model.ts";
 {{/if}}
-import type { {{pascalCase (singular name)}}, {{pascalCase name}}ListResponse } from "./{{camelCase name}}.contracts.ts";
+import type { {{pascalCase (singular name)}}, {{pascalCase name}}ListResponse } from "./{{kebabCase name}}.contracts.ts";
 {{#if withPagination}}
-import { {{upperSnakeCase name}}_PAGINATION_CONFIG } from "./{{camelCase name}}.pagination-config.ts";
+import { {{upperSnakeCase name}}_PAGINATION_CONFIG } from "./{{kebabCase name}}.pagination-config.ts";
 {{/if}}
 
 const getOne = async ({ {{camelCase name}}Repository, logger }: Cradle, id: string): Promise<{{pascalCase (singular name)}}> => {

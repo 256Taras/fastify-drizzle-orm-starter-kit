@@ -13,9 +13,9 @@ import {
   {{upperSnakeCase (singular name)}}_CREATE_INPUT_CONTRACT,
   {{upperSnakeCase (singular name)}}_OUTPUT_CONTRACT,
   {{upperSnakeCase (singular name)}}_UPDATE_INPUT_CONTRACT,
-} from "./{{camelCase name}}.contracts.ts";
+} from "./{{kebabCase name}}.contracts.ts";
 {{#if withPagination}}
-import { {{upperSnakeCase name}}_PAGINATION_CONFIG } from "./{{camelCase name}}.pagination-config.ts";
+import { {{upperSnakeCase name}}_PAGINATION_CONFIG } from "./{{kebabCase name}}.pagination-config.ts";
 {{/if}}
 
 const {{camelCase name}}Schemas = {

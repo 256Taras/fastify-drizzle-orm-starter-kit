@@ -1,6 +1,6 @@
 import type { FastifyPluginAsyncTypebox } from "@fastify/type-provider-typebox";
 
-import {{camelCase name}}Schemas from "./{{camelCase name}}.schemas.ts";
+import {{camelCase name}}Schemas from "./{{kebabCase name}}.schemas.ts";
 
 const {{camelCase name}}RouterV1: FastifyPluginAsyncTypebox = async (app) => {
   const { {{camelCase name}}Mutations, {{camelCase name}}Queries } = app.diContainer.cradle;

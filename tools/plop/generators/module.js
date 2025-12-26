@@ -57,50 +57,50 @@ export default function moduleGenerator(plop) {
     ],
     actions: (data) => {
       data.parsedFields = parseFields(data.fields);
-      data.modulePath = `src/modules/{{camelCase name}}`;
+      data.modulePath = `src/modules/{{kebabCase name}}`;
       data.testsPath = `tests/e2e/{{kebabCase name}}/v1`;
 
       const actions = [
         // Model
         {
           type: "add",
-          path: `${data.modulePath}/{{camelCase name}}.model.ts`,
+          path: `${data.modulePath}/{{kebabCase name}}.model.ts`,
           templateFile: join(templatesPath, "model/model.hbs"),
         },
         // Contracts
         {
           type: "add",
-          path: `${data.modulePath}/{{camelCase name}}.contracts.ts`,
+          path: `${data.modulePath}/{{kebabCase name}}.contracts.ts`,
           templateFile: join(templatesPath, "contracts/contracts.hbs"),
         },
         // Repository
         {
           type: "add",
-          path: `${data.modulePath}/{{camelCase name}}.repository.ts`,
+          path: `${data.modulePath}/{{kebabCase name}}.repository.ts`,
           templateFile: join(templatesPath, "repository/repository.hbs"),
         },
         // Queries
         {
           type: "add",
-          path: `${data.modulePath}/{{camelCase name}}.queries.ts`,
+          path: `${data.modulePath}/{{kebabCase name}}.queries.ts`,
           templateFile: join(templatesPath, "queries/queries.hbs"),
         },
         // Mutations
         {
           type: "add",
-          path: `${data.modulePath}/{{camelCase name}}.mutations.ts`,
+          path: `${data.modulePath}/{{kebabCase name}}.mutations.ts`,
           templateFile: join(templatesPath, "mutations/mutations.hbs"),
         },
         // Schemas
         {
           type: "add",
-          path: `${data.modulePath}/{{camelCase name}}.schemas.ts`,
+          path: `${data.modulePath}/{{kebabCase name}}.schemas.ts`,
           templateFile: join(templatesPath, "schemas/schemas.hbs"),
         },
         // Router
         {
           type: "add",
-          path: `${data.modulePath}/{{camelCase name}}.router.v1.ts`,
+          path: `${data.modulePath}/{{kebabCase name}}.router.v1.ts`,
           templateFile: join(templatesPath, "router/router.hbs"),
         },
       ];
@@ -110,12 +110,12 @@ export default function moduleGenerator(plop) {
         actions.push(
           {
             type: "add",
-            path: `${data.modulePath}/{{camelCase name}}.events.ts`,
+            path: `${data.modulePath}/{{kebabCase name}}.events.ts`,
             templateFile: join(templatesPath, "events/events.hbs"),
           },
           {
             type: "add",
-            path: `${data.modulePath}/{{camelCase name}}.event-handlers.ts`,
+            path: `${data.modulePath}/{{kebabCase name}}.event-handlers.ts`,
             templateFile: join(templatesPath, "event-handlers/event-handlers.hbs"),
           },
         );
@@ -125,7 +125,7 @@ export default function moduleGenerator(plop) {
       if (data.withPagination) {
         actions.push({
           type: "add",
-          path: `${data.modulePath}/{{camelCase name}}.pagination-config.ts`,
+          path: `${data.modulePath}/{{kebabCase name}}.pagination-config.ts`,
           templateFile: join(templatesPath, "pagination-config/pagination-config.hbs"),
         });
       }
@@ -143,7 +143,7 @@ export default function moduleGenerator(plop) {
         type: "append",
         path: "src/infra/database/db-schema.ts",
         pattern: /import \{ users \} from "#modules\/users\/users\.model\.ts";/,
-        template: 'import { {{camelCase name}} } from "#modules/{{camelCase name}}/{{camelCase name}}.model.ts";',
+        template: 'import { {{camelCase name}} } from "#modules/{{kebabCase name}}/{{kebabCase name}}.model.ts";',
       });
 
       // Add to schema object in db-schema.ts
@@ -165,7 +165,7 @@ export default function moduleGenerator(plop) {
       // Generate module-specific types (declaration merging for Cradle)
       actions.push({
         type: "add",
-        path: `${data.modulePath}/{{camelCase name}}.types.d.ts`,
+        path: `${data.modulePath}/{{kebabCase name}}.types.d.ts`,
         templateFile: join(templatesPath, "types/types.hbs"),
       });
 
@@ -184,7 +184,7 @@ export default function moduleGenerator(plop) {
           type: "append",
           path: "tests/helpers/utils/db.utils.ts",
           pattern: /import \{ users \} from "#modules\/users\/users\.model\.ts";/,
-          template: 'import { {{camelCase name}} } from "#modules/{{camelCase name}}/{{camelCase name}}.model.ts";',
+          template: 'import { {{camelCase name}} } from "#modules/{{kebabCase name}}/{{kebabCase name}}.model.ts";',
         });
 
         // Add to DRIZZLE_TABLES in db.utils.ts

@@ -4,8 +4,8 @@ import { partial } from "rambda";
 
 import { createBaseRepository } from "#libs/persistence/base-repository.ts";
 
-import type { {{pascalCase (singular name)}}, {{pascalCase (singular name)}}Insert } from "./{{camelCase name}}.contracts.ts";
-import { {{camelCase name}} } from "./{{camelCase name}}.model.ts";
+import type { {{pascalCase (singular name)}}, {{pascalCase (singular name)}}Insert } from "./{{kebabCase name}}.contracts.ts";
+import { {{camelCase name}} } from "./{{kebabCase name}}.model.ts";
 
 const updateOneById = async (
   { db }: Cradle,

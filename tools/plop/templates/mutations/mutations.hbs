@@ -3,9 +3,9 @@ import { partial } from "rambda";
 
 import { ResourceNotFoundException } from "#libs/errors/domain.errors.ts";
 
-import type { {{pascalCase (singular name)}}, {{pascalCase (singular name)}}CreateInput, {{pascalCase (singular name)}}UpdateInput } from "./{{camelCase name}}.contracts.ts";
+import type { {{pascalCase (singular name)}}, {{pascalCase (singular name)}}CreateInput, {{pascalCase (singular name)}}UpdateInput } from "./{{kebabCase name}}.contracts.ts";
 {{#if withEvents}}
-import { {{upperSnakeCase (singular name)}}_EVENTS } from "./{{camelCase name}}.events.ts";
+import { {{upperSnakeCase (singular name)}}_EVENTS } from "./{{kebabCase name}}.events.ts";
 {{/if}}
 
 const createOne = async (
