@@ -3,7 +3,7 @@ import { services } from "./services.model.ts";
 import { FILTER_OPERATORS, PAGINATION_DEFAULTS, PAGINATION_STRATEGY } from "#libs/pagination/pagination.contracts.ts";
 import type { PaginationConfig } from "#libs/pagination/pagination.types.d.ts";
 
-export const SERVICES_PAGINATION_CONFIG: PaginationConfig<typeof services> = {
+export const SERVICES_PAGINATION_CONFIG: PaginationConfig<typeof services, typeof PAGINATION_STRATEGY.offset> = {
   table: services,
   defaultLimit: PAGINATION_DEFAULTS.defaultLimit,
   defaultSortBy: [

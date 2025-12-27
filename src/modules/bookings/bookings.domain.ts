@@ -3,6 +3,7 @@ import type { Booking } from "./bookings.types.d.ts";
 
 import { SERVICE_STATUS } from "#modules/services/services.contracts.ts";
 import type { Service } from "#modules/services/services.types.d.ts";
+import type { DateTimeString } from "#types/brands.ts";
 
 const HOURS_BEFORE_START_FOR_FREE_CANCELLATION = 24;
 const CANCELLATION_FEE_PERCENTAGE = 0.2;
@@ -15,7 +16,9 @@ export const canCreateBooking = (service: Service, userId: string, providerUserI
 
 export const canCancelBooking = (booking: Booking, userId: string): boolean => {
   const isCancellable = booking.status === BOOKING_STATUS.pending || booking.status === BOOKING_STATUS.confirmed;
+
   const isOwner = booking.userId === userId;
+
   return isCancellable && isOwner;
 };
 
@@ -30,11 +33,13 @@ export const canCompleteBooking = (
   currentDate: Date,
 ): boolean => {
   const endAt = new Date(booking.endAt);
+
   return booking.status === BOOKING_STATUS.confirmed && providerUserId === serviceProviderUserId && currentDate >= endAt;
 };
 
 export const calculateCancellationFee = (booking: Booking, cancelledAt: Date): number => {
   const startAt = new Date(booking.startAt);
+
   const hoursBeforeStart = (startAt.getTime() - cancelledAt.getTime()) / MS_PER_HOUR;
 
   if (hoursBeforeStart >= HOURS_BEFORE_START_FOR_FREE_CANCELLATION) {
@@ -45,13 +50,15 @@ export const calculateCancellationFee = (booking: Booking, cancelledAt: Date): n
 };
 
 export const hasTimeConflict = (
-  existingBookings: Array<{ endAt: string; startAt: string }>,
+  existingBookings: Array<{ endAt: DateTimeString; startAt: DateTimeString }>,
   newStartAt: Date,
   newEndAt: Date,
 ): boolean => {
   return existingBookings.some((booking) => {
     const existingStart = new Date(booking.startAt);
+
     const existingEnd = new Date(booking.endAt);
+
     return newStartAt < existingEnd && newEndAt > existingStart;
   });
 };

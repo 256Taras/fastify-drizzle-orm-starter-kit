@@ -1,7 +1,15 @@
+import type { UUID } from "node:crypto";
+
 import { Type } from "@sinclair/typebox";
-import type { Static, TObject, TSchema, TUnion } from "@sinclair/typebox";
+import type { Static, TObject, TSchema, TUnion, TUnsafe } from "@sinclair/typebox";
 
 import { ERROR_CODE_FORMAT } from "#libs/constants/error-codes.ts";
+import type { DateTimeString } from "#types/brands.ts";
+
+export const TypeUuid = (): TUnsafe<UUID> => Type.Unsafe<UUID>(Type.String({ format: "uuid" }));
+
+export const TypeDateTimeString = (): TUnsafe<DateTimeString> =>
+  Type.Unsafe<DateTimeString>(Type.String({ format: "date-time" }));
 
 export const createEnumTypeUnionSchema = (
   object: (boolean | number | string)[] | Record<string, boolean | number | string>,
@@ -14,20 +22,7 @@ export const createEnumTypeUnionSchema = (
   );
 };
 
-export const createFileTypeSchema = (mimetypes: string[]): TObject => {
-  const baseSchema: Record<string, TSchema> = {
-    encoding: Type.Optional(Type.String()),
-    filename: Type.Optional(Type.String()),
-    limit: Type.Optional(Type.Boolean()),
-  };
-
-  baseSchema.mimetype =
-    mimetypes && mimetypes.length > 0 ? Type.Optional(Type.String({ enum: mimetypes })) : Type.Optional(Type.String());
-
-  return Type.Object(baseSchema, { isFile: true });
-};
-
-export const PAGINATION_META_SCHEMA = Type.Object({
+export const OFFSET_PAGINATION_META_SCHEMA = Type.Object({
   hasNextPage: Type.Boolean(),
   hasPreviousPage: Type.Boolean(),
   itemCount: Type.Number(),
@@ -36,12 +31,30 @@ export const PAGINATION_META_SCHEMA = Type.Object({
   pageCount: Type.Number(),
 });
 
+export const CURSOR_PAGINATION_META_SCHEMA = Type.Object({
+  endCursor: Type.Optional(Type.String()),
+  hasNextPage: Type.Boolean(),
+  hasPreviousPage: Type.Boolean(),
+  itemCount: Type.Number(),
+  limit: Type.Number(),
+  startCursor: Type.Optional(Type.String()),
+});
+
+export const PAGINATION_META_SCHEMA = OFFSET_PAGINATION_META_SCHEMA;
+
+export type CursorPaginationMeta = Static<typeof CURSOR_PAGINATION_META_SCHEMA>;
 export type PaginationMeta = Static<typeof PAGINATION_META_SCHEMA>;
 
 export const paginationSchema = <T extends TSchema>(dataType: T) =>
   Type.Object({
     data: Type.Array(dataType),
     meta: PAGINATION_META_SCHEMA,
+  });
+
+export const cursorPaginationSchema = <T extends TSchema>(dataType: T) =>
+  Type.Object({
+    data: Type.Array(dataType),
+    meta: CURSOR_PAGINATION_META_SCHEMA,
   });
 
 const ERROR_DETAIL_SCHEMA = Type.Array(
@@ -107,3 +120,5 @@ export const mapHttpErrorsToSchemaErrorCollection = (
   const list = listHttpErrorsAsSchemaErrors(httpErrorCollection);
   return Object.fromEntries(list.map((item) => [Object.keys(item)[0], item[Object.keys(item)[0]]]));
 };
+
+export { type DateTimeString } from "#types/brands.ts";

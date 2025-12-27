@@ -1,5 +1,3 @@
-import type { UUID } from "node:crypto";
-
 import type { FastifyPluginAsyncTypebox } from "@fastify/type-provider-typebox";
 
 import usersSchemas from "./users.schemas.ts";
@@ -44,7 +42,7 @@ const usersRouterV1: FastifyPluginAsyncTypebox = async (app) => {
     schema: usersSchemas.update,
 
     async handler(req) {
-      return usersMutations.updateUser(req.params.id as UUID, req.body);
+      return usersMutations.updateUser(req.params.id, req.body);
     },
   });
 

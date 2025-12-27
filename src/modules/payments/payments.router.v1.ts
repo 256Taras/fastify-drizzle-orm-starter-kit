@@ -1,5 +1,3 @@
-import type { UUID } from "node:crypto";
-
 import type { FastifyPluginAsyncTypebox } from "@fastify/type-provider-typebox";
 
 import paymentsSchemas from "./payments.schemas.ts";
@@ -21,7 +19,7 @@ const paymentsRouterV1: FastifyPluginAsyncTypebox = async (app) => {
     schema: paymentsSchemas.payBooking,
 
     async handler(req, rep) {
-      const payment = await paymentsMutations.payBooking(req.params.id as UUID);
+      const payment = await paymentsMutations.payBooking(req.params.id);
       rep.status(201);
       return payment;
     },

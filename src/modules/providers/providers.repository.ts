@@ -21,7 +21,7 @@ const findOneByUserId = async ({ db }: Cradle, userId: UUID): Promise<Provider |
 const updateOneById = async (
   { db, dateTimeService }: Cradle,
   id: UUID,
-  data: Partial<Omit<ProviderInsert, "id">>,
+  data: Partial<Omit<ProviderInsert, "createdAt" | "deletedAt" | "id" | "updatedAt">>,
 ): Promise<Provider | undefined> => {
   const [updated] = await db
     .update(providers)

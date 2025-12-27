@@ -1,8 +1,10 @@
 import { Type } from "@sinclair/typebox";
 
+import { TypeDateTimeString, TypeUuid } from "#libs/utils/schemas.ts";
+
 const TimestampSchema = {
-  createdAt: Type.Object({ createdAt: Type.String({ format: "date-time" }) }),
-  updatedAt: Type.Object({ updatedAt: Type.String({ format: "date-time" }) }),
+  createdAt: Type.Object({ createdAt: TypeDateTimeString() }),
+  updatedAt: Type.Object({ updatedAt: TypeDateTimeString() }),
 };
 
 const HeaderSchema = {
@@ -15,7 +17,7 @@ const HeaderSchema = {
 };
 
 const StatusSchema = Type.Object({ status: Type.Boolean() }, { additionalProperties: false });
-const IdSchema = Type.Object({ id: Type.String({ format: "uuid" }) }, { additionalProperties: false });
+const IdSchema = Type.Object({ id: TypeUuid() }, { additionalProperties: false });
 
 export const headers = HeaderSchema;
 export const id = IdSchema;

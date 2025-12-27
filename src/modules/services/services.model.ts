@@ -8,6 +8,7 @@ import { SERVICE_STATUS } from "./services.constants.ts";
 
 import { TABLE_NAMES } from "#infra/database/table-names.ts";
 import { providers } from "#modules/providers/providers.model.ts";
+import type { DateTimeString } from "#types/brands.ts";
 
 export const serviceStatusEnum = pgEnum("service_status", SERVICE_STATUS);
 
@@ -24,9 +25,9 @@ export const services = pgTable(
     price: integer("price").notNull(),
     duration: integer("duration").notNull(),
     status: serviceStatusEnum("status").notNull().default("draft"),
-    createdAt: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow().notNull(),
-    deletedAt: timestamp("deleted_at", { mode: "string" }),
+    createdAt: timestamp("created_at", { mode: "string" }).$type<DateTimeString>().defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "string" }).$type<DateTimeString>().defaultNow().notNull(),
+    deletedAt: timestamp("deleted_at", { mode: "string" }).$type<DateTimeString>(),
   },
   (table) => [
     index("services_provider_id_idx").on(table.providerId),

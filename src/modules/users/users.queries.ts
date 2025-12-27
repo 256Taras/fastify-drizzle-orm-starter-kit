@@ -44,11 +44,9 @@ const findMany = async (
 ): Promise<UsersListResponse> => {
   logger.debug(`[UsersQueries] Getting users list`);
 
-  return paginationService.paginate<typeof users, UsersListResponse["data"][number]>(
-    USERS_PAGINATION_CONFIG,
-    paginationParams,
-    { queryBuilder: (qb) => qb.where(isNull(users.deletedAt)) },
-  );
+  return paginationService.paginate(USERS_PAGINATION_CONFIG, paginationParams, {
+    queryBuilder: (qb) => qb.where(isNull(users.deletedAt)),
+  });
 };
 
 export default function usersQueries(deps: Cradle) {

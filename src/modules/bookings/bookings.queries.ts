@@ -20,7 +20,7 @@ const findOneById = async ({ bookingsRepository, logger }: Cradle, bookingId: st
 
 const findManyByUserId = async (
   { paginationService, logger, sessionStorageService }: Cradle,
-  paginationParams: PaginationParams<"offset">,
+  paginationParams: PaginationParams,
 ): Promise<BookingsListResponse> => {
   const { userId } = sessionStorageService.getUser();
 
@@ -28,7 +28,7 @@ const findManyByUserId = async (
 
   return paginationService.paginate(BOOKINGS_PAGINATION_CONFIG, paginationParams, {
     queryBuilder: (qb) => qb.where(eq(bookings.userId, userId)),
-  }) as Promise<BookingsListResponse>;
+  });
 };
 
 export default function bookingsQueries(deps: Cradle) {

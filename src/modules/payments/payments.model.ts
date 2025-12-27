@@ -8,6 +8,7 @@ import { PAYMENT_STATUS } from "./payments.constants.ts";
 
 import { TABLE_NAMES } from "#infra/database/table-names.ts";
 import { bookings } from "#modules/bookings/bookings.model.ts";
+import type { DateTimeString } from "#types/brands.ts";
 
 export const paymentStatusEnum = pgEnum("payment_status", PAYMENT_STATUS);
 
@@ -21,9 +22,9 @@ export const payments = pgTable(
       .references(() => bookings.id),
     amount: integer("amount").notNull(),
     status: paymentStatusEnum("status").notNull().default("pending"),
-    paidAt: timestamp("paid_at", { mode: "string" }),
-    refundedAt: timestamp("refunded_at", { mode: "string" }),
-    createdAt: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
+    paidAt: timestamp("paid_at", { mode: "string" }).$type<DateTimeString>(),
+    refundedAt: timestamp("refunded_at", { mode: "string" }).$type<DateTimeString>(),
+    createdAt: timestamp("created_at", { mode: "string" }).$type<DateTimeString>().defaultNow().notNull(),
   },
   (table) => [index("payments_booking_id_idx").on(table.bookingId), index("payments_status_idx").on(table.status)],
 );

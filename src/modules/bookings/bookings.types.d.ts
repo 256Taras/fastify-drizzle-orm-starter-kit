@@ -15,14 +15,18 @@ import type bookingsRepository from "./bookings.repository.ts";
 import type { User } from "#modules/users/users.contracts.ts";
 
 export type Booking = Static<typeof BOOKING_OUTPUT_CONTRACT>;
+
 export type BookingCancelInput = Static<typeof BOOKING_CANCEL_INPUT_CONTRACT>;
+
 export type BookingCreateInput = Static<typeof BOOKING_CREATE_INPUT_CONTRACT>;
 
 export interface BookingEventPayload {
   booking: Booking;
   user: User;
 }
+
 export type BookingInsert = Static<typeof BOOKING_INSERT_CONTRACT>;
+
 export type BookingsListResponse = Static<typeof BOOKING_OUTPUT_LIST>;
 
 export type BookingStatus = keyof typeof BOOKING_STATUS;

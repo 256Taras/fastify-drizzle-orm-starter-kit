@@ -6,6 +6,7 @@ import { index, jsonb, pgEnum, pgTable, text, timestamp, uuid, varchar } from "d
 import { AUDIT_ACTION } from "./audits.constants.ts";
 
 import { TABLE_NAMES } from "#infra/database/table-names.ts";
+import type { DateTimeString } from "#types/brands.ts";
 
 export const auditActionEnum = pgEnum("audit_action", AUDIT_ACTION);
 
@@ -20,7 +21,7 @@ export const auditLogs = pgTable(
     metadata: jsonb("metadata").$type<Record<string, unknown>>(),
     ipAddress: varchar("ip_address", { length: 45 }),
     userAgent: text("user_agent"),
-    createdAt: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
+    createdAt: timestamp("created_at", { mode: "string" }).$type<DateTimeString>().defaultNow().notNull(),
   },
   (table) => [
     index("audit_logs_user_id_idx").on(table.userId),

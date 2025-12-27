@@ -1,4 +1,4 @@
-/* eslint-disable security/detect-object-injection */
+/* eslint-disable security/detect-object-injection, complexity */
 import { Type } from "@sinclair/typebox";
 import type { TObject, TSchema } from "@sinclair/typebox";
 import { getTableColumns } from "drizzle-orm";
@@ -9,7 +9,7 @@ import {
   OFFSET_PAGINATION_META_CONTRACT,
   PAGINATION_STRATEGY,
 } from "./pagination.contracts.ts";
-import type { FilterOperator, PaginationConfig } from "./pagination.types.d.ts";
+import type { FilterOperator, PaginationConfig, PaginationStrategy } from "./pagination.types.d.ts";
 
 /** Documentation for filter operators */
 const OPERATOR_DOCS: Record<string, { description: string; example: string; label: string }> = {
@@ -27,7 +27,9 @@ const OPERATOR_DOCS: Record<string, { description: string; example: string; labe
 /**
  * Validates pagination config
  */
-const validatePaginationConfig = <T>(config: PaginationConfig<T>): void => {
+const validatePaginationConfig = <TTable, TStrategy extends PaginationStrategy = "offset">(
+  config: PaginationConfig<TTable, TStrategy>,
+): void => {
   const { excludeColumns, selectableColumns } = config;
 
   if (excludeColumns && excludeColumns.length > 0 && selectableColumns && selectableColumns.length > 0) {
@@ -39,7 +41,9 @@ const validatePaginationConfig = <T>(config: PaginationConfig<T>): void => {
  * Gets selectable columns from config If selectableColumns is provided, use it If excludeColumns is provided, generate
  * selectableColumns from all columns minus excluded
  */
-const getSelectableColumns = <T>(config: PaginationConfig<T>): string[] => {
+const getSelectableColumns = <TTable, TStrategy extends PaginationStrategy = "offset">(
+  config: PaginationConfig<TTable, TStrategy>,
+): string[] => {
   const { excludeColumns, selectableColumns, table } = config;
 
   if (selectableColumns && selectableColumns.length > 0) {
@@ -269,8 +273,9 @@ const extractEnumValues = (columnProperty: TSchema | undefined): string[] => {
 /**
  * Generates TypeBox schema for pagination querystring based on config
  */
-// eslint-disable-next-line complexity -- Complex dynamic schema generation based on config
-export const generatePaginationQuerySchema = <T>(config: PaginationConfig<T>): TObject => {
+export const generatePaginationQuerySchema = <TTable, TStrategy extends PaginationStrategy = "offset">(
+  config: PaginationConfig<TTable, TStrategy>,
+): TObject => {
   validatePaginationConfig(config);
 
   const {
@@ -535,7 +540,6 @@ export const generatePaginationQuerySchema = <T>(config: PaginationConfig<T>): T
 
   return Type.Object(schema, {
     additionalProperties: false,
-    // @ts-expect-error - Strategy type is narrowed by TypeScript but runtime value can be either
     description: `Query parameters for ${strategy === PAGINATION_STRATEGY.cursor ? "cursor-based" : "offset-based"} pagination`,
     title: "Pagination Query",
   });
@@ -544,7 +548,9 @@ export const generatePaginationQuerySchema = <T>(config: PaginationConfig<T>): T
 /**
  * Generates TypeBox schema for single item based on Drizzle table
  */
-export const generateItemSchema = <T>(config: PaginationConfig<T>): TObject => {
+export const generateItemSchema = <TTable, TStrategy extends PaginationStrategy = "offset">(
+  config: PaginationConfig<TTable, TStrategy>,
+): TObject => {
   validatePaginationConfig(config);
 
   const { excludeColumns = [], table } = config;
@@ -578,13 +584,14 @@ export const generateItemSchema = <T>(config: PaginationConfig<T>): TObject => {
 /**
  * Generates TypeBox schema for paginated response based on config
  */
-export const generatePaginatedResponseSchema = <T>(config: PaginationConfig<T>): TObject => {
+export const generatePaginatedResponseSchema = <TTable, TStrategy extends PaginationStrategy = "offset">(
+  config: PaginationConfig<TTable, TStrategy>,
+): TObject => {
   validatePaginationConfig(config);
 
   const { strategy = PAGINATION_STRATEGY.offset } = config;
   const itemSchema = generateItemSchema(config);
   const metaSchema =
-    // @ts-expect-error - Strategy type is narrowed by TypeScript but runtime value can be either
     strategy === PAGINATION_STRATEGY.cursor ? CURSOR_PAGINATION_META_CONTRACT : OFFSET_PAGINATION_META_CONTRACT;
 
   return Type.Object(
@@ -597,20 +604,19 @@ export const generatePaginatedResponseSchema = <T>(config: PaginationConfig<T>):
     },
     {
       additionalProperties: false,
-      // @ts-expect-error - Strategy type is narrowed by TypeScript but runtime value can be either
       description: `Paginated response using ${strategy === PAGINATION_STRATEGY.cursor ? "cursor-based" : "offset-based"} pagination`,
       title: "Paginated Response",
     },
   );
 };
 
-type GeneratePaginatedRouteSchemaOptions<T> = {
+type GeneratePaginatedRouteSchemaOptions<TTable, TStrategy extends PaginationStrategy = "offset"> = {
   bodySchema?: TSchema;
-  config: PaginationConfig<T>;
+  config: PaginationConfig<TTable, TStrategy>;
   description?: string;
   errorSchemas?: Record<number, TSchema>;
   paramsSchema?: TSchema;
-  security?: Record<string, any>;
+  security?: Record<string, unknown>[];
   summary?: string;
   tags?: string[];
 };
@@ -618,7 +624,7 @@ type GeneratePaginatedRouteSchemaOptions<T> = {
 /**
  * Generates complete Fastify route schema with pagination
  */
-export const generatePaginatedRouteSchema = <T>({
+export const generatePaginatedRouteSchema = <TTable, TStrategy extends PaginationStrategy = "offset">({
   bodySchema,
   config,
   description,
@@ -627,7 +633,7 @@ export const generatePaginatedRouteSchema = <T>({
   summary,
   tags,
   security,
-}: GeneratePaginatedRouteSchemaOptions<T>): Record<string, unknown> => {
+}: GeneratePaginatedRouteSchemaOptions<TTable, TStrategy>): Record<string, unknown> => {
   validatePaginationConfig(config);
 
   const schema: Record<string, unknown> = {

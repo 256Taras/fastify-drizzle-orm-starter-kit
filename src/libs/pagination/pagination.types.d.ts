@@ -103,7 +103,7 @@ export type PaginatedResponse<TItem, TStrategy extends PaginationStrategy = "off
  * @template TTable - Drizzle table type (PgTable or similar)
  * @template TStrategy - Pagination strategy type. Default is `'offset'`
  */
-export interface PaginationConfig<TTable, TStrategy extends PaginationStrategy = "offset"> {
+export interface PaginationConfig<TTable, TStrategy extends PaginationStrategy> {
   /** Column to use for cursor (cursor strategy only). Default is `'id'` */
   cursorColumn?: string;
   /** Default items per page. Default is `10` */

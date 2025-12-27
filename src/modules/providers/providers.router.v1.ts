@@ -1,5 +1,3 @@
-import type { UUID } from "node:crypto";
-
 import type { FastifyPluginAsyncTypebox } from "@fastify/type-provider-typebox";
 
 import providersSchemas from "./providers.schemas.ts";
@@ -29,7 +27,7 @@ const providersRouterV1: FastifyPluginAsyncTypebox = async (app) => {
   app.patch("/:id", {
     preHandler: app.auth([app.verifyJwt]),
     schema: providersSchemas.updateOne,
-    handler: (req) => providersMutations.updateProvider(req.params.id as UUID, req.body),
+    handler: (req) => providersMutations.updateProvider(req.params.id, req.body),
   });
 
   app.delete("/:id", {

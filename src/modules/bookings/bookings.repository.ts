@@ -7,17 +7,19 @@ import { partial } from "rambda";
 import type { Booking, BookingInsert, BookingStatus } from "./bookings.types.d.ts";
 
 import { createBaseRepository } from "#libs/persistence/base-repository.ts";
+import { BOOKING_STATUS } from "#modules/bookings/bookings.constants.ts";
 import { BOOKING_PUBLIC_COLUMNS, bookings } from "#modules/bookings/bookings.model.ts";
+import type { DateTimeString } from "#types/brands.ts";
 
 type BookingInsertDrizzle = InferInsertModel<typeof bookings>;
 
 const findManyByServiceIdAndTimeRange = async (
   { db }: Cradle,
   serviceId: UUID,
-  startAt: string,
-  endAt: string,
-  excludeStatuses: BookingStatus[] = ["cancelled"],
-): Promise<Array<{ endAt: string; startAt: string }>> => {
+  startAt: DateTimeString,
+  endAt: DateTimeString,
+  excludeStatuses: BookingStatus[] = [BOOKING_STATUS.cancelled],
+): Promise<Array<{ endAt: DateTimeString; startAt: DateTimeString }>> => {
   const result = await db
     .select({ startAt: bookings.startAt, endAt: bookings.endAt })
     .from(bookings)
@@ -26,7 +28,9 @@ const findManyByServiceIdAndTimeRange = async (
         eq(bookings.serviceId, serviceId),
         lt(bookings.startAt, endAt),
         gt(bookings.endAt, startAt),
-        excludeStatuses.length > 0 ? inArray(bookings.status, ["pending", "confirmed", "completed"]) : undefined,
+        excludeStatuses.length > 0
+          ? inArray(bookings.status, [BOOKING_STATUS.pending, BOOKING_STATUS.confirmed, BOOKING_STATUS.completed])
+          : undefined,
       ),
     );
 
@@ -40,21 +44,21 @@ const findManyByUserId = async ({ db }: Cradle, userId: UUID): Promise<Booking[]
     .where(eq(bookings.userId, userId))
     .orderBy(bookings.startAt);
 
-  return result as Booking[];
+  return result;
 };
 
 const updateOneById = async (
   { db, dateTimeService }: Cradle,
   id: UUID,
   data: Partial<Omit<BookingInsertDrizzle, "createdAt" | "id" | "updatedAt">>,
-): Promise<Booking | undefined> => {
+): Promise<Booking | null> => {
   const [updated] = await db
     .update(bookings)
     .set({ ...data, updatedAt: dateTimeService.now() })
     .where(eq(bookings.id, id))
     .returning(BOOKING_PUBLIC_COLUMNS);
 
-  return updated as Booking | undefined;
+  return updated;
 };
 
 export default function bookingsRepository(deps: Cradle) {

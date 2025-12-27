@@ -9,6 +9,7 @@ import { BOOKING_STATUS } from "./bookings.constants.ts";
 import { TABLE_NAMES } from "#infra/database/table-names.ts";
 import { services } from "#modules/services/services.model.ts";
 import { users } from "#modules/users/users.model.ts";
+import type { DateTimeString } from "#types/brands.ts";
 
 export const bookingStatusEnum = pgEnum("booking_status", BOOKING_STATUS);
 
@@ -17,19 +18,21 @@ export const bookings = pgTable(
   {
     id: uuid("id").$type<UUID>().primaryKey().notNull().defaultRandom(),
     serviceId: uuid("service_id")
+      .$type<UUID>()
       .notNull()
       .references(() => services.id),
     userId: uuid("user_id")
+      .$type<UUID>()
       .notNull()
       .references(() => users.id),
-    startAt: timestamp("start_at", { mode: "string" }).notNull(),
-    endAt: timestamp("end_at", { mode: "string" }).notNull(),
-    status: bookingStatusEnum("status").notNull().default("pending"),
+    startAt: timestamp("start_at", { mode: "string" }).$type<DateTimeString>().notNull(),
+    endAt: timestamp("end_at", { mode: "string" }).$type<DateTimeString>().notNull(),
+    status: bookingStatusEnum("status").notNull().default(BOOKING_STATUS.pending),
     totalPrice: integer("total_price").notNull(),
     cancellationReason: text("cancellation_reason"),
-    cancelledAt: timestamp("cancelled_at", { mode: "string" }),
-    createdAt: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow().notNull(),
+    cancelledAt: timestamp("cancelled_at", { mode: "string" }).$type<DateTimeString>(),
+    createdAt: timestamp("created_at", { mode: "string" }).$type<DateTimeString>().defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "string" }).$type<DateTimeString>().defaultNow().notNull(),
   },
   (table) => [
     index("bookings_service_id_idx").on(table.serviceId),

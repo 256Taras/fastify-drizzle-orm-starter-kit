@@ -56,7 +56,7 @@ const updateOnePasswordById = async (
 const updateOneById = async (
   { db, dateTimeService }: Cradle,
   id: UUID,
-  data: Partial<Omit<UserInsert, "id">>,
+  data: Partial<Omit<UserInsert, "createdAt" | "deletedAt" | "id" | "updatedAt">>,
 ): Promise<undefined | User> => {
   const [updatedUser] = await db
     .update(users)

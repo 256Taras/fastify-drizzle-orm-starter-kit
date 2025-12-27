@@ -22,9 +22,10 @@ import {
   ForbiddenException,
   ResourceNotFoundException,
 } from "#libs/errors/domain.errors.ts";
+import { BOOKING_STATUS } from "#modules/bookings/bookings.constants.ts";
 
-const createBooking = async (
-  {
+const createBooking = async (deps: Cradle, input: BookingCreateInput): Promise<Booking> => {
+  const {
     bookingsRepository,
     servicesRepository,
     providersRepository,
@@ -33,9 +34,8 @@ const createBooking = async (
     eventBus,
     logger,
     sessionStorageService,
-  }: Cradle,
-  input: BookingCreateInput,
-): Promise<Booking> => {
+  } = deps;
+
   const { userId } = sessionStorageService.getUser();
 
   logger.debug(`[BookingsMutations] Creating booking for service: ${input.serviceId}`);
@@ -63,11 +63,7 @@ const createBooking = async (
   const startAtIso = dateTimeService.toISOString(startAt);
   const endAtIso = dateTimeService.toISOString(endAt);
 
-  const existingBookings = await bookingsRepository.findManyByServiceIdAndTimeRange(
-    input.serviceId as UUID,
-    startAtIso,
-    endAtIso,
-  );
+  const existingBookings = await bookingsRepository.findManyByServiceIdAndTimeRange(input.serviceId, startAtIso, endAtIso);
 
   if (hasTimeConflict(existingBookings, startAt, endAt)) {
     throw new ConflictException("Time slot is already booked");
@@ -79,7 +75,7 @@ const createBooking = async (
     startAt: startAtIso,
     endAt: endAtIso,
     totalPrice: service.price,
-    status: "pending",
+    status: BOOKING_STATUS.pending,
   });
 
   const user = await usersRepository.findOneById(userId);
@@ -114,7 +110,7 @@ const cancelBooking = async (
   const cancellationFee = calculateCancellationFee(booking, cancelledAt);
 
   const updatedBooking = await bookingsRepository.updateOneById(bookingId, {
-    status: "cancelled",
+    status: BOOKING_STATUS.cancelled,
     cancellationReason: input.reason,
     cancelledAt: dateTimeService.toISOString(cancelledAt),
   });
@@ -153,12 +149,12 @@ const confirmBooking = async (
     throw new ResourceNotFoundException(`Booking with id: ${bookingId} not found`);
   }
 
-  const service = await servicesRepository.findOneById(booking.serviceId as UUID);
+  const service = await servicesRepository.findOneById(booking.serviceId);
   if (!service) {
     throw new ResourceNotFoundException(`Service with id: ${booking.serviceId} not found`);
   }
 
-  const provider = await providersRepository.findOneById(service.providerId as UUID);
+  const provider = await providersRepository.findOneById(service.providerId);
   if (!provider) {
     throw new ResourceNotFoundException(`Provider not found`);
   }
@@ -168,7 +164,7 @@ const confirmBooking = async (
   }
 
   const updatedBooking = await bookingsRepository.updateOneById(bookingId, {
-    status: "confirmed",
+    status: BOOKING_STATUS.confirmed,
   });
   if (!updatedBooking) {
     throw new ResourceNotFoundException(`Booking with id: ${bookingId} not found`);
@@ -184,8 +180,8 @@ const confirmBooking = async (
   return updatedBooking;
 };
 
-const completeBooking = async (
-  {
+const completeBooking = async (deps: Cradle, bookingId: UUID): Promise<Booking> => {
+  const {
     bookingsRepository,
     servicesRepository,
     providersRepository,
@@ -194,9 +190,8 @@ const completeBooking = async (
     eventBus,
     logger,
     sessionStorageService,
-  }: Cradle,
-  bookingId: UUID,
-): Promise<Booking> => {
+  } = deps;
+
   const { userId: providerUserId } = sessionStorageService.getUser();
 
   logger.debug(`[BookingsMutations] Completing booking: ${bookingId}`);
@@ -206,12 +201,12 @@ const completeBooking = async (
     throw new ResourceNotFoundException(`Booking with id: ${bookingId} not found`);
   }
 
-  const service = await servicesRepository.findOneById(booking.serviceId as UUID);
+  const service = await servicesRepository.findOneById(booking.serviceId);
   if (!service) {
     throw new ResourceNotFoundException(`Service with id: ${booking.serviceId} not found`);
   }
 
-  const provider = await providersRepository.findOneById(service.providerId as UUID);
+  const provider = await providersRepository.findOneById(service.providerId);
   if (!provider) {
     throw new ResourceNotFoundException(`Provider not found`);
   }
@@ -221,7 +216,7 @@ const completeBooking = async (
   }
 
   const updatedBooking = await bookingsRepository.updateOneById(bookingId, {
-    status: "completed",
+    status: BOOKING_STATUS.completed,
   });
   if (!updatedBooking) {
     throw new ResourceNotFoundException(`Booking with id: ${bookingId} not found`);

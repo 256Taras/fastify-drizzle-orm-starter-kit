@@ -3,7 +3,7 @@ import { reviews } from "./reviews.model.ts";
 import { FILTER_OPERATORS, PAGINATION_DEFAULTS, PAGINATION_STRATEGY } from "#libs/pagination/pagination.contracts.ts";
 import type { PaginationConfig } from "#libs/pagination/pagination.types.d.ts";
 
-export const REVIEWS_PAGINATION_CONFIG: PaginationConfig<typeof reviews> = {
+export const REVIEWS_PAGINATION_CONFIG: PaginationConfig<typeof reviews, typeof PAGINATION_STRATEGY.offset> = {
   table: reviews,
   defaultLimit: PAGINATION_DEFAULTS.defaultLimit,
   defaultSortBy: [
